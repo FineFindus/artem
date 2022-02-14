@@ -20,7 +20,9 @@ fn main() {
                 .short('c')
                 .long("characters")
                 .takes_value(true)
-                .help("Change the characters that are used to display the image. The first character should have the highest 'density' and the last should have the least (probably a space)."),
+                .help("Change the characters that are used to display the image.
+                The first character should have the highest 'density' and the last should have the least (probably a space).
+                A lower detail map is recommend for smaller images. "),
         )
         .arg(
             Arg::new("output-file")
@@ -59,6 +61,7 @@ fn main() {
     let width = img.width();
     let height = img.height();
 
+    //clamp image width to a maximum of 80
     let columns = if width > 80 { 80 } else { width };
     let scale = 0.43;
 
@@ -111,6 +114,7 @@ fn main() {
             Ok(f) => f,
             Err(_) => panic!("Could not create file"),
         };
+
         match file.write(file_output.as_bytes()) {
             Ok(_) => {}
             Err(_) => panic!("Could not write to file"),
@@ -131,6 +135,8 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
     let mut red: f64 = 0f64;
     let mut blue: f64 = 0f64;
     let mut green: f64 = 0f64;
+
+    //average all pixel in a block
     for pixel in &block {
         let r = pixel.0[0] as f64;
         let g = pixel.0[1] as f64;
@@ -139,9 +145,9 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
         red += r;
         blue += b;
         green += g;
-        //avg color http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
-        let pixel_avg = 0.21 * r + 0.72 * g + 0.07 * b;
-        block_avg += pixel_avg;
+        //luminosity color http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
+        let pixel_luminosity = 0.21 * r + 0.72 * g + 0.07 * b;
+        block_avg += pixel_luminosity;
     }
 
     block_avg /= block.len() as f64;
@@ -151,16 +157,19 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
     green /= block.len() as f64;
 
     //swap to range for white to black values
+    //convert from rgb values (0 - 255) to the density string index (0 - string length)
     let density_index = map_range((0f64, 255f64), (0f64, density.len() as f64), block_avg)
         .floor()
         .clamp(0f64, density.len() as f64);
 
+    //todo use directional chars
     //get correct char from map
     let density_char = density.chars().nth(density_index as usize);
     if density_char.is_some() {
         //return non an colored string
         (
             density_char.unwrap().to_string(),
+            //use truecolor since it is supported basically everywhere
             density_char.unwrap().to_string().truecolor(
                 red.floor() as u8,
                 green.floor() as u8,
