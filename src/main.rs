@@ -1,28 +1,69 @@
-use std::{fs::File, io::Write};
+use std::{fs::File, io::Write, panic};
 
+use clap::{App, Arg, ValueHint};
 use colored::*;
 use image::{GenericImageView, Rgba};
 
 fn main() {
-    //density chars
-    let density = r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#;
-    // let density = r#"Ñ@#W$9876543210?!abc;:+=-,._ "#;
-    let img = image::open("gloria48.jpg").unwrap();
-    // let img = image::open("art.jpg").unwrap();
-    // let img = image::open("homer.png").unwrap();
-    // let img = image::open("samsung.jpg").unwrap();
-    //todo use output file
-    let mut file = File::create("output.txt").unwrap();
+    let matches = App::new("ica")
+        .version("0.2")
+        .about("Solves and displays Sudoku")
+        .arg(
+            Arg::new("INPUT")
+                .help("Path to the target image. Does NOT alter the original")
+                .required(true)
+                .value_hint(ValueHint::FilePath)
+                .index(1),
+        )
+        .arg(
+            Arg::new("density")
+                .short('c')
+                .long("characters")
+                .takes_value(true)
+                .help("Change the characters that are used to display the image. The first character should have the highest 'density' and the last should have the least (probably a space)."),
+        )
+        .arg(
+            Arg::new("output-file")
+                .short('o')
+                .long("output")
+                .takes_value(true)
+                .value_hint(ValueHint::FilePath)
+                .help("Output file for non-colored ascii"),
+        )
+        .arg(
+            Arg::new("no-color")
+                .long("no-color")
+                .help("Do not use color when printing the image to the terminal"),
+        )
+        .get_matches();
+
+    //density char map
+    let density = if matches.is_present("density") {
+        match matches.value_of("density").unwrap() {
+            "long" | "l" | "0" => {
+                r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
+            }
+            "short" | "s" | "1" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
+            _ => matches.value_of("density").unwrap(),
+        }
+    } else {
+        r#"Ñ@#W$9876543210?!abc;:+=-,._ "#
+    };
+
+    //this should be save to unwrap since the input has to be non-null
+    let img = match image::open(matches.value_of("INPUT").unwrap()) {
+        Ok(img) => img,
+        Err(_) => panic!("Image not found"),
+    };
 
     let width = img.width();
     let height = img.height();
-
-    // println!("Image dimensions: {}x{}", width, height);
 
     let columns = if width > 80 { 80 } else { width };
     let scale = 0.43;
 
     //calculate tiles
+    //todo add custom tiling support
     let tile_width = width / columns;
     let tile_height = (tile_width as f64 / scale).floor() as u32;
 
@@ -55,14 +96,35 @@ fn main() {
         terminal_output.push('\n');
         file_output.push('\n');
     }
-    println!("{}", terminal_output);
-    file.write(file_output.as_bytes()).unwrap();
+    //check if no colors should be used
+    if matches.is_present("no-color") {
+        //print the "normal" non-colored conversion
+        println!("{}", file_output);
+    } else {
+        //print colored terminal conversion
+        println!("{}", terminal_output);
+    }
+
+    //create and write to output file
+    if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
+        let mut file = match File::create(matches.value_of("output-file").unwrap()) {
+            Ok(f) => f,
+            Err(_) => panic!("Could not create file"),
+        };
+        match file.write(file_output.as_bytes()) {
+            Ok(_) => {}
+            Err(_) => panic!("Could not write to file"),
+        };
+    }
 }
 
+//Remap a value from one range to another.
 fn map_range(from_range: (f64, f64), to_range: (f64, f64), s: f64) -> f64 {
     to_range.0 + (s - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
 
+//Convert a pixel block to a char.
+//The converted char will be returned as a string and as a colored string.
 fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredString) {
     let mut block_avg: f64 = 0f64;
     //color
@@ -88,7 +150,6 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
     blue /= block.len() as f64;
     green /= block.len() as f64;
 
-    // let density_index = map_range((0f64, 255f64), (density.len() as f64, 0f64), block_avg)
     //swap to range for white to black values
     let density_index = map_range((0f64, 255f64), (0f64, density.len() as f64), block_avg)
         .floor()
