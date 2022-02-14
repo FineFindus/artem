@@ -5,21 +5,21 @@ use image::{GenericImageView, Rgba};
 
 fn main() {
     //density chars
-    // let density = r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#;
-    let density = r#"Ñ@#W$9876543210?!abc;:+=-,._ "#;
-    // let img = image::open("gloria48.jpg").unwrap();
+    let density = r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#;
+    // let density = r#"Ñ@#W$9876543210?!abc;:+=-,._ "#;
+    let img = image::open("gloria48.jpg").unwrap();
     // let img = image::open("art.jpg").unwrap();
-    let img = image::open("homer.png").unwrap();
+    // let img = image::open("homer.png").unwrap();
     // let img = image::open("samsung.jpg").unwrap();
     //todo use output file
     let mut file = File::create("output.txt").unwrap();
 
-    //todo clamp values
-
     let width = img.width();
     let height = img.height();
 
-    let columns = 80;
+    // println!("Image dimensions: {}x{}", width, height);
+
+    let columns = if width > 80 { 80 } else { width };
     let scale = 0.43;
 
     //calculate tiles
