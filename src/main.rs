@@ -14,11 +14,8 @@ fn main() {
     let density = if matches.is_present("density") {
         match matches.value_of("density").unwrap() {
             "short" | "s" | "0" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
-            "medium" | "m" | "1" => {
+            "long" | "l" | "1" => {
                 r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
-            }
-            "long" | "l" | "2" => {
-                r#"¶@ØÆMåBNÊßÔR#8Q&mÃ0À$GXZA5ñk2S%±3Fz¢yÝCJf1t7ªLc¿+?(r/¤²!*;"^:,'.` "#
             }
             _ => matches.value_of("density").unwrap(),
         }
