@@ -19,8 +19,27 @@ pub fn build_cli() -> App<'static> {
                 .takes_value(true)
                 .help("Change the characters that are used to display the image.
                 The first character should have the highest 'density' and the last should have the least (probably a space).
-                A lower detail map is recommend for smaller images. "),
+                A lower detail map is recommend for smaller images."),
         )
+        .arg(
+            Arg::new("size")
+                .short('s')
+                .long("size")
+                .takes_value(true)
+                .default_value("80")
+                .value_hint(ValueHint::Other)
+                .help("Change the size of the output image. 
+                The minimum size is 80, the maximum 200. Values outside of the range will be 
+                ignored and changed to the nearest usable value"),
+        )
+        // .arg(
+        //     Arg::new("tiles")
+        //         .short('t')
+        //         .long("tiles")
+        //         .takes_value(true)
+        //         // .value_hint(ValueHint::)
+        //         .help("Change the scale of the output"),
+        // )
         .arg(
             Arg::new("output-file")
                 .short('o')

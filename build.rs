@@ -12,9 +12,10 @@ fn main() -> Result<(), Error> {
 
     let mut app = build_cli();
     let path = generate_to(
-        Bash, &mut app, // We need to specify what generator to use
-        "ica",    // We need to specify the bin name manually
-        outdir,   // We need to specify where to write to
+        Bash,
+        &mut app,                // We need to specify what generator to use
+        "ascii_image_converter", // We need to specify the bin name manually
+        outdir,                  // We need to specify where to write to
     )?;
 
     println!("cargo:warning=completion file is generated: {:?}", path);

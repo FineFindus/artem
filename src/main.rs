@@ -13,10 +13,13 @@ fn main() {
     //density char map
     let density = if matches.is_present("density") {
         match matches.value_of("density").unwrap() {
-            "long" | "l" | "0" => {
+            "short" | "s" | "0" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
+            "medium" | "m" | "1" => {
                 r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
             }
-            "short" | "s" | "1" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
+            "long" | "l" | "2" => {
+                r#"¶@ØÆMåBNÊßÔR#8Q&mÃ0À$GXZA5ñk2S%±3Fz¢yÝCJf1t7ªLc¿+?(r/¤²!*;"^:,'.` "#
+            }
             _ => matches.value_of("density").unwrap(),
         }
     } else {
@@ -33,12 +36,26 @@ fn main() {
     let width = img.width();
     let height = img.height();
 
+    //get target size from args
+    let target_size = match matches
+        .value_of("size")
+        .unwrap() //this should always be at least "80", so it should be safe to unwrap
+        .parse::<u32>()
+    {
+        Ok(v) => v.clamp(80, 200),
+        Err(_) => panic!("Could not work with size input value"),
+    };
+
     //clamp image width to a maximum of 80
-    let columns = if width > 80 { 80 } else { width };
+    //todo add custom tiling
+    let columns = if width > target_size {
+        target_size
+    } else {
+        width
+    };
     let scale = 0.43;
 
     //calculate tiles
-    //todo add custom tiling support
     let tile_width = width / columns;
     let tile_height = (tile_width as f64 / scale).floor() as u32;
 
@@ -130,6 +147,7 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
+    // let density_index = map_range((0f64, 255f64), (density.len() as f64, 0f64), block_avg)
     let density_index = map_range((0f64, 255f64), (0f64, density.len() as f64), block_avg)
         .floor()
         .clamp(0f64, density.len() as f64);
