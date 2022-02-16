@@ -14,13 +14,15 @@ fn main() {
     let density = if matches.is_present("density") {
         match matches.value_of("density").unwrap() {
             "short" | "s" | "0" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
-            "long" | "l" | "1" => {
+            "flat" | "f" | "1" => r#"MWNXK0Okxdolc:;,'...   "#,
+            "long" | "l" | "2" => {
                 r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
             }
             _ => matches.value_of("density").unwrap(),
         }
     } else {
-        r#"Ñ@#W$9876543210?!abc;:+=-,._ "#
+        //density map from jp2a
+        r#"MWNXK0Okxdolc:;,'...   "#
     };
 
     //this should be save to unwrap since the input has to be non-null
@@ -48,13 +50,13 @@ fn main() {
     };
 
     //clamp image width to a maximum of 80
-    //todo add custom tiling
     let columns = if width > target_size {
         target_size
     } else {
         width
     };
 
+    //best ratio between height and width is 0.43
     let scale = match matches
         .value_of("scale")
         .unwrap() //this should always be at least "0.43", so it should be safe to unwrap
@@ -64,7 +66,7 @@ fn main() {
             0f64, //a negative scale is not allowed
             1f64, //even a scale above 0.43 is not looking good
         ),
-        Err(_) => panic!("Could not work with size input value"),
+        Err(_) => panic!("Could not work with ratio input value"),
     };
 
     //calculate tiles
@@ -159,8 +161,7 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
-    // let density_index = map_range((0f64, 255f64), (density.len() as f64, 0f64), block_avg)
-    let density_index = map_range((0f64, 255f64), (0f64, density.len() as f64), block_avg)
+    let density_index = map_range((0f64, 255f64), (density.len() as f64, 0f64), block_avg)
         .floor()
         .clamp(0f64, density.len() as f64);
 

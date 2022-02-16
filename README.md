@@ -43,6 +43,8 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 - [ ] Use directional Ascii chars
 
+- [ ] Use the current terminal size to auto fit the image
+
 - [ ] Add tests
 
 ## License

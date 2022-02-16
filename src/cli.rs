@@ -17,6 +17,7 @@ pub fn build_cli() -> App<'static> {
                 .short('c')
                 .long("characters")
                 .takes_value(true)
+                .value_hint(ValueHint::Other)
                 .help("Change the characters that are used to display the image.
                 The first character should have the highest 'density' and the last should have the least (probably a space).
                 A lower detail map is recommend for smaller images."),
@@ -36,7 +37,7 @@ pub fn build_cli() -> App<'static> {
             Arg::new("scale")
                 .long("ratio")
                 .takes_value(true)
-                .default_value("0.43")
+                .default_value("0.43") 
                 .value_hint(ValueHint::Other)
                 .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),

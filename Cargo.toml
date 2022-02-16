@@ -9,11 +9,11 @@ edition = "2018"
 build = "build.rs"
 
 
+[build-dependencies]
+clap = "3.0.14"
+clap_complete = "3.0.6"
+
 [dependencies]
 image = "0.24.0"
 colored = "2"
 clap = "3.0.14"
-
-[build-dependencies]
-clap = "3.0.14"
-clap_complete = "3.0.6"
