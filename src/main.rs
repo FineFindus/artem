@@ -30,6 +30,7 @@ fn main() {
         Err(_) => panic!("Image not found"),
     };
 
+    //get img dimensions
     let width = img.width();
     let height = img.height();
 
@@ -39,7 +40,10 @@ fn main() {
         .unwrap() //this should always be at least "80", so it should be safe to unwrap
         .parse::<u32>()
     {
-        Ok(v) => v.clamp(80, 200),
+        Ok(v) => v.clamp(
+            20,  //min should be 20 to ensure a somewhat visible picture
+            230, //img above 230 might not be displayed properly
+        ),
         Err(_) => panic!("Could not work with size input value"),
     };
 
@@ -50,7 +54,18 @@ fn main() {
     } else {
         width
     };
-    let scale = 0.43;
+
+    let scale = match matches
+        .value_of("scale")
+        .unwrap() //this should always be at least "0.43", so it should be safe to unwrap
+        .parse::<f64>()
+    {
+        Ok(v) => v.clamp(
+            0f64, //a negative scale is not allowed
+            1f64, //even a scale above 0.43 is not looking good
+        ),
+        Err(_) => panic!("Could not work with size input value"),
+    };
 
     //calculate tiles
     let tile_width = width / columns;

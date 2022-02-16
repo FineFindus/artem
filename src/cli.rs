@@ -29,8 +29,17 @@ pub fn build_cli() -> App<'static> {
                 .default_value("80")
                 .value_hint(ValueHint::Other)
                 .help("Change the size of the output image. 
-                The minimum size is 80, the maximum 200. Values outside of the range will be 
+                The minimum size is 20, the maximum 230. Values outside of the range will be 
                 ignored and changed to the nearest usable value"),
+        )
+        .arg(
+            Arg::new("scale")
+                .long("ratio")
+                .takes_value(true)
+                .default_value("0.43")
+                .value_hint(ValueHint::Other)
+                .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.
+                The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
         )
         // .arg(
         //     Arg::new("tiles")

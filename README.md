@@ -4,7 +4,7 @@
 # ASCII Image Converter
 
 This is a small cli program written in rust to easily convert images
-to ascii art.
+to ascii art. It will take a while to generate the ascii characters, especially for larger images.
 
 ## Usage
 
@@ -41,9 +41,9 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## Todo
 
-[ ] Use directional Ascii chars
+- [ ] Use directional Ascii chars
 
-[ ] Add tests
+- [ ] Add tests
 
 ## License
 
