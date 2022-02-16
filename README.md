@@ -39,11 +39,19 @@ cargo build
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. Please be aware that it might take some time for someone to respond.
 
+## Credits
+
+This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a).
+
 ## Todo
 
-- [ ] Use directional Ascii chars
+- [ ] Use better downsampling with less artifacts
 
 - [ ] Use the current terminal size to auto fit the image
+
+- [ ] Support ANSi terminal colors
+
+- [ ] Convert output to colored html
 
 - [ ] Add tests
 
