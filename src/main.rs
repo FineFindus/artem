@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, panic};
+use std::{env, fs::File, io::Write, ops::Div, panic};
 
 use colored::*;
 use image::{GenericImageView, Rgba};
@@ -37,16 +37,26 @@ fn main() {
     let height = img.height();
 
     //get target size from args
-    let target_size = match matches
-        .value_of("size")
-        .unwrap() //this should always be at least "80", so it should be safe to unwrap
-        .parse::<u32>()
-    {
-        Ok(v) => v.clamp(
-            20,  //min should be 20 to ensure a somewhat visible picture
-            230, //img above 230 might not be displayed properly
-        ),
-        Err(_) => panic!("Could not work with size input value"),
+    //only one arg should be present
+    let target_size = if matches.is_present("height") {
+        //use max terminal height
+        (terminal_size::terminal_size().unwrap().1 .0 as f64 * 1.9).floor() as u32
+    } else if matches.is_present("width") {
+        //use max terminal width
+        terminal_size::terminal_size().unwrap().0 .0 as u32
+    } else {
+        //use given input size
+        match matches
+            .value_of("size")
+            .unwrap() //this should always be at least "80", so it should be safe to unwrap
+            .parse::<u32>()
+        {
+            Ok(v) => v.clamp(
+                20,  //min should be 20 to ensure a somewhat visible picture
+                230, //img above 230 might not be displayed properly
+            ),
+            Err(_) => panic!("Could not work with size input value"),
+        }
     };
 
     //clamp image width to a maximum of 80
@@ -77,6 +87,7 @@ fn main() {
 
     let mut terminal_output = String::new();
     let mut file_output = String::new();
+    //? use multiple threads for faster conversion?
     for row in 0..rows {
         for col in 0..columns {
             //get a single tile
@@ -99,11 +110,13 @@ fn main() {
             terminal_output.push_str(char.1.to_string().as_str());
         }
         //add new line
-        terminal_output.push('\n');
-        file_output.push('\n');
+        if row != rows - 1 {
+            terminal_output.push('\n');
+            file_output.push('\n');
+        }
     }
     //check if no colors should be used
-    if matches.is_present("no-color") {
+    if matches.is_present("no-color") || !supports_truecolor() {
         //print the "normal" non-colored conversion
         println!("{}", file_output);
     } else {
@@ -119,9 +132,22 @@ fn main() {
         };
 
         match file.write(file_output.as_bytes()) {
-            Ok(_) => {}
+            Ok(result) => println!(
+                "Written {} bytes to {}",
+                result,
+                matches.value_of("output-file").unwrap()
+            ),
             Err(_) => panic!("Could not write to file"),
         };
+    }
+}
+
+///Checks if the terminal supports truecolor mode.
+/// Returns false if not.
+fn supports_truecolor() -> bool {
+    match env::var("COLORTERM") {
+        Ok(var) => var.contains("truecolor") || var.contains("24bit"),
+        Err(_) => false, //not found, true colors are not supported
     }
 }
 
@@ -140,24 +166,27 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
     let mut green: f64 = 0f64;
 
     //average all pixel in a block
+    //it might be possible to use a better algorithm for this
     for pixel in &block {
         let r = pixel.0[0] as f64;
         let g = pixel.0[1] as f64;
         let b = pixel.0[2] as f64;
         //save the pixel values
-        red += r;
-        blue += b;
-        green += g;
+        //rgb values have to squared and rooted to get avg color (https://sighack.com/post/averaging-rgb-colors-the-right-way)
+        red += r * r;
+        blue += b * b;
+        green += g * g;
         //luminosity color http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
         let pixel_luminosity = 0.21 * r + 0.72 * g + 0.07 * b;
         block_avg += pixel_luminosity;
     }
 
+    //block average luminosity
     block_avg /= block.len() as f64;
     //block average color
-    red /= block.len() as f64;
-    blue /= block.len() as f64;
-    green /= block.len() as f64;
+    red = red.div(block.len() as f64).sqrt();
+    blue = blue.div(block.len() as f64).sqrt();
+    green = green.div(block.len() as f64).sqrt();
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)

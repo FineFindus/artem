@@ -45,15 +45,17 @@ This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a).
 
 ## Todo
 
-- [ ] Use better downsampling with less artifacts
+- [x] Better average the RGB values of multiple pixel
 
-- [ ] Use the current terminal size to auto fit the image
+- [x] Use the current terminal size to auto fit the image
 
-- [ ] Support ANSi terminal colors
+- [ ] Support ANSI terminal colors
 
 - [ ] Convert output to colored html
 
 - [ ] Add tests
+
+- [ ] Publish
 
 ## License
 

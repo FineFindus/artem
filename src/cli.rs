@@ -29,9 +29,24 @@ pub fn build_cli() -> App<'static> {
                 .takes_value(true)
                 .default_value("80")
                 .value_hint(ValueHint::Other)
+                .conflicts_with_all(&["height", "width"])
                 .help("Change the size of the output image. 
                 The minimum size is 20, the maximum 230. Values outside of the range will be 
-                ignored and changed to the nearest usable value"),
+                ignored and changed to the nearest usable value. This argument is conflicting with --width and --height"),
+        )
+        .arg(
+            Arg::new("height")
+                .short('h')
+                .long("height")
+                .help("Use the terminal maximum terminal height to display the image.
+                This argument is conflicting with --size and --width "),
+        )
+        .arg(
+            Arg::new("width")
+                .short('w')
+                .long("width")
+                .help("Use the terminal maximum terminal height to display the image.
+                This argument is conflicting with --size and --height "),
         )
         .arg(
             Arg::new("scale")
@@ -42,21 +57,13 @@ pub fn build_cli() -> App<'static> {
                 .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
         )
-        // .arg(
-        //     Arg::new("tiles")
-        //         .short('t')
-        //         .long("tiles")
-        //         .takes_value(true)
-        //         // .value_hint(ValueHint::)
-        //         .help("Change the scale of the output"),
-        // )
         .arg(
             Arg::new("output-file")
                 .short('o')
                 .long("output")
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
-                .help("Output file for non-colored ascii"),
+                .help("Output file for non-colored ascii."),
         )
         .arg(
             Arg::new("no-color")
