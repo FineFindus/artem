@@ -3,7 +3,7 @@ use clap::{App, Arg, ValueHint};
 ///Build the clap command-line-interface  
 pub fn build_cli() -> App<'static> {
     App::new("ica")
-        .version("0.2")
+        .version("0.3")
         .about("Solves and displays Sudoku")
         .arg(
             Arg::new("INPUT")
