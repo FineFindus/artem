@@ -6,6 +6,17 @@
 This is a small cli program written in rust to easily convert images
 to ascii art. It will take a while to generate the ascii characters, especially for larger images.
 
+## Examples
+
+### Input
+
+_source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg_
+![Abraham Lincoln](/examples/abraham_lincoln.jpg)
+
+### Output
+
+![Abraham Lincoln](/examples/abraham_lincoln_ascii.png)
+
 ## Usage
 
 For simply converting an image:
