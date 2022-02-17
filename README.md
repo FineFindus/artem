@@ -28,14 +28,25 @@ ica PATH
 For more options use:
 
 ```bash
-ica -h
+ica --help
 ```
 
 To use custom ascii chars, use the `--characters` (or `-c` for short) argument.The characters should be ordered from darkest/densest to lightest.
 If the background should be invisible add a space at the end.
 
 ```bash
-ica PATH -c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>|,.-#+!$%&/()=?*'_:; "
+ica PATH --characters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>|,.-#+!$%&/()=?*'_:; "
+```
+
+For auto-sizing the image to the terminal height/width use:
+
+```bash
+#for auto sizing height
+ica PATH --height
+#for auto-sizing width
+ica PATH --width
+#for manual resizing use the --size flag
+ica PATH --size 100
 ```
 
 ## Building from source
@@ -52,7 +63,8 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## Credits
 
-This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a).
+This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a) as well as
+the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tGI).
 
 ## Todo
 
@@ -64,7 +76,11 @@ This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a).
 
 - [ ] Convert output to colored html
 
-- [ ] Add tests
+- [ ] Use multithreading
+
+- [x] Add tests
+
+- [ ] Add even more test
 
 - [ ] Publish
 
