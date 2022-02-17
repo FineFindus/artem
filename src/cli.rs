@@ -38,6 +38,7 @@ pub fn build_cli() -> App<'static> {
             Arg::new("height")
                 .short('h')
                 .long("height")
+                .conflicts_with("width")
                 .help("Use the terminal maximum terminal height to display the image.
                 This argument is conflicting with --size and --width "),
         )
@@ -70,4 +71,58 @@ pub fn build_cli() -> App<'static> {
                 .long("no-color")
                 .help("Do not use color when printing the image to the terminal"),
         )
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn fail_missing_input() {
+        let matches = build_cli().try_get_matches_from(["ascii_image_converter"]);
+        assert_eq!(true, matches.is_err());
+    }
+
+    #[test]
+    fn success_input() {
+        let matches = build_cli()
+            .try_get_matches_from(["ascii_image_converter", "../example/abraham_lincoln.jpg"]);
+        assert_eq!(true, matches.is_ok());
+    }
+
+    #[test]
+    fn fail_conflicting_args_size_width() {
+        //size and width conflict
+        let matches = build_cli().try_get_matches_from([
+            "ascii_image_converter",
+            "../example/abraham_lincoln.jpg",
+            "-s 20",
+            "-w",
+        ]);
+        assert_eq!(true, matches.is_err());
+    }
+
+    #[test]
+    fn fail_conflicting_args_size_height() {
+        //size and height conflict
+        let matches = build_cli().try_get_matches_from([
+            "ascii_image_converter",
+            "../example/abraham_lincoln.jpg",
+            "-s 20",
+            "-h",
+        ]);
+        assert_eq!(true, matches.is_err());
+    }
+
+    #[test]
+    fn fail_conflicting_args_height_width() {
+        //height and width conflict
+        let matches = build_cli().try_get_matches_from([
+            "ascii_image_converter",
+            "../example/abraham_lincoln.jpg",
+            "-h",
+            "-w",
+        ]);
+        assert_eq!(true, matches.is_err());
+    }
 }

@@ -1,10 +1,12 @@
-use std::{env, fs::File, io::Write, ops::Div, panic};
+use std::{fs::File, io::Write, ops::Div, panic};
 
 use colored::*;
 use image::{GenericImageView, Rgba};
 
 //import cli
 mod cli;
+//import utilities
+mod util;
 
 fn main() {
     //get args from cli
@@ -116,7 +118,7 @@ fn main() {
         }
     }
     //check if no colors should be used
-    if matches.is_present("no-color") || !supports_truecolor() {
+    if matches.is_present("no-color") || !util::supports_truecolor() {
         //print the "normal" non-colored conversion
         println!("{}", file_output);
     } else {
@@ -140,20 +142,6 @@ fn main() {
             Err(_) => panic!("Could not write to file"),
         };
     }
-}
-
-///Checks if the terminal supports truecolor mode.
-/// Returns false if not.
-fn supports_truecolor() -> bool {
-    match env::var("COLORTERM") {
-        Ok(var) => var.contains("truecolor") || var.contains("24bit"),
-        Err(_) => false, //not found, true colors are not supported
-    }
-}
-
-//Remap a value from one range to another.
-fn map_range(from_range: (f64, f64), to_range: (f64, f64), s: f64) -> f64 {
-    to_range.0 + (s - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
 
 //Convert a pixel block to a char.
@@ -190,7 +178,7 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
-    let density_index = map_range((0f64, 255f64), (density.len() as f64, 0f64), block_avg)
+    let density_index = util::map_range((0f64, 255f64), (density.len() as f64, 0f64), block_avg)
         .floor()
         .clamp(0f64, density.len() as f64);
 
