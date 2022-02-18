@@ -4,7 +4,7 @@
 # ASCII Image Converter
 
 This is a small cli program written in rust to easily convert images
-to ascii art. It will take a while to generate the ascii characters, especially for larger images.
+to ascii art. It will take a while to generate the ascii characters, especially for larger images. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI.
 
 ## Examples
 
@@ -32,13 +32,15 @@ ica --help
 ```
 
 To use custom ascii chars, use the `--characters` (or `-c` for short) argument.The characters should be ordered from darkest/densest to lightest.
-If the background should be invisible add a space at the end.
+If the background should be invisible, add a space at the end. Alternatively this program has already 3 predefined character sets,
+accessibly by supplying the `--characters` argument to gether with the number (`0`, `1` or `2`) of the preset that should be used.
+By default preset `1` is used.
 
 ```bash
 ica PATH --characters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>|,.-#+!$%&/()=?*'_:; "
 ```
 
-For auto-sizing the image to the terminal height/width use:
+To change the size at which the converted image is displayed, use::
 
 ```bash
 #for auto sizing height
@@ -61,7 +63,7 @@ cargo build
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. Please be aware that it might take some time for someone to respond.
 
-## Credits
+## Credits/Inspiration
 
 This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a) as well as
 the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tGI).
@@ -72,7 +74,7 @@ the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tG
 
 - [x] Use the current terminal size to auto fit the image
 
-- [ ] Support ANSI terminal colors
+- [x] Support ANSI terminal colors
 
 - [ ] Convert output to colored html
 

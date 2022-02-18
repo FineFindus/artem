@@ -69,7 +69,7 @@ pub fn build_cli() -> App<'static> {
         .arg(
             Arg::new("no-color")
                 .long("no-color")
-                .help("Do not use color when printing the image to the terminal"),
+                .help("Do not use color when printing the image to the terminal."),
         )
 }
 

@@ -118,11 +118,11 @@ fn main() {
         }
     }
     //check if no colors should be used
-    if matches.is_present("no-color") || !util::supports_truecolor() {
+    if matches.is_present("no-color") {
         //print the "normal" non-colored conversion
         println!("{}", file_output);
     } else {
-        //print colored terminal conversion
+        //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
         println!("{}", terminal_output);
     }
 
@@ -189,12 +189,23 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
         //return non an colored string
         (
             density_char.unwrap().to_string(),
-            //use truecolor since it is supported basically everywhere
-            density_char.unwrap().to_string().truecolor(
-                red.floor() as u8,
-                green.floor() as u8,
-                blue.floor() as u8,
-            ),
+            //check if true color is supported
+            if util::supports_truecolor() {
+                //return true color string
+                density_char.unwrap().to_string().truecolor(
+                    red.floor() as u8,
+                    green.floor() as u8,
+                    blue.floor() as u8,
+                )
+            } else {
+                //otherwise use basic (8 color) ansi color
+                util::convert_rgb_ansi(
+                    density_char.unwrap().to_string().as_str(),
+                    red as u8,
+                    green as u8,
+                    blue as u8,
+                )
+            },
         )
     } else {
         //return non an colored string
