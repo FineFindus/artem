@@ -17,6 +17,7 @@ build = "build.rs"
 #bin definition
 [[bin]]
 name = "artem"
+path = "src/main.rs"
 
 
 [build-dependencies]

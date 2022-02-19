@@ -24,7 +24,14 @@ fn main() -> Result<(), Error> {
     let mut buffer: Vec<u8> = Default::default();
     man.render(&mut buffer)?;
 
-    std::fs::write(std::path::PathBuf::from(out_dir).join("artem.1"), buffer)?;
+    let man_page_path = std::path::PathBuf::from(out_dir).join("artem.1");
+
+    std::fs::write(&man_page_path, buffer)?;
+
+    println!(
+        "cargo:warning=completion file is generated: {:?}",
+        man_page_path
+    );
 
     Ok(())
 }

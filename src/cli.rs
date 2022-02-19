@@ -1,6 +1,6 @@
 use clap::{Arg, Command, ValueHint};
 
-///Build the clap command-line-interface  
+///Build the clap command-line-interface using clap  
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
         .version("0.3")

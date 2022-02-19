@@ -144,8 +144,8 @@ fn main() {
     }
 }
 
-//Convert a pixel block to a char.
-//The converted char will be returned as a string and as a colored string.
+///Convert a pixel block to a char.
+///The converted char will be returned as a string and as a colored string.
 fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredString) {
     let mut block_avg: f64 = 0f64;
     //color

@@ -4,7 +4,7 @@
 # Artem
 
 This is a small cli program written in rust to easily convert images
-to ascii art. It will take a while to generate the ascii characters, especially for larger images. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI.
+to ascii art, named after the latin word for art. It will take a while to generate the ascii characters, especially for larger images. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI.
 
 ## Examples
 

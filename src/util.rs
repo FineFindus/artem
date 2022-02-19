@@ -34,7 +34,7 @@ mod test_color_support {
     }
 }
 
-//Remap a value from one range to another.
+///Remap a value from one range to another.
 pub fn map_range(from_range: (f64, f64), to_range: (f64, f64), value: f64) -> f64 {
     to_range.0 + (value - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
