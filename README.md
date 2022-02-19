@@ -22,13 +22,13 @@ _source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_hea
 For simply converting an image:
 
 ```bash
-ica PATH
+artem PATH
 ```
 
 For more options use:
 
 ```bash
-ica --help
+artem --help
 ```
 
 To use custom ascii chars, use the `--characters` (or `-c` for short) argument.The characters should be ordered from darkest/densest to lightest.
@@ -37,18 +37,18 @@ accessibly by supplying the `--characters` argument to gether with the number (`
 By default preset `1` is used.
 
 ```bash
-ica PATH --characters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>|,.-#+!$%&/()=?*'_:; "
+artem PATH --characters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>|,.-#+!$%&/()=?*'_:; "
 ```
 
 To change the size at which the converted image is displayed, use::
 
 ```bash
 #for auto sizing height
-ica PATH --height
+artem PATH --height
 #for auto-sizing width
-ica PATH --width
+artem PATH --width
 #for manual resizing use the --size flag
-ica PATH --size 100
+artem PATH --size 100
 ```
 
 ## Building from source
