@@ -97,14 +97,9 @@ fn main() {
             let tile_col = col * tile_width;
             //create a pixel block from multiple pixels
             let mut pixel_block: Vec<Rgba<u8>> = Vec::new();
-            //crop image to smaller block
-            let crop = img.crop_imm(tile_col, tile_row, tile_width, tile_height);
-            for pixel in crop.pixels() {
-                //add pixel to block
-                pixel_block.push(pixel.2);
-            }
-            //get and display density char
-            //this returns a normal and a colored string
+            //add pixel to block
+            pixel_block.push(img.get_pixel(tile_col, tile_row));
+            //get and display density char, it returns a normal and a colored string
             let char = get_pixel_density(pixel_block, density);
             //save the normal string to the output file
             file_output.push_str(char.0.as_str());

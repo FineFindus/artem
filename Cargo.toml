@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2018"
 description = "An easy program to convert an image to an ascii image"
 readme = "README.md"
-license = "MPL-2.0"
 license-file = "LICENSE"
 homepage = "https://github.com/finefindus/artem"
 repository = "https://github.com/finefindus/artem"
@@ -13,6 +12,10 @@ catogories = "command-line-utilities"
 
 #build file
 build = "build.rs"
+
+[profile.release]
+debug = true
+
 
 #bin definition
 [[bin]]
