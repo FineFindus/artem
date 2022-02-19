@@ -1,7 +1,7 @@
 ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
-# ASCII Image Converter
+# Artem
 
 This is a small cli program written in rust to easily convert images
 to ascii art. It will take a while to generate the ascii characters, especially for larger images. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI.
@@ -83,6 +83,8 @@ the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tG
 - [x] Add tests
 
 - [ ] Add even more test
+
+- [ ] Change name
 
 - [ ] Publish
 

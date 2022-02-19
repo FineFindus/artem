@@ -1,10 +1,10 @@
-use clap::{App, Arg, ValueHint};
+use clap::{Arg, Command, ValueHint};
 
 ///Build the clap command-line-interface  
-pub fn build_cli() -> App<'static> {
-    App::new("ica")
+pub fn build_cli() -> Command<'static> {
+    Command::new("artem")
         .version("0.3")
-        .about("Solves and displays Sudoku")
+        .about("Convert the given image to an ascii representation of the image.")
         .arg(
             Arg::new("INPUT")
                 .help("Path to the target image. Does NOT alter the original")
@@ -79,14 +79,13 @@ mod test {
 
     #[test]
     fn fail_missing_input() {
-        let matches = build_cli().try_get_matches_from(["ascii_image_converter"]);
+        let matches = build_cli().try_get_matches_from(["artem"]);
         assert_eq!(true, matches.is_err());
     }
 
     #[test]
     fn success_input() {
-        let matches = build_cli()
-            .try_get_matches_from(["ascii_image_converter", "../example/abraham_lincoln.jpg"]);
+        let matches = build_cli().try_get_matches_from(["artem", "../example/abraham_lincoln.jpg"]);
         assert_eq!(true, matches.is_ok());
     }
 
@@ -94,7 +93,7 @@ mod test {
     fn fail_conflicting_args_size_width() {
         //size and width conflict
         let matches = build_cli().try_get_matches_from([
-            "ascii_image_converter",
+            "artem",
             "../example/abraham_lincoln.jpg",
             "-s 20",
             "-w",
@@ -106,7 +105,7 @@ mod test {
     fn fail_conflicting_args_size_height() {
         //size and height conflict
         let matches = build_cli().try_get_matches_from([
-            "ascii_image_converter",
+            "artem",
             "../example/abraham_lincoln.jpg",
             "-s 20",
             "-h",
@@ -118,7 +117,7 @@ mod test {
     fn fail_conflicting_args_height_width() {
         //height and width conflict
         let matches = build_cli().try_get_matches_from([
-            "ascii_image_converter",
+            "artem",
             "../example/abraham_lincoln.jpg",
             "-h",
             "-w",
