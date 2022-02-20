@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, ops::Div, panic};
+use std::{fs::File, io::Write, ops::Div, panic, sync::Arc, thread};
 
 use colored::*;
 use image::{GenericImageView, Rgba};
@@ -29,7 +29,7 @@ fn main() {
 
     //this should be save to unwrap since the input has to be non-null
     let img = match image::open(matches.value_of("INPUT").unwrap()) {
-        Ok(img) => img,
+        Ok(img) => Arc::new(img),
         //Todo use error function
         Err(_) => panic!("Image not found"),
     };
@@ -89,34 +89,75 @@ fn main() {
 
     let mut terminal_output = String::new();
     let mut file_output = String::new();
-    //? use multiple threads for faster conversion?
-    for row in 0..rows {
-        for col in 0..columns {
-            //get a single tile
-            let tile_row = row * tile_height;
-            let tile_col = col * tile_width;
-            //create a pixel block from multiple pixels
-            let mut pixel_block: Vec<Rgba<u8>> = Vec::new();
-            //go through each pixel in the tile
-            for x in tile_row..(tile_row + tile_height) {
-                for y in tile_col..(tile_col + tile_width) {
-                    //add pixel to block
-                    pixel_block.push(img.get_pixel(y, x));
+
+    //number rof threads used to convert the image
+    let thread_count: u32 = match matches
+        .value_of("threads")
+        .unwrap() //this should always be at least "4", so it should be safe to unwrap
+        .parse::<u32>()
+    {
+        Ok(v) => v.clamp(
+            1,    //there has to be at least 1 thread to convert the img
+            rows, //there should no be more threads than rows
+        ),
+        Err(_) => panic!("Could not work with size input value"),
+    };
+    //split the img into tile for each thread
+    let thread_tiles = rows / thread_count;
+    //collect threads handles
+    let mut handles = Vec::new();
+    //split the img into chunks for each thread
+    for chunk in 0..thread_count {
+        //arc clone img and density
+        let thread_img = Arc::clone(&img);
+        let thread_density = density.to_owned();
+        //create a thread for this img chunk
+        let handle = thread::spawn(move || {
+            //create thread strings
+            let mut thread_terminal_output = String::new();
+            let mut thread_file_output = String::new();
+
+            //go through the thread img chunk
+            for row in chunk * thread_tiles..(chunk + 1) * thread_tiles {
+                // for row in 0..rows {
+                for col in 0..columns {
+                    //get a single tile
+                    let tile_row = row * tile_height;
+                    let tile_col = col * tile_width;
+                    //create a pixel block from multiple pixels
+                    let mut pixel_block: Vec<Rgba<u8>> = Vec::new();
+                    //go through each pixel in the tile
+                    for x in tile_row..(tile_row + tile_height) {
+                        for y in tile_col..(tile_col + tile_width) {
+                            //add pixel to block
+                            pixel_block.push(thread_img.get_pixel(y, x));
+                        }
+                    }
+
+                    //get and display density char, it returns a normal and a colored string
+                    let char = get_pixel_density(pixel_block, thread_density.as_str());
+                    //save the normal string to the output file
+                    thread_file_output.push_str(char.0.as_str());
+                    //save the colored string for the terminal output
+                    thread_terminal_output.push_str(char.1.to_string().as_str());
+                }
+                //add new line
+                if row != rows - 1 {
+                    thread_terminal_output.push('\n');
+                    thread_file_output.push('\n');
                 }
             }
-            //get and display density char, it returns a normal and a colored string
-            let char = get_pixel_density(pixel_block, density);
-            //save the normal string to the output file
-            file_output.push_str(char.0.as_str());
-            //save the colored string for the terminal output
-            terminal_output.push_str(char.1.to_string().as_str());
-        }
-        //add new line
-        if row != rows - 1 {
-            terminal_output.push('\n');
-            file_output.push('\n');
-        }
+            (thread_terminal_output, thread_file_output)
+        });
+        handles.push(handle);
     }
+
+    for handle in handles {
+        let result = handle.join().unwrap();
+        terminal_output.push_str(result.0.as_str());
+        file_output.push_str(result.1.as_str());
+    }
+
     //check if no colors should be used
     if matches.is_present("no-color") {
         //print the "normal" non-colored conversion

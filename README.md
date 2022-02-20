@@ -78,7 +78,7 @@ the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tG
 
 - [ ] Convert output to colored html
 
-- [ ] Use multithreading
+- [x] Use multithreading
 
 - [x] Add tests
 

@@ -65,6 +65,13 @@ pub fn build_cli() -> Command<'static> {
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
                 .help("Output file for non-colored ascii."),
+        ) .arg(
+            Arg::new("threads")
+                .long("thread")
+                .takes_value(true)
+                .default_value("4")
+                .value_hint(ValueHint::Other)
+                .help("OutputNumber of threads used to convert the image. A larger number can mean grater performance. Defaults to 4"),
         )
         .arg(
             Arg::new("no-color")
