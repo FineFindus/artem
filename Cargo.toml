@@ -14,7 +14,7 @@ catogories = "command-line-utilities"
 build = "build.rs"
 
 [profile.release]
-debug = true
+opt-level = 3
 
 
 #bin definition
