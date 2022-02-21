@@ -4,7 +4,7 @@ use clap::{Arg, Command, ValueHint};
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
         .version("0.3")
-        .about("Convert the given image to an ascii representation of the image.")
+        .about("A small rust cli program to convert an image into an ascii art representation.")
         .arg(
             Arg::new("INPUT")
                 .help("Path to the target image. Does NOT alter the original")

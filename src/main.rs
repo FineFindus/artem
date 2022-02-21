@@ -42,7 +42,7 @@ fn main() {
     //only one arg should be present
     let target_size = if matches.is_present("height") {
         //use max terminal height
-        (terminal_size::terminal_size().unwrap().1 .0 as f64 * 1.9).floor() as u32
+        (terminal_size::terminal_size().unwrap().1 .0 as f64 * 2f64).floor() as u32
     } else if matches.is_present("width") {
         //use max terminal width
         terminal_size::terminal_size().unwrap().0 .0 as u32
@@ -87,6 +87,7 @@ fn main() {
 
     let rows = height / tile_height;
 
+    //todo preallocate size
     let mut terminal_output = String::new();
     let mut file_output = String::new();
 
@@ -102,10 +103,11 @@ fn main() {
         ),
         Err(_) => panic!("Could not work with size input value"),
     };
+
     //split the img into tile for each thread
     let thread_tiles = rows / thread_count;
     //collect threads handles
-    let mut handles = Vec::new();
+    let mut handles = Vec::with_capacity(thread_count as usize);
     //split the img into chunks for each thread
     for chunk in 0..thread_count {
         //arc clone img and density
@@ -114,6 +116,7 @@ fn main() {
         //create a thread for this img chunk
         let handle = thread::spawn(move || {
             //create thread strings
+            //todo preallocate size
             let mut thread_terminal_output = String::new();
             let mut thread_file_output = String::new();
 
@@ -124,8 +127,12 @@ fn main() {
                     //get a single tile
                     let tile_row = row * tile_height;
                     let tile_col = col * tile_width;
+
                     //create a pixel block from multiple pixels
-                    let mut pixel_block: Vec<Rgba<u8>> = Vec::new();
+                    //preallocate vector with the correct size
+                    let mut pixel_block: Vec<Rgba<u8>> =
+                        Vec::with_capacity((tile_height * tile_width) as usize);
+
                     //go through each pixel in the tile
                     for x in tile_row..(tile_row + tile_height) {
                         for y in tile_col..(tile_col + tile_width) {
@@ -142,18 +149,25 @@ fn main() {
                     thread_terminal_output.push_str(char.1.to_string().as_str());
                 }
                 //add new line
-                if row != rows - 1 {
+                if row != (chunk + 1) * thread_tiles - 1 || chunk != thread_count - 1 {
                     thread_terminal_output.push('\n');
                     thread_file_output.push('\n');
                 }
             }
+            println!(
+                "Cap: {}, guess: {}",
+                thread_file_output.capacity(),
+                tile_height * tile_width * thread_tiles
+            );
             (thread_terminal_output, thread_file_output)
         });
         handles.push(handle);
     }
 
     for handle in handles {
+        //get thread result
         let result = handle.join().unwrap();
+        //add output together
         terminal_output.push_str(result.0.as_str());
         file_output.push_str(result.1.as_str());
     }
@@ -189,7 +203,7 @@ fn main() {
 ///The converted char will be returned as a string and as a colored string.
 fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredString) {
     let mut block_avg: f64 = 0f64;
-    //color
+    //color as f64 for square rooting later
     let mut red: f64 = 0f64;
     let mut blue: f64 = 0f64;
     let mut green: f64 = 0f64;

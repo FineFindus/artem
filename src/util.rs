@@ -64,16 +64,11 @@ mod test_range {
 
 ///Converts the given input string to an ansi colored string, somewhat matching given rgb values
 /// Since only 8 ansi colors are supported
-pub fn convert_rgb_ansi(
-    input: &str,
-    input_color_r: u8,
-    input_color_g: u8,
-    input_color_b: u8,
-) -> ColoredString {
+pub fn convert_rgb_ansi(input: &str, r: u8, g: u8, b: u8) -> ColoredString {
     //get rgb values and convert them to i32, since later on the could negative when subtracting
-    let r = input_color_r as i32;
-    let g = input_color_g as i32;
-    let b = input_color_b as i32;
+    let r = r as i32;
+    let g = g as i32;
+    let b = b as i32;
 
     //vga colors as example ansi color
     //from https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
@@ -189,5 +184,11 @@ mod test_convert_rgb_ansi {
             "input".bright_white(),
             convert_rgb_ansi("input", 255, 255, 255)
         );
+    }
+
+    #[test]
+    fn rgb_blue() {
+        //convert a blue rgb tone to ansi blue
+        assert_eq!("input".blue(), convert_rgb_ansi("input", 0, 0, 88));
     }
 }
