@@ -64,7 +64,7 @@ pub fn build_cli() -> Command<'static> {
                 .long("output")
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
-                .help("Output file for non-colored ascii."),
+                .help("Output file for non-colored ascii. There is currently no way to enable color support for output files."),
         ) .arg(
             Arg::new("threads")
                 .long("thread")

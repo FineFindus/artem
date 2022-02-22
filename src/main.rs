@@ -1,7 +1,7 @@
 use std::{fs::File, io::Write, ops::Div, panic, sync::Arc, thread};
 
 use colored::*;
-use image::{GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView, Rgba};
 
 //import cli
 mod cli;
@@ -34,10 +34,6 @@ fn main() {
         Err(_) => panic!("Image not found"),
     };
 
-    //get img dimensions
-    let width = img.width();
-    let height = img.height();
-
     //get target size from args
     //only one arg should be present
     let target_size = if matches.is_present("height") {
@@ -61,13 +57,6 @@ fn main() {
         }
     };
 
-    //clamp image width to a maximum of 80
-    let columns = if width > target_size {
-        target_size
-    } else {
-        width
-    };
-
     //best ratio between height and width is 0.43
     let scale = match matches
         .value_of("scale")
@@ -81,31 +70,85 @@ fn main() {
         Err(_) => panic!("Could not work with ratio input value"),
     };
 
-    //calculate tiles
-    let tile_width = width / columns;
-    let tile_height = (tile_width as f64 / scale).floor() as u32;
-
-    let rows = height / tile_height;
-
-    //todo preallocate size
-    let mut terminal_output = String::new();
-    let mut file_output = String::new();
-
     //number rof threads used to convert the image
     let thread_count: u32 = match matches
         .value_of("threads")
         .unwrap() //this should always be at least "4", so it should be safe to unwrap
         .parse::<u32>()
     {
-        Ok(v) => v.clamp(
-            1,    //there has to be at least 1 thread to convert the img
-            rows, //there should no be more threads than rows
-        ),
+        Ok(v) => v,
         Err(_) => panic!("Could not work with size input value"),
     };
 
+    //check if no colors should be used or the if a output file will be used
+    //since text documents don`t support ansi ascii colors
+    let color = if matches.is_present("no-color") || matches.is_present("output-file") {
+        //print the "normal" non-colored conversion
+        false
+    } else {
+        //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
+        true
+    };
+
+    //convert the img
+    let output = convert_img(img, thread_count, density, scale, target_size, color);
+
+    //create and write to output file
+    if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
+        let mut file = match File::create(matches.value_of("output-file").unwrap()) {
+            Ok(f) => f,
+            Err(_) => panic!("Could not create file"),
+        };
+
+        match file.write(output.as_bytes()) {
+            Ok(result) => println!(
+                "Written {} bytes to {}",
+                result,
+                matches.value_of("output-file").unwrap()
+            ),
+            Err(_) => panic!("Could not write to file"),
+        };
+    } else {
+        //print the img to the terminal
+        println!("{}", output);
+    }
+}
+
+///Converts the given image to an ascii representation
+fn convert_img(
+    img: Arc<DynamicImage>,
+    thread_count: u32,
+    density: &str,
+    scale: f64,
+    target_size: u32,
+    color: bool,
+) -> String {
+    //get img dimensions
+    let width = img.width();
+    let height = img.height();
+
+    //clamp image width to a maximum of 80
+    let columns = if width > target_size {
+        target_size
+    } else {
+        width
+    };
+
+    //calculate tiles
+    let tile_width = width / columns;
+    let tile_height = (tile_width as f64 / scale).floor() as u32;
+
+    let rows = height / tile_height;
+
+    //output string
+    let mut output = String::new();
+
     //split the img into tile for each thread
-    let thread_tiles = rows / thread_count;
+    let thread_tiles = rows
+        / thread_count.clamp(
+            1,    //there has to be at least 1 thread to convert the img
+            rows, //there should no be more threads than rows
+        );
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     //split the img into chunks for each thread
@@ -113,12 +156,11 @@ fn main() {
         //arc clone img and density
         let thread_img = Arc::clone(&img);
         let thread_density = density.to_owned();
+
         //create a thread for this img chunk
         let handle = thread::spawn(move || {
-            //create thread strings
-            //todo preallocate size
-            let mut thread_terminal_output = String::new();
-            let mut thread_file_output = String::new();
+            //create thread string
+            let mut thread_output = String::new();
 
             //go through the thread img chunk
             for row in chunk * thread_tiles..(chunk + 1) * thread_tiles {
@@ -142,24 +184,16 @@ fn main() {
                     }
 
                     //get and display density char, it returns a normal and a colored string
-                    let char = get_pixel_density(pixel_block, thread_density.as_str());
-                    //save the normal string to the output file
-                    thread_file_output.push_str(char.0.as_str());
-                    //save the colored string for the terminal output
-                    thread_terminal_output.push_str(char.1.to_string().as_str());
+                    let char = get_pixel_density(pixel_block, thread_density.as_str(), color);
+                    //append the char for the output
+                    thread_output.push_str(char.as_str());
                 }
                 //add new line
                 if row != (chunk + 1) * thread_tiles - 1 || chunk != thread_count - 1 {
-                    thread_terminal_output.push('\n');
-                    thread_file_output.push('\n');
+                    thread_output.push('\n');
                 }
             }
-            println!(
-                "Cap: {}, guess: {}",
-                thread_file_output.capacity(),
-                tile_height * tile_width * thread_tiles
-            );
-            (thread_terminal_output, thread_file_output)
+            thread_output
         });
         handles.push(handle);
     }
@@ -168,40 +202,15 @@ fn main() {
         //get thread result
         let result = handle.join().unwrap();
         //add output together
-        terminal_output.push_str(result.0.as_str());
-        file_output.push_str(result.1.as_str());
+        output.push_str(result.as_str());
     }
 
-    //check if no colors should be used
-    if matches.is_present("no-color") {
-        //print the "normal" non-colored conversion
-        println!("{}", file_output);
-    } else {
-        //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
-        println!("{}", terminal_output);
-    }
-
-    //create and write to output file
-    if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
-        let mut file = match File::create(matches.value_of("output-file").unwrap()) {
-            Ok(f) => f,
-            Err(_) => panic!("Could not create file"),
-        };
-
-        match file.write(file_output.as_bytes()) {
-            Ok(result) => println!(
-                "Written {} bytes to {}",
-                result,
-                matches.value_of("output-file").unwrap()
-            ),
-            Err(_) => panic!("Could not write to file"),
-        };
-    }
+    output
 }
 
 ///Convert a pixel block to a char.
 ///The converted char will be returned as a string and as a colored string.
-fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredString) {
+fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str, color: bool) -> String {
     let mut block_avg: f64 = 0f64;
     //color as f64 for square rooting later
     let mut red: f64 = 0f64;
@@ -238,32 +247,28 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str) -> (String, ColoredStr
         .clamp(0f64, density.len() as f64);
 
     //todo use directional chars
-    //get correct char from map
-    let density_char = density.chars().nth(density_index as usize);
-    if density_char.is_some() {
-        //return non an colored string
-        (
-            density_char.unwrap().to_string(),
-            //check if true color is supported
-            if util::supports_truecolor() {
-                //return true color string
-                density_char.unwrap().to_string().truecolor(
-                    red.floor() as u8,
-                    green.floor() as u8,
-                    blue.floor() as u8,
-                )
-            } else {
-                //otherwise use basic (8 color) ansi color
-                util::convert_rgb_ansi(
-                    density_char.unwrap().to_string().as_str(),
-                    red as u8,
-                    green as u8,
-                    blue as u8,
-                )
-            },
-        )
+    //get correct char from map, default to a space
+    let density_char = density.chars().nth(density_index as usize).unwrap_or(' ');
+    //return if needed a colored or non colored string
+    if color {
+        //check if true color is supported
+        if util::supports_truecolor() {
+            //return true color string
+            density_char
+                .to_string()
+                .truecolor(red.floor() as u8, green.floor() as u8, blue.floor() as u8)
+                .to_string()
+        } else {
+            //otherwise use basic (8 color) ansi color
+            util::convert_rgb_ansi(
+                density_char.to_string().as_str(),
+                red as u8,
+                green as u8,
+                blue as u8,
+            )
+            .to_string()
+        }
     } else {
-        //return non an colored string
-        (' '.to_string(), ' '.to_string().normal())
+        density_char.to_string()
     }
 }
