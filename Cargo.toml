@@ -1,13 +1,13 @@
 [package]
 name = "artem"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 description = "An easy program to convert an image to an ascii image"
 readme = "README.md"
 license-file = "LICENSE"
 homepage = "https://github.com/finefindus/artem"
 repository = "https://github.com/finefindus/artem"
-catogories = "command-line-utilities"
+catogories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 #build file
