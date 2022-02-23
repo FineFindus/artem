@@ -90,7 +90,7 @@ fn main() {
         true
     };
 
-    //convert the img
+    //convert the img to ascii string
     let output = convert_img(img, thread_count, density, scale, target_size, color);
 
     //create and write to output file
