@@ -68,6 +68,8 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 This projects was heavily inspired by [jp2a](https://github.com/cslarsen/jp2a) as well as
 the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tGI).
 
+Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indirectly helping with inspiration for the build setup.
+
 ## Todo
 
 - [x] Better average the RGB values of multiple pixel
