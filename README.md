@@ -86,7 +86,7 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [ ] Add even more test
 
-- [ ] Change name
+- [x] Change name
 
 - [ ] Publish
 
