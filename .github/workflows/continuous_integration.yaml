@@ -6,6 +6,7 @@ jobs:
 
   check:
     name: Check
+    #format does not need to run on all platforms
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -36,7 +37,11 @@ jobs:
 
   test:
     name: Test Suite
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+      #tests should pass on all platforms
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2

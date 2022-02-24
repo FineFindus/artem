@@ -1,4 +1,5 @@
 ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
+[![Continuous Integration](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml/badge.svg)](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
 # Artem
