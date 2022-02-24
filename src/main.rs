@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, ops::Div, panic, sync::Arc, thread};
+use std::{fs::File, io::Write, ops::Div, panic, path::Path, process, sync::Arc, thread};
 
 use colored::*;
 use image::{DynamicImage, GenericImageView, Rgba};
@@ -28,7 +28,14 @@ fn main() {
     };
 
     //this should be save to unwrap since the input has to be non-null
-    let img = match image::open(matches.value_of("INPUT").unwrap()) {
+    let img_path = matches.value_of("INPUT").unwrap();
+    //check if file exist
+    if !Path::new(img_path).is_file() {
+        eprintln!("File {} does not exist", img_path);
+        process::exit(1);
+    }
+    //try to open img
+    let img = match image::open(img_path) {
         Ok(img) => Arc::new(img),
         //Todo use error function
         Err(_) => panic!("Image not found"),
@@ -77,7 +84,7 @@ fn main() {
         .parse::<u32>()
     {
         Ok(v) => v,
-        Err(_) => panic!("Could not work with size input value"),
+        Err(_) => panic!("Could not work with thread input value"),
     };
 
     //check if no colors should be used or the if a output file will be used
@@ -144,11 +151,10 @@ fn convert_img(
     let mut output = String::new();
 
     //split the img into tile for each thread
-    let thread_tiles = rows
-        / thread_count.clamp(
-            1,    //there has to be at least 1 thread to convert the img
-            rows, //there should no be more threads than rows
-        );
+    let thread_tiles = (rows / thread_count).clamp(
+        1,    //there has to be at least 1 thread to convert the img
+        rows, //there should no be more threads than rows
+    );
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     //split the img into chunks for each thread
