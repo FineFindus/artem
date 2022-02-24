@@ -150,11 +150,14 @@ fn convert_img(
     //output string
     let mut output = String::new();
 
-    //split the img into tile for each thread
-    let thread_tiles = (rows / thread_count).clamp(
+    //clamp threads
+    let thread_count = thread_count.clamp(
         1,    //there has to be at least 1 thread to convert the img
         rows, //there should no be more threads than rows
     );
+
+    //split the img into tile for each thread
+    let thread_tiles = rows / thread_count;
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     //split the img into chunks for each thread

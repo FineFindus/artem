@@ -409,9 +409,9 @@ pub mod thread {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", u32::MAX.to_string().as_str()]);
-        //should panic when allocating that much memory
-        cmd.assert().stderr(predicate::str::contains(
-            "memory allocation of 137438953440 bytes failed",
+        //since its clamped, it should return the normal img
+        cmd.assert().stdout(predicate::str::starts_with(
+            "WWWNNNNNNXXXXXXKXXXKK0000OO000OOOOOOOOOOOkkkkkkOkkkkkkxxxxxkkOOOkOO0000KKKKKKKXX",
         ));
     }
 
@@ -442,6 +442,8 @@ pub mod output_file {
     }
 
     #[test]
+    //windows does not like this test, it can not create the file
+    #[cfg(not(target_os = "windows"))]
     fn arg_is_correct() -> Result<(), std::io::Error> {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
