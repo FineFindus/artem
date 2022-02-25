@@ -482,3 +482,45 @@ pub mod no_color {
         ));
     }
 }
+
+pub mod verbosity {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_is_none() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--verbose");
+        cmd.assert().stderr(predicate::str::starts_with(
+            "error: The argument '--verbose <verbosity>' requires a value but none was supplied",
+        ));
+    }
+
+    #[test]
+    fn arg_info() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--verbose", "info"]);
+        //only check first line
+        cmd.assert().stderr(predicate::str::contains("INFO"));
+    }
+
+    #[test]
+    fn arg_debug() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--verbose", "debug"]);
+        //only check first line
+        cmd.assert().stderr(predicate::str::contains("DEBUG"));
+    }
+
+    #[test]
+    fn arg_error() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.nonexisting") //this causes a fatal error
+            .args(["--verbose", "error"]);
+        //only check first line
+        cmd.assert().stderr(predicate::str::contains("ERROR"));
+    }
+}
