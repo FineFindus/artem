@@ -1,7 +1,8 @@
-use std::{fs::File, io::Write, ops::Div, panic, path::Path, process, sync::Arc, thread};
+use std::{fs::File, io::Write, ops::Div, path::Path, sync::Arc, thread};
 
 use colored::*;
 use image::{DynamicImage, GenericImageView, Rgba};
+use log::{debug, info, warn, LevelFilter};
 
 //import cli
 mod cli;
@@ -12,6 +13,19 @@ fn main() {
     //get args from cli
     let matches = cli::build_cli().get_matches();
 
+    //get log level from args
+    let log_level = match matches.value_of("verbosity") {
+        Some("trace") => LevelFilter::Trace,
+        Some("debug") => LevelFilter::Debug,
+        Some("info") => LevelFilter::Info,
+        Some("warn") => LevelFilter::Warn,
+        Some("error") => LevelFilter::Error,
+        _ => LevelFilter::Error,
+    };
+
+    //enable logging
+    env_logger::builder().filter_level(log_level).init();
+
     //density char map
     let density = if matches.is_present("density") {
         match matches.value_of("density").unwrap() {
@@ -20,10 +34,14 @@ fn main() {
             "long" | "l" | "2" => {
                 r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
             }
-            _ => matches.value_of("density").unwrap(),
+            _ => {
+                info!("Using user provided characters");
+                matches.value_of("density").unwrap()
+            }
         }
     } else {
         //density map from jp2a
+        info!("Using default characters");
         r#"MWNXK0Okxdolc:;,'...   "#
     };
 
@@ -31,14 +49,17 @@ fn main() {
     let img_path = matches.value_of("INPUT").unwrap();
     //check if file exist
     if !Path::new(img_path).is_file() {
-        eprintln!("File {} does not exist", img_path);
-        process::exit(1);
+        util::fatal_error(
+            format!("File {} does not exist", img_path).as_str(),
+            Some(66),
+        );
     }
+
     //try to open img
     let img = match image::open(img_path) {
         Ok(img) => Arc::new(img),
         //Todo use error function
-        Err(_) => panic!("Image not found"),
+        Err(_) => util::fatal_error("Image was not found", Some(66)),
     };
 
     //get target size from args
@@ -60,9 +81,10 @@ fn main() {
                 20,  //min should be 20 to ensure a somewhat visible picture
                 230, //img above 230 might not be displayed properly
             ),
-            Err(_) => panic!("Could not work with size input value"),
+            Err(_) => util::fatal_error("Could not work with size input value", Some(65)),
         }
     };
+    debug!("Target Size: {}", target_size);
 
     //best ratio between height and width is 0.43
     let scale = match matches
@@ -74,8 +96,9 @@ fn main() {
             0f64, //a negative scale is not allowed
             1f64, //even a scale above 0.43 is not looking good
         ),
-        Err(_) => panic!("Could not work with ratio input value"),
+        Err(_) => util::fatal_error("Could not work with ratio input value", Some(65)),
     };
+    debug!("Scale: {}", scale);
 
     //number rof threads used to convert the image
     let thread_count: u32 = match matches
@@ -84,39 +107,53 @@ fn main() {
         .parse::<u32>()
     {
         Ok(v) => v,
-        Err(_) => panic!("Could not work with thread input value"),
+        Err(_) => util::fatal_error("Could not work with thread input value", Some(65)),
     };
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
     let color = if matches.is_present("no-color") || matches.is_present("output-file") {
         //print the "normal" non-colored conversion
+        info!("Using non-colored ascii");
         false
     } else {
         //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
+        info!("Using colored ascii");
+        let truecolor = util::supports_truecolor();
+        if !truecolor {
+            warn!("Truecolor is not supported. Using ansi color")
+        } else {
+            info!("Using truecolor ascii")
+        }
         true
     };
 
     //convert the img to ascii string
+    info!("Converting the img: {}", img_path);
     let output = convert_img(img, thread_count, density, scale, target_size, color);
 
     //create and write to output file
     if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
+        info!("Writing output to output file");
         let mut file = match File::create(matches.value_of("output-file").unwrap()) {
             Ok(f) => f,
-            Err(_) => panic!("Could not create file"),
+            Err(_) => util::fatal_error("Could not create file", Some(73)),
         };
 
         match file.write(output.as_bytes()) {
-            Ok(result) => println!(
-                "Written {} bytes to {}",
-                result,
-                matches.value_of("output-file").unwrap()
-            ),
-            Err(_) => panic!("Could not write to file"),
+            Ok(result) => {
+                info!("Written ascii chars to output file");
+                println!(
+                    "Written {} bytes to {}",
+                    result,
+                    matches.value_of("output-file").unwrap()
+                )
+            }
+            Err(_) => util::fatal_error("Could not write to file", Some(74)),
         };
     } else {
         //print the img to the terminal
+        info!("Printing output");
         println!("{}", output);
     }
 }
@@ -130,9 +167,12 @@ fn convert_img(
     target_size: u32,
     color: bool,
 ) -> String {
+    debug!("Color: {}", color);
     //get img dimensions
     let width = img.width();
     let height = img.height();
+    debug!("Image Width: {}", width);
+    debug!("Image Height: {}", height);
 
     //clamp image width to a maximum of 80
     let columns = if width > target_size {
@@ -140,12 +180,16 @@ fn convert_img(
     } else {
         width
     };
+    debug!("Columns: {}", columns);
 
     //calculate tiles
     let tile_width = width / columns;
     let tile_height = (tile_width as f64 / scale).floor() as u32;
+    debug!("Tile Width: {}", tile_width);
+    debug!("Tile Height: {}", tile_height);
 
     let rows = height / tile_height;
+    debug!("Rows: {}", rows);
 
     //output string
     let mut output = String::new();
@@ -155,6 +199,7 @@ fn convert_img(
         1,    //there has to be at least 1 thread to convert the img
         rows, //there should no be more threads than rows
     );
+    debug!("Threads: {}", thread_count);
 
     //split the img into tile for each thread
     let thread_tiles = rows / thread_count;

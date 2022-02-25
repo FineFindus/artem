@@ -4,7 +4,6 @@ about: Create a report to help us improve
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -37,7 +36,8 @@ Add any other context about the problem here.
 <details>
   <summary>Output</summary>
 
-<!-- Please paste the output of the command in the backticks below-->
+<!-- Please paste the output of the command
+with the flag `--verbose debug`  in the backticks below-->
 
 ```
 

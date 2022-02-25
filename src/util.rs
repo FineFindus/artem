@@ -1,6 +1,7 @@
-use std::env;
+use std::{env, process};
 
 use colored::{ColoredString, Colorize};
+use log::error;
 
 ///Checks if the terminal supports truecolor mode.
 /// Returns false if not.
@@ -191,4 +192,16 @@ mod test_convert_rgb_ansi {
         //convert a blue rgb tone to ansi blue
         assert_eq!("input".blue(), convert_rgb_ansi("input", 0, 0, 88));
     }
+}
+
+///Function for fatal errors,
+///which are errors from which it is not possible to recover, (e.g. non-existing file).
+///This function logs the error as a error and exits the program with the error code,
+///if none is provided it uses code 1
+///Use the exit codes defined by https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
+pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
+    //This function never returns, since it always exit the program
+    error!("{}", message);
+    error!("Artem exited with code: {}", code.unwrap_or(1));
+    process::exit(code.unwrap_or(1));
 }

@@ -3,7 +3,7 @@ use clap::{Arg, Command, ValueHint};
 ///Build the clap command-line-interface using clap  
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
-        .version("0.3")
+        .version("0.3.0")
         .about("A small rust cli program to convert an image into an ascii art representation.")
         .arg(
             Arg::new("INPUT")
@@ -79,6 +79,18 @@ pub fn build_cli() -> Command<'static> {
                 .long("no-color")
                 .help("Do not use color when printing the image to the terminal."),
         )
+        .arg(Arg::new("verbosity")
+                .long("verbose")
+                .takes_value(false)
+                .possible_values([
+                    "trace",
+                    "debug",
+                    "info",
+                    "warn",
+                    "error",
+                    ])
+                .help("Choose the verbosity of the logging level."),
+    )
 }
 
 #[cfg(test)]
