@@ -46,9 +46,14 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
+        rust:
+          - stable
+          - beta
+          - nightly
+          - 1.58.1  # MSRV
       #tests should pass on all platforms
     runs-on: ${{ matrix.platform }}
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -56,8 +61,8 @@ jobs:
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ matrix.rust }}
           profile: minimal
-          toolchain: stable
           override: true
       #use caching for cargo build 
       - name: Cache dependencies
@@ -71,7 +76,14 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Run cargo test
+      - name: Build artem
+        uses: actions-rs/cargo@v1
+        continue-on-error: false 
+        with:
+          command: build 
+          args: --verbose
+
+      - name: Run tests
         uses: actions-rs/cargo@v1
         continue-on-error: false 
         with:

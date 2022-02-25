@@ -22,7 +22,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop**
+**Information**
 
 - OS: [e.g. Ubuntu 20.10]
 - Shell: [e.g. Bash, PowerShell]
