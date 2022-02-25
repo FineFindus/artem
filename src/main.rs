@@ -24,7 +24,11 @@ fn main() {
     };
 
     //enable logging
-    env_logger::builder().filter_level(log_level).init();
+    env_logger::builder()
+        .format_target(false)
+        .format_timestamp(None)
+        .filter_level(log_level)
+        .init();
 
     //density char map
     let density = if matches.is_present("density") {

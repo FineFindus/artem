@@ -9,9 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Removed linting problems found by clippy
 - CI tests now against the stable, beta and nightly rust version
+- CI now checks for clippy warnings
 - Changelog file to document changes to the project
 - A Feature template can be used to easily request features over Github
+
+### Changed
+
+- Logging no longer logs the date, since it is not needed
 
 ## [0.3.0] - 2022-02-25
 

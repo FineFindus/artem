@@ -19,19 +19,19 @@ mod test_color_support {
     #[test]
     fn true_when_env_is_truecolor() {
         env::set_var("COLORTERM", "truecolor");
-        assert_eq!(true, supports_truecolor());
+        assert!(supports_truecolor());
     }
 
     #[test]
     fn true_when_env_is_24bit() {
         env::set_var("COLORTERM", "24bit");
-        assert_eq!(true, supports_truecolor());
+        assert!(supports_truecolor());
     }
 
     #[test]
     fn false_with_different_env() {
         env::set_var("COLORTERM", "asdas");
-        assert_eq!(false, supports_truecolor());
+        assert!(!supports_truecolor());
     }
 }
 

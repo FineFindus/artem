@@ -100,13 +100,13 @@ mod test {
     #[test]
     fn fail_missing_input() {
         let matches = build_cli().try_get_matches_from(["artem"]);
-        assert_eq!(true, matches.is_err());
+        assert!(matches.is_err());
     }
 
     #[test]
     fn success_input() {
         let matches = build_cli().try_get_matches_from(["artem", "../example/abraham_lincoln.jpg"]);
-        assert_eq!(true, matches.is_ok());
+        assert!(matches.is_ok());
     }
 
     #[test]
@@ -118,7 +118,7 @@ mod test {
             "-s 20",
             "-w",
         ]);
-        assert_eq!(true, matches.is_err());
+        assert!(matches.is_err());
     }
 
     #[test]
@@ -130,7 +130,7 @@ mod test {
             "-s 20",
             "-h",
         ]);
-        assert_eq!(true, matches.is_err());
+        assert!(matches.is_err());
     }
 
     #[test]
@@ -142,6 +142,6 @@ mod test {
             "-h",
             "-w",
         ]);
-        assert_eq!(true, matches.is_err());
+        assert!(matches.is_err());
     }
 }
