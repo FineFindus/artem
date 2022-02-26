@@ -85,7 +85,7 @@ jobs:
 
   release_deb:
     name: Create Debian
-    needs: create_release # we need to know the upload URL
+    # needs: create_release # we need to know the upload URL
     runs-on: ${{ matrix.platform }} # we run many different builds
     strategy:
       matrix:
