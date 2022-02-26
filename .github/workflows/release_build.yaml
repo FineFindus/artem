@@ -121,7 +121,8 @@ jobs:
         uses: actions-rs/cargo@v1
         continue-on-error: false 
         with:
-          command: install deb
+          command: install
+          args: deb
 
       - name: Run cargo deb
         uses: actions-rs/cargo@v1
