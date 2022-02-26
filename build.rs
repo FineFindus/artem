@@ -3,9 +3,9 @@ use clap_complete::{
     shells::{Bash, Elvish, Fish, PowerShell, Zsh},
     Generator,
 };
+use std::ffi::OsString;
 use std::path::PathBuf;
 use std::{env, fs, path};
-use std::{ffi::OsString, fmt::format};
 
 use std::io::Error;
 

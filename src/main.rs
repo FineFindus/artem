@@ -2,7 +2,7 @@ use std::{fs::File, io::Write, ops::Div, path::Path, sync::Arc, thread};
 
 use colored::*;
 use image::{DynamicImage, GenericImageView, Rgba};
-use log::{debug, info, warn, LevelFilter};
+use log::{debug, info, trace, warn, LevelFilter};
 
 //import cli
 mod cli;
@@ -30,6 +30,8 @@ fn main() {
         .filter_level(log_level)
         .init();
 
+    trace!("Started logger with trace");
+
     //this should be save to unwrap since the input has to be non-null
     let img_path = matches.value_of("INPUT").unwrap();
     //check if file exist
@@ -43,7 +45,6 @@ fn main() {
     //try to open img
     let img = match image::open(img_path) {
         Ok(img) => Arc::new(img),
-        //Todo use error function
         Err(_) => util::fatal_error("Image was not found", Some(66)),
     };
 
@@ -70,12 +71,15 @@ fn main() {
     //only one arg should be present
     let target_size = if matches.is_present("height") {
         //use max terminal height
+        trace!("Using terminal height as target size");
         (terminal_size::terminal_size().unwrap().1 .0 as f64 * 2f64).floor() as u32
     } else if matches.is_present("width") {
         //use max terminal width
+        trace!("Using terminal width as target size");
         terminal_size::terminal_size().unwrap().0 .0 as u32
     } else {
         //use given input size
+        trace!("Using user input size as target size");
         match matches
             .value_of("size")
             .unwrap() //this should always be at least "80", so it should be safe to unwrap
@@ -114,6 +118,10 @@ fn main() {
         Err(_) => util::fatal_error("Could not work with thread input value", Some(65)),
     };
 
+    if !matches.is_present("no-color") && matches.is_present("output-file") {
+        warn!("Output-file flag is present, ignoring colors")
+    }
+
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
     let color = if matches.is_present("no-color") || matches.is_present("output-file") {
@@ -143,6 +151,7 @@ fn main() {
             Ok(f) => f,
             Err(_) => util::fatal_error("Could not create file", Some(73)),
         };
+        trace!("Created output file");
 
         match file.write(output.as_bytes()) {
             Ok(result) => {
@@ -197,6 +206,7 @@ fn convert_img(
 
     //output string
     let mut output = String::new();
+    trace!("Created output string");
 
     //clamp threads
     let thread_count = thread_count.clamp(
@@ -209,6 +219,7 @@ fn convert_img(
     let thread_tiles = rows / thread_count;
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
+    trace!("Allocated thread handles");
     //split the img into chunks for each thread
     for chunk in 0..thread_count {
         //arc clone img and density
@@ -216,6 +227,7 @@ fn convert_img(
         let thread_density = density.to_owned();
 
         //create a thread for this img chunk
+        trace!("Creating thread: {}", chunk);
         let handle = thread::spawn(move || {
             //create thread string
             let mut thread_output = String::new();
@@ -251,8 +263,10 @@ fn convert_img(
                     thread_output.push('\n');
                 }
             }
+            trace!("Thread {} finished", chunk);
             thread_output
         });
+        trace!("Appending handle of thread {}", chunk);
         handles.push(handle);
     }
 
@@ -260,6 +274,7 @@ fn convert_img(
         //get thread result
         let result = handle.join().unwrap();
         //add output together
+        trace!("Appending output of thread");
         output.push_str(result.as_str());
     }
 
