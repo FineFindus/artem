@@ -10,24 +10,6 @@ on:
     # tags:
     # - "[0-9]+.[0-9]+.[0-9]+"
 jobs:
-  # create_release:
-  #   name: Create Release
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     upload_url: ${{ steps.release.outputs.upload_url }}
-  #   steps:
-  #     - name: Create release
-  #       id: create_release
-  #       uses: actions/create-release@v1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         tag_name: ${{ github.ref }}
-  #         release_name: Release ${{ github.ref }}
-  #         #save as draft to manually release it later and add the body from changelog
-  #         draft: true
-  #         #while version is still below 1.0.0, mark the release as a prerelease
-  #         prerelease: true
 
   release_assets:
     name: Release assets
@@ -43,9 +25,6 @@ jobs:
         ]
         rust:
           - stable
-          - beta
-          - nightly
-          - 1.58.1  # MSRV
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -92,9 +71,6 @@ jobs:
         platform: [ubuntu-latest]
         rust:
           - stable
-          - beta
-          - nightly
-          - 1.58.1  # MSRV
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -122,7 +98,7 @@ jobs:
         continue-on-error: false 
         with:
           command: install
-          args: deb
+          args: cargo-deb
 
       - name: Run cargo deb
         uses: actions-rs/cargo@v1
