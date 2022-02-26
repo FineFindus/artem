@@ -3,12 +3,9 @@
 
 name: release
 on:
-  push:
-    # Enable when testing release infrastructure on a branch.
-    branches:
-    - features/continuous_delivery
-    # tags:
-    # - "[0-9]+.[0-9]+.[0-9]+"
+  release:
+    types:
+      - "created"
 jobs:
 
   release_assets:
@@ -54,10 +51,18 @@ jobs:
           command: build 
           args: --locked --release --verbose
 
-      - name: Upload Debian Package
+          #from: https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
+      - name: Extract Version Number
+        shell: bash
+        run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
+
+      - name: Compress release files
+        run: tar -czvf artem--v${PROJECT_VERSION}-${{ matrix.platform }}.tar.gz target/release/artem
+
+      - name: Upload Release Build
         uses: softprops/action-gh-release@v1
         with:
-          files: ./target/release/artem
+          files: artem--v${PROJECT_VERSION}-${{ matrix.platform }}.tar.gz
           draft: true
           prerelease: true
 
