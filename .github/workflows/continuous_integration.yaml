@@ -45,7 +45,12 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        platform: [ubuntu-latest, 
+        #disable macos since it is 10x more expensive and currently not needed 
+        #macos-latest, 
+        #same with windows
+        #windows-latest
+        ]
         rust:
           - stable
           - beta
