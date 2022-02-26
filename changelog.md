@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tab completions now works in other shells as well (fish and zsh in deb package)
 - Removed linting problems found by clippy
 - CI tests now against the stable, beta and nightly rust version
 - CI now checks for clippy warnings

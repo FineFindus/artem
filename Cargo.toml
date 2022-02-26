@@ -48,8 +48,10 @@ priority = "optional"
 assets = [
       ["target/release/artem", "usr/bin/", "755"],
       ["deployment/deb/artem.1", "usr/share/man/man1/artem.1", "644"],
-      #the completion file and man page is generated and copied by the build script
+      #the completion files and man page is generated and copied by the build script
       ["deployment/deb/artem.bash", "usr/share/bash-completion/completions/artem", "644"],
+      ["deployment/deb/artem.fish", "usr/share/fish/vendor_completions.d/aretem.fish", "644"],
+      ["deployment/deb/_artem", "usr/share/zsh/vendor-completions/", "644"],
 ]
 extended-description = """\
 artem is a cli project to convert images to ascii art. By default it uses truecolor, if not support it fallsback to ansi colors.
