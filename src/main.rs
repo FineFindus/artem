@@ -30,6 +30,23 @@ fn main() {
         .filter_level(log_level)
         .init();
 
+    //this should be save to unwrap since the input has to be non-null
+    let img_path = matches.value_of("INPUT").unwrap();
+    //check if file exist
+    if !Path::new(img_path).is_file() {
+        util::fatal_error(
+            format!("File {} does not exist", img_path).as_str(),
+            Some(66),
+        );
+    }
+
+    //try to open img
+    let img = match image::open(img_path) {
+        Ok(img) => Arc::new(img),
+        //Todo use error function
+        Err(_) => util::fatal_error("Image was not found", Some(66)),
+    };
+
     //density char map
     let density = if matches.is_present("density") {
         match matches.value_of("density").unwrap() {
@@ -47,23 +64,6 @@ fn main() {
         //density map from jp2a
         info!("Using default characters");
         r#"MWNXK0Okxdolc:;,'...   "#
-    };
-
-    //this should be save to unwrap since the input has to be non-null
-    let img_path = matches.value_of("INPUT").unwrap();
-    //check if file exist
-    if !Path::new(img_path).is_file() {
-        util::fatal_error(
-            format!("File {} does not exist", img_path).as_str(),
-            Some(66),
-        );
-    }
-
-    //try to open img
-    let img = match image::open(img_path) {
-        Ok(img) => Arc::new(img),
-        //Todo use error function
-        Err(_) => util::fatal_error("Image was not found", Some(66)),
     };
 
     //get target size from args
