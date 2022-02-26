@@ -33,9 +33,9 @@ fn main() -> Result<(), Error> {
         Some(dir) => path::PathBuf::from(dir),
     };
 
-    //create a deployment/deb directory
+    //create a deployment/asset directory
     println!("cargo:warning=creating deployment directory");
-    fs::create_dir_all(project_dir.join("deployment/deb")).expect("Failed to create project dir");
+    fs::create_dir_all(project_dir.join("deployment/asset")).expect("Failed to create project dir");
 
     for path in shells_paths {
         if path.is_err() {
@@ -49,7 +49,7 @@ fn main() -> Result<(), Error> {
             None => "",
         };
 
-        let completion_path = project_dir.join(format!("/deployment/deb/artem.{}", extension));
+        let completion_path = project_dir.join(format!("/deployment/asset/artem.{}", extension));
         println!(
             "cargo:warning=copying completion file to: {}",
             completion_path.to_str().unwrap()
@@ -72,10 +72,13 @@ fn main() -> Result<(), Error> {
     //copy man page to deployment dir
     println!(
         "cargo:warning=copying man page to: {:?}",
-        project_dir.join("deployment/deb/artem.1")
+        project_dir.join("deployment/asset/artem.1")
     );
-    fs::copy(&man_page_path, &project_dir.join("deployment/deb/artem.1"))
-        .expect("failed to copy man page");
+    fs::copy(
+        &man_page_path,
+        &project_dir.join("deployment/asset/artem.1"),
+    )
+    .expect("failed to copy man page");
 
     Ok(())
 }
