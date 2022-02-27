@@ -75,6 +75,10 @@ pub fn build_cli() -> Command<'static> {
                 .help("OutputNumber of threads used to convert the image. A larger number can mean grater performance. Defaults to 4"),
         )
         .arg(
+            Arg::new("invert-density")
+                .long("invert")
+                .help("Inverts the characters used for the image, so light characters will as dark ones. Can be useful if the image has a dark background."),
+        ).arg(
             Arg::new("no-color")
                 .long("no-color")
                 .help("Do not use color when printing the image to the terminal."),
