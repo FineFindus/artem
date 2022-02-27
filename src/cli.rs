@@ -78,7 +78,13 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("invert-density")
                 .long("invert")
                 .help("Inverts the characters used for the image, so light characters will as dark ones. Can be useful if the image has a dark background."),
-        ).arg(
+        )
+        .arg(
+            Arg::new("background-color")
+                .long("background")
+                .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor"),
+        )
+        .arg(
             Arg::new("no-color")
                 .long("no-color")
                 .help("Do not use color when printing the image to the terminal."),

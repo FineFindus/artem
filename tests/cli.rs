@@ -483,6 +483,32 @@ pub mod invert {
     }
 }
 
+pub mod background {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--background", "123"]);
+        cmd.assert().stderr(predicate::str::starts_with(
+            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--background");
+        //only check first line
+        cmd.assert().stdout(predicate::str::starts_with(
+            "WWWNNNNNNXXXXXXKXXXKK0000OO000OOOOOOOOOOOkkkkkkOkkkkkkxxxxxkkOOOkOO0000KKKKKKKXX",
+        ));
+    }
+}
+
 pub mod no_color {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;

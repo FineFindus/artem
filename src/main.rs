@@ -125,6 +125,9 @@ fn main() {
     let invert = matches.is_present("invert-density");
     debug!("Invert is set to: {}", invert);
 
+    let on_background_color = matches.is_present("background-color");
+    debug!("BackgroundColor is set to: {}", on_background_color);
+
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
     let color = if matches.is_present("no-color") || matches.is_present("output-file") {
@@ -136,6 +139,9 @@ fn main() {
         info!("Using colored ascii");
         let truecolor = util::supports_truecolor();
         if !truecolor {
+            if on_background_color {
+                warn!("Background flag will be ignored, since truecolor is not supported.")
+            }
             warn!("Truecolor is not supported. Using ansi color")
         } else {
             info!("Using truecolor ascii")
@@ -153,6 +159,7 @@ fn main() {
         target_size,
         color,
         invert,
+        on_background_color,
     );
 
     //create and write to output file
@@ -191,6 +198,7 @@ fn convert_img(
     target_size: u32,
     color: bool,
     invert: bool,
+    on_background_color: bool,
 ) -> String {
     debug!("Color: {}", color);
     //get img dimensions
@@ -266,8 +274,13 @@ fn convert_img(
                     }
 
                     //get and display density char, it returns a normal and a colored string
-                    let char =
-                        get_pixel_density(pixel_block, thread_density.as_str(), color, invert);
+                    let char = get_pixel_density(
+                        pixel_block,
+                        thread_density.as_str(),
+                        color,
+                        invert,
+                        on_background_color,
+                    );
                     //append the char for the output
                     thread_output.push_str(char.as_str());
                 }
@@ -296,7 +309,13 @@ fn convert_img(
 
 ///Convert a pixel block to a char.
 ///The converted char will be returned as a string and as a colored string.
-fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str, color: bool, invert: bool) -> String {
+fn get_pixel_density(
+    block: Vec<Rgba<u8>>,
+    density: &str,
+    color: bool,
+    invert: bool,
+    on_background_color: bool,
+) -> String {
     let mut block_avg: f64 = 0f64;
     //color as f64 for square rooting later
     let mut red: f64 = 0f64;
@@ -348,10 +367,17 @@ fn get_pixel_density(block: Vec<Rgba<u8>>, density: &str, color: bool, invert: b
         //check if true color is supported
         if util::supports_truecolor() {
             //return true color string
-            density_char
-                .to_string()
-                .truecolor(red.floor() as u8, green.floor() as u8, blue.floor() as u8)
-                .to_string()
+            if on_background_color {
+                density_char
+                    .to_string()
+                    .on_truecolor(red.floor() as u8, green.floor() as u8, blue.floor() as u8)
+                    .to_string()
+            } else {
+                density_char
+                    .to_string()
+                    .truecolor(red.floor() as u8, green.floor() as u8, blue.floor() as u8)
+                    .to_string()
+            }
         } else {
             //otherwise use basic (8 color) ansi color
             util::convert_rgb_ansi(
