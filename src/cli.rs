@@ -9,6 +9,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("INPUT")
                 .help("Path to the target image. Does NOT alter the original")
                 .required(true)
+                .max_values(1)
                 .value_hint(ValueHint::FilePath)
                 .index(1),
         )

@@ -35,17 +35,19 @@ fn main() {
     //this should be save to unwrap since the input has to be non-null
     let img_path = matches.value_of("INPUT").unwrap();
     //check if file exist
-    if !Path::new(img_path).is_file() {
+    if !Path::new(img_path).exists() {
         util::fatal_error(
             format!("File {} does not exist", img_path).as_str(),
             Some(66),
         );
+    } else if !Path::new(img_path).is_file() {
+        util::fatal_error(format!("{} is not a file", img_path).as_str(), Some(66));
     }
 
     //try to open img
     let img = match image::open(img_path) {
         Ok(img) => Arc::new(img),
-        Err(_) => util::fatal_error("Image was not found", Some(66)),
+        Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
     };
 
     //density char map
