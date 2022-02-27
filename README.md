@@ -53,6 +53,16 @@ artem PATH --width
 artem PATH --size 100
 ```
 
+## Installation
+
+If you are on Debian/Ubuntu download the `.deb` file from the releases tab and install it with:
+
+```bash
+sudo dpkg -i artem.deb
+```
+
+One other distributions use the binary file provided in the release tab.
+
 ## Building from source
 
 If you have rust/cargo installed, you can build the project with:

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- README now contains an installation section
 - Use the `--background` flag to let the ascii chars have a background color. Might be useful for images with dark backgrounds.
 - Use the `--invert` flag to change the brightness of the used characters. Can be useful for images with a dark background
 - README now lists some example formats that can be used
