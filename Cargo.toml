@@ -24,7 +24,7 @@ path = "src/main.rs"
 
 
 [build-dependencies]
-clap = "3.1.0"
+clap = "3.1.2"
 clap_complete = "3.1.0"
 clap_mangen = "0.1.2"
 
@@ -34,11 +34,11 @@ predicates = "2.1.1"
 
 
 [dependencies]
-image = "0.24.0"
+image = "0.24.1"
 colored = "2"
-clap = "3.1.0"
+clap = "3.1.2"
 terminal_size = "0.1.17"
-log = "0.4.0"
+log = "0.4.14"
 env_logger = "0.9.0"
 
 
