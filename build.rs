@@ -44,12 +44,12 @@ fn main() -> Result<(), Error> {
 
         let unwrapped = &path.unwrap();
 
-        let extension = match &unwrapped.extension() {
+        let file_name = match &unwrapped.file_name() {
             Some(v) => v.to_str().unwrap(),
             None => "",
         };
 
-        let completion_path = project_dir.join(format!("deployment/asset/artem.{}", extension));
+        let completion_path = project_dir.join(format!("deployment/asset/{}", file_name));
         println!(
             "cargo:warning=copying completion file to: {}",
             completion_path.to_str().unwrap()

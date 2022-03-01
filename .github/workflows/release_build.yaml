@@ -3,6 +3,7 @@
 
 name: release
 on:
+#for debugging purposes
   [push]
   # release:
   #   types: [created]
@@ -65,7 +66,7 @@ jobs:
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
         with:
-          files: artem--v${PROJECT_VERSION}-${{ matrix.platform }}.tar.gz
+          files: artem--v${{ PROJECT_VERSION }}-${{ matrix.platform }}.tar.gz
           draft: true
           prerelease: true
 
