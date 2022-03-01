@@ -4,23 +4,23 @@ These steps should be performed when making a new release. Do not commit marked 
 
 ## Pre-release Test Checklist
 
-- [x] Local and Remote branches are synced
-- [x] All the tests are passing
+- [ ] Local and Remote branches are synced
+- [ ] All the tests are passing
 - [ ] Continuous Integration is passing
-- [x] README has been updated
-- [x] All changes were documented in the Changelog
-- [x] Added the correct semantic version in the Changelog
-- [x] Changed the changes from Unreleased to the new version in the Changelog
-- [x] Updated the version number in Cargo.toml
-- [x] Updated the version number in in cli.rs
-- [x] Example images still represents the project accurately
-- [x] Example commands still represents the project accurately
+- [ ] README has been updated
+- [ ] All changes were documented in the Changelog
+- [ ] Added the correct semantic version in the Changelog
+- [ ] Changed the changes from Unreleased to the new version in the Changelog
+- [ ] Updated the version number in Cargo.toml
+- [ ] Updated the version number in in cli.rs
+- [ ] Example images still represents the project accurately
+- [ ] Example commands still represents the project accurately
 - [ ] Copied the changes to a new release
 - [ ] Build artifacts have been attached to the release through continuous delivery
-- [x] Cargo deb builds the correct package
-- [x] Documentation has been updated to reflect the changes
-- [x] Manpage contains the correct help
-- [x] Tab-completions works in a all supported shells
+- [ ] Cargo deb builds the correct package
+- [ ] Documentation has been updated to reflect the changes
+- [ ] Manpage contains the correct help
+- [ ] Tab-completions works in a all supported shells
 
 ## Post-release Test Checklist
 
