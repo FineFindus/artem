@@ -4,9 +4,9 @@
 name: release
 on:
 #for debugging purposes
-  [push]
-  # release:
-  #   types: [created]
+  # [push]
+  release:
+    types: [created]
 
 jobs:
 
@@ -61,12 +61,12 @@ jobs:
 
       - name: Compress release files
         shell: bash
-        run: tar -czvf artem--v$PROJECT_VERSION-${{ matrix.platform }}.tar.gz target/release/artem
+        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.platform }}.tar.gz -C target/release/artem .
 
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
         with:
-          files: artem--v${{ env.PROJECT_VERSION }}-${{ matrix.platform }}.tar.gz
+          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.platform }}.tar.gz
           draft: true
           prerelease: true
 
