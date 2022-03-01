@@ -3,8 +3,6 @@
 
 name: release
 on:
-#for debugging purposes
-  # [push]
   release:
     types: [created]
 
