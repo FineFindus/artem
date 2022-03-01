@@ -57,6 +57,7 @@ jobs:
         run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
 
       - name: Compress release files
+        shell: bash
         run: tar -czvf artem--v${PROJECT_VERSION}-${{ matrix.platform }}.tar.gz target/release/artem
 
       - name: Upload Release Build
