@@ -49,14 +49,14 @@ fn main() -> Result<(), Error> {
             None => "",
         };
 
-        let completion_path = project_dir.join(format!("/deployment/asset/artem.{}", extension));
+        let completion_path = project_dir.join(format!("deployment/asset/artem.{}", extension));
         println!(
             "cargo:warning=copying completion file to: {}",
             completion_path.to_str().unwrap()
         );
 
         //copy generated completion script to deployment dir
-        fs::copy(&unwrapped, completion_path).expect_err("failed to copy completion script");
+        fs::copy(&unwrapped, completion_path).unwrap();
     }
 
     let man = clap_mangen::Man::new(cmd);
