@@ -19,13 +19,13 @@ fn main() -> Result<(), Error> {
 
     let mut cmd = build_cli();
     //this is only generated when the git ref changes???
-    let mut shells_paths = Vec::with_capacity(5);
-
-    shells_paths.push(generate_shell_completion(&mut cmd, &out_dir, Bash));
-    shells_paths.push(generate_shell_completion(&mut cmd, &out_dir, PowerShell));
-    shells_paths.push(generate_shell_completion(&mut cmd, &out_dir, Zsh));
-    shells_paths.push(generate_shell_completion(&mut cmd, &out_dir, Fish));
-    shells_paths.push(generate_shell_completion(&mut cmd, &out_dir, Elvish));
+    let shells_paths = vec![
+        generate_shell_completion(&mut cmd, &out_dir, Bash),
+        generate_shell_completion(&mut cmd, &out_dir, PowerShell),
+        generate_shell_completion(&mut cmd, &out_dir, Zsh),
+        generate_shell_completion(&mut cmd, &out_dir, Fish),
+        generate_shell_completion(&mut cmd, &out_dir, Elvish),
+    ];
 
     //get output file location
     let project_dir = match env::var_os("CARGO_MANIFEST_DIR") {

@@ -47,6 +47,7 @@ jobs:
       - name: Build artem release
         uses: actions-rs/cargo@v1
         continue-on-error: false 
+        #todo use cross to compile for more targets
         with:
           command: build 
           args: --locked --release --verbose

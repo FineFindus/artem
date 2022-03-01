@@ -1,0 +1,2 @@
+#fixes a too many arguments warning for the img convert function
+too-many-arguments-threshold = 8

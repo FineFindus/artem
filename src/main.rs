@@ -155,8 +155,8 @@ fn main() {
     info!("Converting the img: {}", img_path);
     let output = convert_img(
         img,
-        thread_count,
         density,
+        thread_count,
         scale,
         target_size,
         color,
@@ -194,8 +194,8 @@ fn main() {
 ///Converts the given image to an ascii representation
 fn convert_img(
     img: Arc<DynamicImage>,
-    thread_count: u32,
     density: &str,
+    thread_count: u32,
     scale: f64,
     target_size: u32,
     color: bool,
