@@ -3,7 +3,7 @@ use clap::{Arg, Command, ValueHint};
 ///Build the clap command-line-interface using clap  
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
-        .version("0.3.0")
+        .version("0.4.0")
         .about("A small rust cli program to convert an image into an ascii art representation.")
         .arg(
             Arg::new("INPUT")
@@ -18,8 +18,9 @@ pub fn build_cli() -> Command<'static> {
                 .long("characters")
                 .takes_value(true)
                 .value_hint(ValueHint::Other)
-                .help("Change the characters that are used to display the image.
-                The first character should have the highest 'density' and the last should have the least (probably a space).
+                //use "\" to keep this readable but still as a single line string
+                .help("Change the characters that are used to display the image.\
+                The first character should have the highest 'density' and the last should have the least (probably a space).\
                 A lower detail map is recommend for smaller images."),
         )
         .arg(
@@ -30,8 +31,8 @@ pub fn build_cli() -> Command<'static> {
                 .default_value("80")
                 .value_hint(ValueHint::Other)
                 .conflicts_with_all(&["height", "width"])
-                .help("Change the size of the output image. 
-                The minimum size is 20, the maximum 230. Values outside of the range will be 
+                .help("Change the size of the output image.\
+                The minimum size is 20, the maximum 230. Values outside of the range will be\
                 ignored and changed to the nearest usable value. This argument is conflicting with --width and --height"),
         )
         .arg(
@@ -39,14 +40,14 @@ pub fn build_cli() -> Command<'static> {
                 .short('h')
                 .long("height")
                 .conflicts_with("width")
-                .help("Use the terminal maximum terminal height to display the image.
+                .help("Use the terminal maximum terminal height to display the image.\
                 This argument is conflicting with --size and --width "),
         )
         .arg(
             Arg::new("width")
                 .short('w')
                 .long("width")
-                .help("Use the terminal maximum terminal height to display the image.
+                .help("Use the terminal maximum terminal height to display the image.\
                 This argument is conflicting with --size and --height "),
         )
         .arg(
@@ -55,7 +56,7 @@ pub fn build_cli() -> Command<'static> {
                 .takes_value(true)
                 .default_value("0.43") 
                 .value_hint(ValueHint::Other)
-                .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.
+                .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.\
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
         )
         .arg(

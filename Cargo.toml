@@ -1,6 +1,6 @@
 [package]
 name = "artem"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Jonathan (@FineFindus)"]
 edition = "2021"
 description = "An easy program to convert an image to an ascii image"
@@ -50,7 +50,7 @@ assets = [
       ["target/release/artem", "usr/bin/", "755"],
       ["deployment/asset/artem.1", "usr/share/man/man1/artem.1", "644"],
       ["CHANGELOG.md", "usr/share/doc/artem/CHANGELOG", "644"],
-      ["LICENSE-MIT", "usr/share/doc/artem/", "644"],
+      ["LICENSE", "usr/share/doc/artem/", "644"],
       #the completion files and man page is generated and copied by the build script
       ["deployment/asset/artem.bash", "usr/share/bash-completion/completions/artem", "644"],
       ["deployment/asset/artem.fish", "usr/share/fish/vendor_completions.d/aretem.fish", "644"],

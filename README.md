@@ -98,6 +98,8 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [ ] Add even more test
 
+- [ ] Convert multiple files at once
+
 - [x] Change name
 
 - [ ] Publish
