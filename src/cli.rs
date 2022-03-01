@@ -3,7 +3,7 @@ use clap::{Arg, Command, ValueHint};
 ///Build the clap command-line-interface using clap  
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
-        .version("0.4.0")
+        .version("0.4.1")
         .about("A small rust cli program to convert an image into an ascii art representation.")
         .arg(
             Arg::new("INPUT")

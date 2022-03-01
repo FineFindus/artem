@@ -59,7 +59,7 @@ jobs:
 
       - name: Compress release files
         shell: bash
-        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.platform }}.tar.gz -C target/release/artem .
+        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.platform }}.tar.gz -C target/release/ artem
 
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
