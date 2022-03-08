@@ -104,6 +104,12 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [ ] Publish
 
+### Ideas
+
+- [ ] Use edge detection and directional ascii
+
+- [ ] Implement a faster resizing algorithm
+
 ## License
 
 [Mozilla Public License 2.0.](LICENSE)
