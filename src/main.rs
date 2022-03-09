@@ -46,7 +46,7 @@ fn main() {
 
     //try to open img
     let img = match image::open(img_path) {
-        Ok(img) => Arc::new(img),
+        Ok(img) => img,
         Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
     };
 
@@ -68,13 +68,14 @@ fn main() {
         info!("Using default characters");
         r#"MWNXK0Okxdolc:;,'...   "#
     };
+    debug!("Characters used: \"{}\"", density);
 
     //get target size from args
     //only one arg should be present
     let target_size = if matches.is_present("height") {
         //use max terminal height
         trace!("Using terminal height as target size");
-        (terminal_size::terminal_size().unwrap().1 .0 as f64 * 2f64).floor() as u32
+        terminal_size::terminal_size().unwrap().1 .0 as u32
     } else if matches.is_present("width") {
         //use max terminal width
         trace!("Using terminal width as target size");
@@ -193,7 +194,7 @@ fn main() {
 
 ///Converts the given image to an ascii representation
 fn convert_img(
-    img: Arc<DynamicImage>,
+    img: DynamicImage,
     density: &str,
     thread_count: u32,
     scale: f64,
@@ -202,29 +203,40 @@ fn convert_img(
     invert: bool,
     on_background_color: bool,
 ) -> String {
-    debug!("Color: {}", color);
+    debug!("Using Color: {}", color);
+    debug!("Using colored background: {}", on_background_color);
+    debug!("Using inverted color: {}", invert);
     //get img dimensions
-    let width = img.width();
-    let height = img.height();
-    debug!("Image Width: {}", width);
-    debug!("Image Height: {}", height);
+    let input_width = img.width();
+    let input_height = img.height();
+    debug!("Input Image Width: {}", input_width);
+    debug!("Input Image Height: {}", input_height);
 
     //clamp image width to a maximum of 80
-    let columns = if width > target_size {
+    let columns = if input_width > target_size {
         target_size
     } else {
-        width
+        input_width
     };
     debug!("Columns: {}", columns);
 
     //calculate tiles
-    let tile_width = width / columns;
+    let tile_width = input_width / columns;
     let tile_height = (tile_width as f64 / scale).floor() as u32;
     debug!("Tile Width: {}", tile_width);
     debug!("Tile Height: {}", tile_height);
 
-    let rows = height / tile_height;
+    let rows = input_height / tile_height;
     debug!("Rows: {}", rows);
+
+    info!("Resizing image to fit new dimensions");
+    //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
+    let img = Arc::new(img.thumbnail_exact(columns * tile_width, rows * tile_height));
+    debug!("Columns x Tiles: {}", columns * tile_width);
+    debug!("Rows x Tiles: {}", rows * tile_height);
+
+    debug!("Resized Image Width: {}", img.width());
+    debug!("Resized Image Height: {}", img.height());
 
     //output string
     let mut output = String::new();
@@ -242,10 +254,12 @@ fn convert_img(
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     trace!("Allocated thread handles");
+
     //split the img into chunks for each thread
     for chunk in 0..thread_count {
         //arc clone img and density
         let thread_img = Arc::clone(&img);
+        let thread_img_height = thread_img.height();
         let thread_density = density.to_owned();
 
         //create a thread for this img chunk
@@ -256,7 +270,6 @@ fn convert_img(
 
             //go through the thread img chunk
             for row in chunk * thread_tiles..(chunk + 1) * thread_tiles {
-                // for row in 0..rows {
                 for col in 0..columns {
                     //get a single tile
                     let tile_row = row * tile_height;
@@ -267,13 +280,24 @@ fn convert_img(
                     let mut pixel_block: Vec<Rgba<u8>> =
                         Vec::with_capacity((tile_height * tile_width) as usize);
 
+                    let row_tile_end = if tile_row + tile_height > thread_img_height {
+                        thread_img_height
+                    } else {
+                        tile_row + tile_height
+                    };
+
                     //go through each pixel in the tile
-                    for x in tile_row..(tile_row + tile_height) {
-                        for y in tile_col..(tile_col + tile_width) {
+                    for y in tile_row..row_tile_end {
+                        for x in tile_col..(tile_col + tile_width) {
                             //add pixel to block
-                            pixel_block.push(thread_img.get_pixel(y, x));
+                            // if x < thread_img.width() && y < thread_img_height {
+                            pixel_block.push(thread_img.get_pixel(x, y));
+                            // }
                         }
                     }
+                    // if pixel_block.is_empty() {
+                    //     continue;
+                    // }
 
                     //get and display density char, it returns a normal and a colored string
                     let char = get_pixel_density(
@@ -286,6 +310,7 @@ fn convert_img(
                     //append the char for the output
                     thread_output.push_str(char.as_str());
                 }
+
                 //add new line
                 if row != (chunk + 1) * thread_tiles - 1 || chunk != thread_count - 1 {
                     thread_output.push('\n');
@@ -306,7 +331,7 @@ fn convert_img(
         output.push_str(result.as_str());
     }
 
-    output
+    output.trim_end().to_string()
 }
 
 ///Convert a pixel block to a char.
