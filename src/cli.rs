@@ -54,7 +54,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("scale")
                 .long("ratio")
                 .takes_value(true)
-                .default_value("0.43") 
+                .default_value("0.42") 
                 .value_hint(ValueHint::Other)
                 .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.\
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
