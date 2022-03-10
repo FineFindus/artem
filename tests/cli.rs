@@ -194,7 +194,7 @@ pub mod size {
         cmd.arg("examples/abraham_lincoln.jpg").args(["-s", "75"]);
         //only check first line
         cmd.assert().stdout(predicate::str::starts_with(
-            "WWWNNNNNXXXXXXKXXKKK000OO000OOOOOO0OOOkkkkkOkkkkkkxxxxkkOOOkOO000KKKKKKXXXX",
+            "WWWNNNNNXXXXXXKXXKKK000O0000OOOOOO0OOOkkkkkOkkkkkkxxxxkkOOOkOO0000KKKKKXXXX",
         ));
     }
 }
@@ -450,7 +450,7 @@ pub mod output_file {
             .args(["-o", "/tmp/test.txt"]);
         //only check first line
         cmd.assert().stdout(predicate::str::starts_with(
-            "Written 3563 bytes to /tmp/test.txt",
+            "Written 3482 bytes to /tmp/test.txt",
         ));
         //delete output file
         fs::remove_file("/tmp/test.txt")
