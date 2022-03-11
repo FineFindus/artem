@@ -205,3 +205,120 @@ pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
     error!("Artem exited with code: {}", code.unwrap_or(1));
     process::exit(code.unwrap_or(1));
 }
+
+/// Calculate image dimension related values.
+/// This calculates the number of columns, rows, and the tile dimensions (tile_width, tile_height) for these
+/// values based on a target_size. It returns them as a tuple, the elements are in the previously named order.
+/// The dimension property can be used to change what dimension will be scaled. See [ResizingDimension] for more information.
+pub fn calculate_dimensions(
+    target_size: u32,
+    height: u32,
+    width: u32,
+    scale: f64,
+    dimension: ResizingDimension,
+) -> (u32, u32, u32, u32) {
+    match dimension {
+        ResizingDimension::Width => {
+            //calculate dimensions based on columns
+            let columns = if width > target_size {
+                target_size
+            } else {
+                width
+            };
+
+            //calculate tiles
+            let tile_width = width / columns;
+            let tile_height = (tile_width as f64 / scale).floor() as u32;
+
+            let rows = height / tile_height;
+
+            (columns, rows, tile_width, tile_height)
+        }
+        ResizingDimension::Height => {
+            let rows = if height > target_size {
+                target_size
+            } else {
+                height
+            };
+            //calculate tiles
+            let tile_height = height / rows;
+            let tile_width = (tile_height as f64 * scale).ceil() as u32;
+
+            let columns = width / tile_width;
+
+            (columns, rows, tile_width, tile_height)
+        }
+    }
+}
+
+#[cfg(test)]
+mod test_calculate_dimensions {
+    use super::*;
+
+    #[test]
+    fn calculate_dimensions_width() {
+        assert_eq!(
+            (100, 46, 5, 11),
+            calculate_dimensions(100, 512, 512, 0.42, ResizingDimension::Width)
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_width_119() {
+        assert_eq!(
+            (119, 56, 4, 9),
+            calculate_dimensions(119, 512, 512, 0.42, ResizingDimension::Width)
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_height() {
+        assert_eq!(
+            (170, 100, 3, 5),
+            calculate_dimensions(100, 512, 512, 0.42, ResizingDimension::Height)
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_height_zero() {
+        calculate_dimensions(0, 512, 512, 0.42, ResizingDimension::Height);
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_width_zero() {
+        calculate_dimensions(0, 512, 512, 0.42, ResizingDimension::Width);
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_img_width_zero() {
+        calculate_dimensions(100, 512, 0, 0.42, ResizingDimension::Width);
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_img_height_zero() {
+        calculate_dimensions(100, 0, 512, 0.42, ResizingDimension::Height);
+    }
+
+    #[test]
+    fn calculate_dimensions_scale_zero() {
+        assert_eq!(
+            (100, 0, 5, 4294967295),
+            calculate_dimensions(100, 512, 512, 0f64, ResizingDimension::Width)
+        );
+    }
+}
+
+///Preferred image resize direction
+///
+///This changes which dimensions should be used when resizing the image.
+///For example, to fully use one dimension (e.g. width), the height can not be scaled
+///up as well, since it already would be larger than the maximum terminal height.
+///By default width will be used.
+pub enum ResizingDimension {
+    Width,
+    Height,
+}

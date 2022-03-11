@@ -3,6 +3,7 @@ use std::{fs::File, io::Write, ops::Div, path::Path, sync::Arc, thread};
 use colored::*;
 use image::{DynamicImage, GenericImageView, Rgba};
 use log::{debug, info, trace, warn, LevelFilter};
+use util::ResizingDimension;
 
 //import cli
 mod cli;
@@ -70,11 +71,16 @@ fn main() {
     };
     debug!("Characters used: \"{}\"", density);
 
+    //set the default resizing dimension to width
+    let mut dimension = util::ResizingDimension::Width;
+
     //get target size from args
     //only one arg should be present
     let target_size = if matches.is_present("height") {
         //use max terminal height
         trace!("Using terminal height as target size");
+        //change dimension to height
+        dimension = util::ResizingDimension::Height;
         terminal_size::terminal_size().unwrap().1 .0 as u32
     } else if matches.is_present("width") {
         //use max terminal width
@@ -163,6 +169,7 @@ fn main() {
         color,
         invert,
         on_background_color,
+        dimension,
     );
 
     //create and write to output file
@@ -202,6 +209,7 @@ fn convert_img(
     color: bool,
     invert: bool,
     on_background_color: bool,
+    dimension: ResizingDimension,
 ) -> String {
     debug!("Using Color: {}", color);
     debug!("Using colored background: {}", on_background_color);
@@ -212,22 +220,13 @@ fn convert_img(
     debug!("Input Image Width: {}", input_width);
     debug!("Input Image Height: {}", input_height);
 
-    //clamp image width to a maximum of 80
-    let columns = if input_width > target_size {
-        target_size
-    } else {
-        input_width
-    };
+    //calculate the needed dimensions
+    let (columns, rows, tile_width, tile_height) =
+        util::calculate_dimensions(target_size, input_height, input_width, scale, dimension);
     debug!("Columns: {}", columns);
-
-    //calculate tiles
-    let tile_width = input_width / columns;
-    let tile_height = (tile_width as f64 / scale).floor() as u32;
+    debug!("Rows: {}", rows);
     debug!("Tile Width: {}", tile_width);
     debug!("Tile Height: {}", tile_height);
-
-    let rows = input_height / tile_height;
-    debug!("Rows: {}", rows);
 
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
@@ -266,6 +265,12 @@ fn convert_img(
             //create thread string
             let mut thread_output = String::new();
 
+            //create a pixel block from multiple pixels
+            //preallocate vector with the correct size, since all tiles should be the same size,
+            //this vector can be reused for all tiles in a thread
+            let mut pixel_block: Vec<Rgba<u8>> =
+                Vec::with_capacity((tile_height * tile_width) as usize);
+
             //check so that only pixels in the image are accessed
             let chunk_end = if rows > (chunk + 1) * thread_tiles {
                 (chunk + 1) * thread_tiles
@@ -279,10 +284,6 @@ fn convert_img(
                     //get a single tile
                     let tile_row = row * tile_height;
                     let tile_col = col * tile_width;
-                    //create a pixel block from multiple pixels
-                    //preallocate vector with the correct size
-                    let mut pixel_block: Vec<Rgba<u8>> =
-                        Vec::with_capacity((tile_height * tile_width) as usize);
 
                     //go through each pixel in the tile
                     for y in tile_row..(tile_row + tile_height) {
@@ -294,12 +295,14 @@ fn convert_img(
 
                     //get and display density char, it returns a normal and a colored string
                     let char = get_pixel_density(
-                        pixel_block,
+                        &pixel_block,
                         thread_density.as_str(),
                         color,
                         invert,
                         on_background_color,
                     );
+                    //clear the vec for the next iteration
+                    pixel_block.clear();
                     //append the char for the output
                     thread_output.push_str(char.as_str());
                 }
@@ -330,7 +333,7 @@ fn convert_img(
 ///Convert a pixel block to a char.
 ///The converted char will be returned as a string and as a colored string.
 fn get_pixel_density(
-    block: Vec<Rgba<u8>>,
+    block: &[Rgba<u8>],
     density: &str,
     color: bool,
     invert: bool,
@@ -344,7 +347,7 @@ fn get_pixel_density(
 
     //average all pixel in a block
     //it might be possible to use a better algorithm for this
-    for pixel in &block {
+    for pixel in block {
         let r = pixel.0[0] as f64;
         let g = pixel.0[1] as f64;
         let b = pixel.0[2] as f64;
