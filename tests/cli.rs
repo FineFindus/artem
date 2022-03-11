@@ -450,7 +450,7 @@ pub mod output_file {
             .args(["-o", "/tmp/test.txt"]);
         //only check first line
         cmd.assert().stdout(predicate::str::starts_with(
-            "Written 3482 bytes to /tmp/test.txt",
+            "Written 3592 bytes to /tmp/test.txt",
         ));
         //delete output file
         fs::remove_file("/tmp/test.txt")

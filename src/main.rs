@@ -232,8 +232,6 @@ fn convert_img(
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
     let img = Arc::new(img.thumbnail_exact(columns * tile_width, rows * tile_height));
-    debug!("Columns x Tiles: {}", columns * tile_width);
-    debug!("Rows x Tiles: {}", rows * tile_height);
 
     debug!("Resized Image Width: {}", img.width());
     debug!("Resized Image Height: {}", img.height());
@@ -250,7 +248,8 @@ fn convert_img(
     debug!("Threads: {}", thread_count);
 
     //split the img into tile for each thread
-    let thread_tiles = rows / thread_count;
+    let thread_tiles = (rows as f64 / thread_count as f64).ceil() as u32;
+    debug!("Thread Tile Height: {}", thread_tiles);
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     trace!("Allocated thread handles");
@@ -259,7 +258,6 @@ fn convert_img(
     for chunk in 0..thread_count {
         //arc clone img and density
         let thread_img = Arc::clone(&img);
-        let thread_img_height = thread_img.height();
         let thread_density = density.to_owned();
 
         //create a thread for this img chunk
@@ -268,36 +266,31 @@ fn convert_img(
             //create thread string
             let mut thread_output = String::new();
 
+            //check so that only pixels in the image are accessed
+            let chunk_end = if rows > (chunk + 1) * thread_tiles {
+                (chunk + 1) * thread_tiles
+            } else {
+                rows
+            };
+
             //go through the thread img chunk
-            for row in chunk * thread_tiles..(chunk + 1) * thread_tiles {
+            for row in chunk * thread_tiles..chunk_end {
                 for col in 0..columns {
                     //get a single tile
                     let tile_row = row * tile_height;
                     let tile_col = col * tile_width;
-
                     //create a pixel block from multiple pixels
                     //preallocate vector with the correct size
                     let mut pixel_block: Vec<Rgba<u8>> =
                         Vec::with_capacity((tile_height * tile_width) as usize);
 
-                    let row_tile_end = if tile_row + tile_height > thread_img_height {
-                        thread_img_height
-                    } else {
-                        tile_row + tile_height
-                    };
-
                     //go through each pixel in the tile
-                    for y in tile_row..row_tile_end {
+                    for y in tile_row..(tile_row + tile_height) {
                         for x in tile_col..(tile_col + tile_width) {
                             //add pixel to block
-                            // if x < thread_img.width() && y < thread_img_height {
                             pixel_block.push(thread_img.get_pixel(x, y));
-                            // }
                         }
                     }
-                    // if pixel_block.is_empty() {
-                    //     continue;
-                    // }
 
                     //get and display density char, it returns a normal and a colored string
                     let char = get_pixel_density(
