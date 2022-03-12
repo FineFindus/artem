@@ -1,15 +1,19 @@
 use std::{fs::File, io::Write, ops::Div, path::Path, sync::Arc, thread};
 
 use colored::*;
+use conversion_options::ConversionOption;
 use image::{DynamicImage, GenericImageView, Rgba};
 use log::{debug, info, trace, warn, LevelFilter};
-use util::ResizingDimension;
+
+use crate::conversion_options::ConversionOptionBuilder;
 
 //import cli
 mod cli;
 //import utilities
 mod util;
 
+//condense all arguments into a single struct
+mod conversion_options;
 fn main() {
     //get args from cli
     let matches = cli::build_cli().get_matches();
@@ -33,16 +37,15 @@ fn main() {
 
     trace!("Started logger with trace");
 
+    let mut options_builder = ConversionOptionBuilder::new();
+
     //this should be save to unwrap since the input has to be non-null
     let img_path = matches.value_of("INPUT").unwrap();
     //check if file exist
     if !Path::new(img_path).exists() {
-        util::fatal_error(
-            format!("File {} does not exist", img_path).as_str(),
-            Some(66),
-        );
+        util::fatal_error(format!("File {img_path} does not exist").as_str(), Some(66));
     } else if !Path::new(img_path).is_file() {
-        util::fatal_error(format!("{} is not a file", img_path).as_str(), Some(66));
+        util::fatal_error(format!("{img_path} is not a file").as_str(), Some(66));
     }
 
     //try to open img
@@ -69,10 +72,11 @@ fn main() {
         info!("Using default characters");
         r#"MWNXK0Okxdolc:;,'...   "#
     };
-    debug!("Characters used: \"{}\"", density);
+    debug!("Characters used: \"{density}\"");
+    options_builder = options_builder.density(density);
 
     //set the default resizing dimension to width
-    let mut dimension = util::ResizingDimension::Width;
+    options_builder = options_builder.dimension(util::ResizingDimension::Width);
 
     //get target size from args
     //only one arg should be present
@@ -80,7 +84,7 @@ fn main() {
         //use max terminal height
         trace!("Using terminal height as target size");
         //change dimension to height
-        dimension = util::ResizingDimension::Height;
+        options_builder = options_builder.dimension(util::ResizingDimension::Height);
         terminal_size::terminal_size().unwrap().1 .0 as u32
     } else if matches.is_present("width") {
         //use max terminal width
@@ -101,7 +105,8 @@ fn main() {
             Err(_) => util::fatal_error("Could not work with size input value", Some(65)),
         }
     };
-    debug!("Target Size: {}", target_size);
+    debug!("Target Size: {target_size}");
+    options_builder = options_builder.target_size(target_size);
 
     //best ratio between height and width is 0.43
     let scale = match matches
@@ -115,7 +120,8 @@ fn main() {
         ),
         Err(_) => util::fatal_error("Could not work with ratio input value", Some(65)),
     };
-    debug!("Scale: {}", scale);
+    debug!("Scale: {scale}");
+    options_builder = options_builder.scale(scale);
 
     //number rof threads used to convert the image
     let thread_count: u32 = match matches
@@ -126,16 +132,19 @@ fn main() {
         Ok(v) => v,
         Err(_) => util::fatal_error("Could not work with thread input value", Some(65)),
     };
+    options_builder = options_builder.thread_count(thread_count);
 
     if !matches.is_present("no-color") && matches.is_present("output-file") {
         warn!("Output-file flag is present, ignoring colors")
     }
 
     let invert = matches.is_present("invert-density");
-    debug!("Invert is set to: {}", invert);
+    debug!("Invert is set to: {invert}");
+    options_builder = options_builder.invert(invert);
 
     let on_background_color = matches.is_present("background-color");
-    debug!("BackgroundColor is set to: {}", on_background_color);
+    debug!("BackgroundColor is set to: {on_background_color}");
+    options_builder = options_builder.on_background(on_background_color);
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
@@ -157,20 +166,11 @@ fn main() {
         }
         true
     };
+    options_builder = options_builder.color(color);
 
     //convert the img to ascii string
-    info!("Converting the img: {}", img_path);
-    let output = convert_img(
-        img,
-        density,
-        thread_count,
-        scale,
-        target_size,
-        color,
-        invert,
-        on_background_color,
-        dimension,
-    );
+    info!("Converting the img: {img_path}");
+    let output = convert_img(img, options_builder.build());
 
     //create and write to output file
     if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
@@ -185,8 +185,7 @@ fn main() {
             Ok(result) => {
                 info!("Written ascii chars to output file");
                 println!(
-                    "Written {} bytes to {}",
-                    result,
+                    "Written {result} bytes to {}",
                     matches.value_of("output-file").unwrap()
                 )
             }
@@ -195,38 +194,33 @@ fn main() {
     } else {
         //print the img to the terminal
         info!("Printing output");
-        println!("{}", output);
+        println!("{output}");
     }
 }
 
 ///Converts the given image to an ascii representation
-fn convert_img(
-    img: DynamicImage,
-    density: &str,
-    thread_count: u32,
-    scale: f64,
-    target_size: u32,
-    color: bool,
-    invert: bool,
-    on_background_color: bool,
-    dimension: ResizingDimension,
-) -> String {
-    debug!("Using Color: {}", color);
-    debug!("Using colored background: {}", on_background_color);
-    debug!("Using inverted color: {}", invert);
+fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
+    debug!("Using Color: {}", options.color);
+    debug!("Using colored background: {}", options.on_background_color);
+    debug!("Using inverted color: {}", options.invert);
     //get img dimensions
     let input_width = img.width();
     let input_height = img.height();
-    debug!("Input Image Width: {}", input_width);
-    debug!("Input Image Height: {}", input_height);
+    debug!("Input Image Width: {input_width}");
+    debug!("Input Image Height: {input_height}");
 
     //calculate the needed dimensions
-    let (columns, rows, tile_width, tile_height) =
-        util::calculate_dimensions(target_size, input_height, input_width, scale, dimension);
-    debug!("Columns: {}", columns);
-    debug!("Rows: {}", rows);
-    debug!("Tile Width: {}", tile_width);
-    debug!("Tile Height: {}", tile_height);
+    let (columns, rows, tile_width, tile_height) = util::calculate_dimensions(
+        options.target_size,
+        input_height,
+        input_width,
+        options.scale,
+        options.dimension,
+    );
+    debug!("Columns: {columns}");
+    debug!("Rows: {rows}");
+    debug!("Tile Width: {tile_width}");
+    debug!("Tile Height: {tile_height}");
 
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
@@ -240,15 +234,15 @@ fn convert_img(
     trace!("Created output string");
 
     //clamp threads
-    let thread_count = thread_count.clamp(
+    let thread_count = options.thread_count.clamp(
         1,    //there has to be at least 1 thread to convert the img
         rows, //there should no be more threads than rows
     );
-    debug!("Threads: {}", thread_count);
+    debug!("Threads: {thread_count}");
 
     //split the img into tile for each thread
     let thread_tiles = (rows as f64 / thread_count as f64).ceil() as u32;
-    debug!("Thread Tile Height: {}", thread_tiles);
+    debug!("Thread Tile Height: {thread_tiles}");
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     trace!("Allocated thread handles");
@@ -257,10 +251,10 @@ fn convert_img(
     for chunk in 0..thread_count {
         //arc clone img and density
         let thread_img = Arc::clone(&img);
-        let thread_density = density.to_owned();
+        let thread_density = options.density.to_owned();
 
         //create a thread for this img chunk
-        trace!("Creating thread: {}", chunk);
+        trace!("Creating thread: {chunk}");
         let handle = thread::spawn(move || {
             //create thread string
             let mut thread_output = String::new();
@@ -297,9 +291,9 @@ fn convert_img(
                     let char = get_pixel_density(
                         &pixel_block,
                         thread_density.as_str(),
-                        color,
-                        invert,
-                        on_background_color,
+                        options.color,
+                        options.invert,
+                        options.on_background_color,
                     );
                     //clear the vec for the next iteration
                     pixel_block.clear();
@@ -312,10 +306,10 @@ fn convert_img(
                     thread_output.push('\n');
                 }
             }
-            trace!("Thread {} finished", chunk);
+            trace!("Thread {chunk} finished");
             thread_output
         });
-        trace!("Appending handle of thread {}", chunk);
+        trace!("Appending handle of thread {chunk}");
         handles.push(handle);
     }
 

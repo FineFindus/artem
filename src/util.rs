@@ -318,7 +318,14 @@ mod test_calculate_dimensions {
 ///For example, to fully use one dimension (e.g. width), the height can not be scaled
 ///up as well, since it already would be larger than the maximum terminal height.
 ///By default width will be used.
+#[derive(Debug, PartialEq)]
 pub enum ResizingDimension {
     Width,
     Height,
+}
+//Implement `Default` as Width
+impl Default for ResizingDimension {
+    fn default() -> Self {
+        ResizingDimension::Width
+    }
 }
