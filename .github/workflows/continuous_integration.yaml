@@ -93,8 +93,6 @@ jobs:
           -  aarch64-unknown-linux-gnu
           #windows version
           - x86_64-pc-windows-msvc	
-          #macos version
-          - x86_64-apple-darwin
       #tests should pass on all platforms
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 25
