@@ -41,58 +41,6 @@ jobs:
         with:
           command: check
 
-  test:
-    name: Test Suite
-    strategy:
-      matrix:
-        platform: [ubuntu-latest, 
-        #disable macos since it is 10x more expensive and currently not needed 
-        #macos-latest, 
-        #same with windows
-        #windows-latest
-        ]
-        rust:
-          - stable
-          - beta
-          - nightly
-          - 1.58.1  # MSRV
-      #tests should pass on all platforms
-    runs-on: ${{ matrix.platform }}
-    timeout-minutes: 25
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install ${{ matrix.rust }} toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.rust }}
-          profile: minimal
-          override: true
-      #use caching for cargo build 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Build artem
-        uses: actions-rs/cargo@v1
-        continue-on-error: false 
-        with:
-          command: build 
-          args: --locked --verbose
-
-      - name: Run tests
-        uses: actions-rs/cargo@v1
-        continue-on-error: false 
-        with:
-          command: test
 
   clippy:
     name: Clippy
@@ -127,3 +75,63 @@ jobs:
         with:
           command: clippy
           args: -- -Dwarnings
+
+  test:
+    name: Test Suite
+    strategy:
+      matrix:
+        platform: [ubuntu-latest] # when using cross compile, no other platforms should be needed
+        rust:
+          - stable
+          - beta
+          - nightly
+          - 1.58.1  # MSRV
+        target:
+          #x64 linux
+          -  x86_64-unknown-linux-gnu
+          #arm linux
+          -  aarch64-unknown-linux-gnu
+          #windows version
+          - x86_64-pc-windows-msvc	
+          #macos version
+          - x86_64-apple-darwin
+      #tests should pass on all platforms
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 25
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          profile: minimal
+          override: true
+      #use caching for cargo build 
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build artem
+        uses: actions-rs/cargo@v1
+        continue-on-error: false 
+        with:
+          command: build 
+          use-cross: true
+          args: --locked --verbose --target=${{ matrix.target }}
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        continue-on-error: false 
+        with:
+          command: test
+          use-cross: true
+          args: --locked --verbose --target=${{ matrix.target }}

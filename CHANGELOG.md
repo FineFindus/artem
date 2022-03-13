@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Continuous Integration uses now more target/platforms when testing
+
 ### Changed
 
 - Using the `--width` argument now correctly resizes the image
