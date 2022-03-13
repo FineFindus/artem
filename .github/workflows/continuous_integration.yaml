@@ -80,7 +80,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest] # when using cross compile, no other platforms should be needed
+        platform: [ubuntu-latest] 
         rust:
           - stable
           - beta
@@ -117,6 +117,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build artem
+        if: contains(${{ matrix.target }}, "x86_64")
         uses: actions-rs/cargo@v1
         continue-on-error: false 
         with:
@@ -125,6 +126,7 @@ jobs:
           args: --locked --verbose --target=${{ matrix.target }}
 
       - name: Run tests
+        if: contains(${{ matrix.target }}, "x86_64")
         uses: actions-rs/cargo@v1
         continue-on-error: false 
         with:
