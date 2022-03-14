@@ -5,7 +5,7 @@
 name: Build Release files
 on: 
 #switch for debugging
-# [push]
+# [push] 
   release:
     types: [published]
 
@@ -24,8 +24,6 @@ jobs:
         #compile for x86 and armv8 (64-Bit)
          - x86_64-unknown-linux-gnu
          - aarch64-unknown-linux-gnu
-         #windows gnu
-         - x86_64-pc-windows-gnu
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -62,29 +60,69 @@ jobs:
         run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
 
       - name: Compress release files
-        #run only for non-windows builds
-        if: contains( ${{ matrix.target }}, "windows") != true
         shell: bash
         run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.tar.gz -C target/${{ matrix.target }}/release/ artem
 
       - name: Upload Release Build
-        #run only for non-windows builds
-        if: contains( ${{ matrix.target }}, "windows") != true
         uses: softprops/action-gh-release@v1
         with:
           files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.tar.gz
           draft: true
           prerelease: true
 
-      - name: Create zip file for windows
-        #run only for windows builds
-        if: contains( ${{ matrix.target }}, "windows")
+  release_assets_windows:
+  #this is only to release the windows build, since it has a .exe extensions will be uploaded as a zip file
+    name: Release Windows Build
+    runs-on: ${{ matrix.platform }} # we run many different builds
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+        rust:
+          - stable
+        target:
+         #windows gnu
+         - x86_64-pc-windows-gnu
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          profile: minimal
+          override: true
+      #use caching for cargo build 
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build artem release
+        uses: actions-rs/cargo@v1
+        continue-on-error: false 
+        with:
+          command: build 
+          use-cross: true
+          args: --locked --release --verbose --target=${{ matrix.target }}
+
+      - name: Extract Version Number
+        shell: bash
+        run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
+      
+        #create zip file from .exe release build 
+      - name: Create zip file for Windows
         shell: bash
         run: zip artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.zip -j target/${{ matrix.target }}/release/artem.exe
 
+        #upload zip file
       - name: Upload Release Build for Windows
-        #run only for windows builds
-        if: contains( ${{ matrix.target }}, "windows")
         uses: softprops/action-gh-release@v1
         with:
           files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.zip
