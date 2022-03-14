@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Continuous Integration uses now more targets (linux x64 and arm) when testing
+- Release builds are now available for more targets (linux x64 and arm) and windows (using gnu-target)
 
 ### Changed
 

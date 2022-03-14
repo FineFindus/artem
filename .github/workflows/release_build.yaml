@@ -3,10 +3,11 @@
 # https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
 
 name: Build Release files
-on: [push]
-#disable for debug
-  # release:
-  #   types: [created, published]
+on: 
+#switch for debugging
+# [push]
+  release:
+    types: [created, published]
 
 jobs:
 
@@ -23,6 +24,8 @@ jobs:
         #compile for x86 and armv8 (64-Bit)
          - x86_64-unknown-linux-gnu
          - aarch64-unknown-linux-gnu
+         #windows gnu
+         - x86_64-pc-windows-gnu
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
