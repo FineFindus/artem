@@ -1,6 +1,6 @@
 [package]
 name = "artem"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Jonathan (@FineFindus)"]
 edition = "2021"
 description = "An easy program to convert an image to an ascii image"
