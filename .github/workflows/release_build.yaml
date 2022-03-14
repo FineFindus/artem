@@ -7,7 +7,7 @@ on:
 #switch for debugging
 # [push]
   release:
-    types: [created]
+    types: [published]
 
 jobs:
 
