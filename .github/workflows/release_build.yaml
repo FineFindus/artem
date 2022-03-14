@@ -50,6 +50,7 @@ jobs:
         continue-on-error: false 
         with:
           command: build 
+          use-cross: true
           args: --locked --release --verbose --target=${{ matrix.target }}
 
           #from: https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
