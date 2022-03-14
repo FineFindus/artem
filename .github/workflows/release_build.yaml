@@ -62,13 +62,32 @@ jobs:
         run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
 
       - name: Compress release files
+        #run only for non-windows builds
+        if: ! contains( ${{ matrix.target }}, "windows")
         shell: bash
         run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.tar.gz -C target/${{ matrix.target }}/release/ artem
 
       - name: Upload Release Build
+        #run only for non-windows builds
+        if: ! contains( ${{ matrix.target }}, "windows")
         uses: softprops/action-gh-release@v1
         with:
           files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.tar.gz
+          draft: true
+          prerelease: true
+
+      - name: Create zip file for windows
+        #run only for windows builds
+        if: contains( ${{ matrix.target }}, "windows")
+        shell: bash
+        run: zip artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.zip -j target/${{ matrix.target }}/release/artem.exe
+
+      - name: Upload Release Build for Windows
+        #run only for windows builds
+        if: contains( ${{ matrix.target }}, "windows")
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.zip
           draft: true
           prerelease: true
 
