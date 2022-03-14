@@ -1,10 +1,12 @@
 # Reference:
 # https://eugene-babichenko.github.io/blog/2020/05/09/github-actions-cross-platform-auto-releases/
+# https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
 
-name: release
-on:
-  release:
-    types: [created, published]
+name: Build Release files
+on: [push]
+#disable for debug
+  # release:
+  #   types: [created, published]
 
 jobs:
 
@@ -14,14 +16,13 @@ jobs:
     runs-on: ${{ matrix.platform }} # we run many different builds
     strategy:
       matrix:
-        platform: [ubuntu-latest, 
-        #disable macos since it is 10x more expensive and currently not needed 
-        #macos-latest, 
-        #same with windows
-        #windows-latest
-        ]
+        platform: [ubuntu-latest]
         rust:
           - stable
+        target:
+        #compile for x86 and armv8 (64-Bit)
+         - x86_64-unknown-linux-gnu
+         - aarch64-unknown-linux-gnu
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -47,10 +48,9 @@ jobs:
       - name: Build artem release
         uses: actions-rs/cargo@v1
         continue-on-error: false 
-        #todo use cross to compile for more targets
         with:
           command: build 
-          args: --locked --release --verbose
+          args: --locked --release --verbose --target=${{ matrix.target }}
 
           #from: https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
       - name: Extract Version Number
@@ -59,12 +59,12 @@ jobs:
 
       - name: Compress release files
         shell: bash
-        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.platform }}.tar.gz -C target/release/ artem
+        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.tar.gz -C target/release/ artem
 
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
         with:
-          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.platform }}.tar.gz
+          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.tar.gz
           draft: true
           prerelease: true
 
