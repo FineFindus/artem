@@ -7,7 +7,7 @@ on:
 #switch for debugging
 # [push]
   release:
-    types: [created, published]
+    types: [created]
 
 jobs:
 
@@ -63,13 +63,13 @@ jobs:
 
       - name: Compress release files
         #run only for non-windows builds
-        if: ! contains( ${{ matrix.target }}, "windows")
+        if: contains( ${{ matrix.target }}, "windows") != true
         shell: bash
         run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.tar.gz -C target/${{ matrix.target }}/release/ artem
 
       - name: Upload Release Build
         #run only for non-windows builds
-        if: ! contains( ${{ matrix.target }}, "windows")
+        if: contains( ${{ matrix.target }}, "windows") != true
         uses: softprops/action-gh-release@v1
         with:
           files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.tar.gz
