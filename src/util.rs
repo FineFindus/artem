@@ -215,16 +215,22 @@ pub fn calculate_dimensions(
     height: u32,
     width: u32,
     scale: f64,
+    border: bool,
     dimension: ResizingDimension,
 ) -> (u32, u32, u32, u32) {
     match dimension {
         ResizingDimension::Width => {
             //calculate dimensions based on columns
-            let columns = if width > target_size {
+            let mut columns = if width > target_size {
                 target_size
             } else {
                 width
             };
+
+            if border {
+                //remove a bit of space for the border
+                columns = columns.saturating_sub(2);
+            }
 
             //calculate tiles
             let tile_width = width / columns;
@@ -244,7 +250,12 @@ pub fn calculate_dimensions(
             let tile_height = height / rows;
             let tile_width = (tile_height as f64 * scale).ceil() as u32;
 
-            let columns = width / tile_width;
+            let mut columns = width / tile_width;
+
+            if border {
+                //remove a bit of space for the border
+                columns = columns.saturating_sub(2);
+            }
 
             (columns, rows, tile_width, tile_height)
         }
@@ -259,7 +270,7 @@ mod test_calculate_dimensions {
     fn calculate_dimensions_width() {
         assert_eq!(
             (100, 46, 5, 11),
-            calculate_dimensions(100, 512, 512, 0.42, ResizingDimension::Width)
+            calculate_dimensions(100, 512, 512, 0.42, false, ResizingDimension::Width)
         );
     }
 
@@ -267,7 +278,7 @@ mod test_calculate_dimensions {
     fn calculate_dimensions_width_119() {
         assert_eq!(
             (119, 56, 4, 9),
-            calculate_dimensions(119, 512, 512, 0.42, ResizingDimension::Width)
+            calculate_dimensions(119, 512, 512, 0.42, false, ResizingDimension::Width)
         );
     }
 
@@ -275,39 +286,47 @@ mod test_calculate_dimensions {
     fn calculate_dimensions_height() {
         assert_eq!(
             (170, 100, 3, 5),
-            calculate_dimensions(100, 512, 512, 0.42, ResizingDimension::Height)
+            calculate_dimensions(100, 512, 512, 0.42, false, ResizingDimension::Height)
         );
     }
 
     #[test]
     #[should_panic]
     fn calculate_dimensions_height_zero() {
-        calculate_dimensions(0, 512, 512, 0.42, ResizingDimension::Height);
+        calculate_dimensions(0, 512, 512, 0.42, false, ResizingDimension::Height);
     }
 
     #[test]
     #[should_panic]
     fn calculate_dimensions_width_zero() {
-        calculate_dimensions(0, 512, 512, 0.42, ResizingDimension::Width);
+        calculate_dimensions(0, 512, 512, 0.42, false, ResizingDimension::Width);
     }
 
     #[test]
     #[should_panic]
     fn calculate_dimensions_img_width_zero() {
-        calculate_dimensions(100, 512, 0, 0.42, ResizingDimension::Width);
+        calculate_dimensions(100, 512, 0, 0.42, false, ResizingDimension::Width);
     }
 
     #[test]
     #[should_panic]
     fn calculate_dimensions_img_height_zero() {
-        calculate_dimensions(100, 0, 512, 0.42, ResizingDimension::Height);
+        calculate_dimensions(100, 0, 512, 0.42, false, ResizingDimension::Height);
     }
 
     #[test]
     fn calculate_dimensions_scale_zero() {
         assert_eq!(
             (100, 0, 5, 4294967295),
-            calculate_dimensions(100, 512, 512, 0f64, ResizingDimension::Width)
+            calculate_dimensions(100, 512, 512, 0f64, false, ResizingDimension::Width)
+        );
+    }
+
+    #[test]
+    fn calculate_border_smaller_columns() {
+        assert_eq!(
+            (98, 0, 5, 4294967295),
+            calculate_dimensions(100, 512, 512, 0f64, true, ResizingDimension::Width)
         );
     }
 }

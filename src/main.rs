@@ -14,6 +14,7 @@ mod util;
 
 //condense all arguments into a single struct
 mod conversion_options;
+
 fn main() {
     //get args from cli
     let matches = cli::build_cli().get_matches();
@@ -168,6 +169,10 @@ fn main() {
     };
     options_builder = options_builder.color(color);
 
+    let border = matches.is_present("border");
+    options_builder = options_builder.border(border);
+    info!("Using border: {border}");
+
     //convert the img to ascii string
     info!("Converting the img: {img_path}");
     let output = convert_img(img, options_builder.build());
@@ -215,6 +220,7 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
         input_height,
         input_width,
         options.scale,
+        options.border,
         options.dimension,
     );
     debug!("Columns: {columns}");
@@ -232,6 +238,14 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     //output string
     let mut output = String::new();
     trace!("Created output string");
+
+    if options.border {
+        //add top part of border before conversion
+        output.push('╔');
+        output.push_str("═".repeat(columns as usize).as_str());
+        output.push_str("╗\n");
+        trace!("Adding top part of border");
+    }
 
     //clamp threads
     let thread_count = options.thread_count.clamp(
@@ -274,6 +288,11 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
 
             //go through the thread img chunk
             for row in chunk * thread_tiles..chunk_end {
+                if options.border {
+                    //add bottom part before image
+                    thread_output.push('║');
+                }
+
                 for col in 0..columns {
                     //get a single tile
                     let tile_row = row * tile_height;
@@ -301,10 +320,13 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
                     thread_output.push_str(char.as_str());
                 }
 
-                //add new line
-                if row != (chunk + 1) * thread_tiles - 1 || chunk != thread_count - 1 {
-                    thread_output.push('\n');
+                if options.border {
+                    //add bottom part after image
+                    thread_output.push('║');
                 }
+
+                //add new line
+                thread_output.push('\n');
             }
             trace!("Thread {chunk} finished");
             thread_output
@@ -319,6 +341,14 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
         //add output together
         trace!("Appending output of thread");
         output.push_str(result.as_str());
+    }
+
+    if options.border {
+        //add bottom part of border after conversion
+        output.push('╚');
+        output.push_str("═".repeat((columns) as usize).as_str());
+        output.push('╝');
+        trace!("Adding bottom part of border");
     }
 
     output.trim_end().to_string()

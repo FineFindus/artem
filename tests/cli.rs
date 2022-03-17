@@ -29,7 +29,7 @@ pub mod input {
 
         cmd.arg("examples/abraham_lincoln.jpg");
         //check only the first line, the rest is likely to be correct as well
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
         ));
     }
@@ -55,7 +55,7 @@ pub mod density {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg").arg("-c 0.6");
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "                       0000  000000000000000000000000000000000000000            ",
         ));
     }
@@ -66,7 +66,7 @@ pub mod density {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["-c", "M0123-."]);
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "MMMMMMMMM00000000000000000000000000000101111111111111111111110011000000000000000",
         ));
     }
@@ -77,7 +77,7 @@ pub mod density {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
-            cmd.assert().stdout(predicate::str::starts_with(
+            cmd.assert().success().stdout(predicate::str::starts_with(
                 "####WWWWW$$$$$999$98887776777776666676665555456555555433345566656677788888999$$9",
             ));
         }
@@ -89,7 +89,7 @@ pub mod density {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
-            cmd.assert().stdout(predicate::str::starts_with(
+            cmd.assert().success().stdout(predicate::str::starts_with(
                 "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
             ));
         }
@@ -101,7 +101,7 @@ pub mod density {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
-            cmd.assert().stdout(predicate::str::starts_with(
+            cmd.assert().success().stdout(predicate::str::starts_with(
                 "W&&WMMM#*oaaaahhaahbbdqqwwwppwwmwmmmwwZmO0O0Q0Z000000CUJJC0OZmm0Zmqqqdbbdbkkaaah",
             ));
         }
@@ -193,7 +193,7 @@ pub mod size {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").args(["-s", "75"]);
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNXXXXXXKXXKKK000O0000OOOOOO0OOOkkkkkOkkkkkkxxxxkkOOOkOO0000KKKKKXXXX",
         ));
     }
@@ -241,7 +241,7 @@ pub mod width {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--width");
         //should panic in the test case, since the terminal size is 0
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXXKK0000OO000OOOOOOOOOOOkkkkkkOkkkkkkxxxxxkkOOOkOO0000KKKKKKKXX",
         ));
     }
@@ -289,7 +289,7 @@ pub mod height {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--height");
         //should panic in the test case, since the terminal size is 0
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXXKK0000OO000OOOOOOOOOOOkkkkkkOkkkkkkxxxxxkkOOOkOO0000KKKKKKKXX",
         ));
     }
@@ -338,7 +338,7 @@ pub mod scale {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", f64::MAX.to_string().as_str()]);
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "NWWNNNNNXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOOO00KKK00KKXXXX",
         ));
     }
@@ -349,7 +349,7 @@ pub mod scale {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", "0.75"]);
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "NWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOkOOkOxkkkxkOkkkkkkxxddxkkOOOkOO000KKK0KKKXXXX",
         ));
     }
@@ -410,7 +410,7 @@ pub mod thread {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", u32::MAX.to_string().as_str()]);
         //since its clamped, it should return the normal img
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
         ));
     }
@@ -421,7 +421,7 @@ pub mod thread {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", "3"]);
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
         ));
     }
@@ -449,7 +449,7 @@ pub mod output_file {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["-o", "/tmp/test.txt"]);
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "Written 3592 bytes to /tmp/test.txt",
         ));
         //delete output file
@@ -477,7 +477,7 @@ pub mod invert {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--invert");
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "         ...............'''..'.'''''.''',,,,,,',,,,,,;;;;;,'''',''..............",
         ));
     }
@@ -503,7 +503,7 @@ pub mod background {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--background");
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
         ));
     }
@@ -529,9 +529,39 @@ pub mod no_color {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--no-color");
         //only check first line
-        cmd.assert().stdout(predicate::str::starts_with(
+        cmd.assert().success().stdout(predicate::str::starts_with(
             "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
         ));
+    }
+}
+
+pub mod border {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--border", "123"]);
+        cmd.assert().stderr(predicate::str::starts_with(
+            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--border");
+        //only check first line
+        cmd.assert()
+            .success().stdout(predicate::str::starts_with(
+                "╔══════════════════════════════════════════════════════════════════════════════╗",
+            ))
+            .success().stdout(predicate::str::ends_with(
+                "╚══════════════════════════════════════════════════════════════════════════════╝\n",
+            ));
     }
 }
 

@@ -9,6 +9,7 @@ pub struct ConversionOption<'a> {
     pub color: bool,
     pub invert: bool,
     pub on_background_color: bool,
+    pub border: bool,
     pub dimension: ResizingDimension,
 }
 
@@ -33,6 +34,7 @@ mod test_conversion_option {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             ConversionOption::builder()
@@ -50,6 +52,7 @@ pub struct ConversionOptionBuilder<'a> {
     color: bool,
     invert: bool,
     on_background_color: bool,
+    border: bool,
     dimension: ResizingDimension,
 }
 
@@ -103,6 +106,13 @@ impl<'a> ConversionOptionBuilder<'a> {
         self.on_background_color = on_background;
         self
     }
+
+    ///Enable the use of a border surrounding the image.
+    pub fn border(mut self, border: bool) -> Self {
+        self.border = border;
+        self
+    }
+
     ///Set which dimension should be scaled first.
     pub fn dimension(mut self, dimension: util::ResizingDimension) -> Self {
         self.dimension = dimension;
@@ -119,6 +129,7 @@ impl<'a> ConversionOptionBuilder<'a> {
             color: self.color,
             invert: self.invert,
             on_background_color: self.on_background_color,
+            border: self.border,
             dimension: self.dimension,
         }
     }
@@ -138,6 +149,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             ConversionOptionBuilder::new().build()
@@ -156,6 +168,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -174,6 +187,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -192,6 +206,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -210,6 +225,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -228,6 +244,7 @@ mod test_conversion_option_builder {
                 color: true, //change attribute
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -246,6 +263,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: true, //change attribute
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -264,6 +282,26 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: true, //change attribute
+                border: false,
+                dimension: util::ResizingDimension::Width,
+            },
+            builder.build()
+        );
+    }
+
+    #[test]
+    fn change_border() {
+        let builder = ConversionOptionBuilder::new().border(true);
+        assert_eq!(
+            ConversionOption {
+                density: "",
+                thread_count: 0,
+                scale: 0.0f64,
+                target_size: 0,
+                color: false,
+                invert: false,
+                on_background_color: false,
+                border: true, //change attribute
                 dimension: util::ResizingDimension::Width,
             },
             builder.build()
@@ -282,6 +320,7 @@ mod test_conversion_option_builder {
                 color: false,
                 invert: false,
                 on_background_color: false,
+                border: false,
                 dimension: util::ResizingDimension::Height, //change attribute
             },
             builder.build()

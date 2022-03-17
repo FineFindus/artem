@@ -3,11 +3,11 @@ use clap::{Arg, Command, ValueHint};
 ///Build the clap command-line-interface using clap  
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
-        .version("0.5.0")
+        .version("0.6.0")
         .about("A small rust cli program to convert an image into an ascii art representation.")
         .arg(
             Arg::new("INPUT")
-                .help("Path to the target image. Does NOT alter the original")
+                .help("Path to the target image. Does NOT alter the original image")
                 .required(true)
                 .value_hint(ValueHint::FilePath)
                 .index(1),
@@ -65,7 +65,7 @@ pub fn build_cli() -> Command<'static> {
                 .long("output")
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
-                .help("Output file for non-colored ascii. There is currently no way to enable color support for output files."),
+                .help("Output file for non-colored ascii. There is mutually exclusive with --color and --background, so they will be ignored."),
         )
         .arg(
             Arg::new("threads")
@@ -73,7 +73,7 @@ pub fn build_cli() -> Command<'static> {
                 .takes_value(true)
                 .default_value("4")
                 .value_hint(ValueHint::Other)
-                .help("OutputNumber of threads used to convert the image. A larger number can mean grater performance. Defaults to 4"),
+                .help("OutputNumber of threads used to convert the image. A larger number can lead to grater performance. Defaults to 4"),
         )
         .arg(
             Arg::new("invert-density")
@@ -84,6 +84,11 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("background-color")
                 .long("background")
                 .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor"),
+        )
+        .arg(
+            Arg::new("border")
+                .long("border")
+                .help("Adds a decorative border surrounding the ascii image. This will make the image overall a bit smaller, since it respects the user given size."),
         )
         .arg(
             Arg::new("no-color")
