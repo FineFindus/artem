@@ -175,12 +175,12 @@ fn main() {
     let transform = if matches.is_present("flipX") {
         //check if y is also present
         if matches.is_present("flipY") {
-            Some(conversion_options::ImageTransform::FlipXY)
+            Some(conversion_options::ImageTransform::XY)
         } else {
-            Some(conversion_options::ImageTransform::FlipX)
+            Some(conversion_options::ImageTransform::X)
         }
     } else if matches.is_present("flipY") {
-        Some(conversion_options::ImageTransform::FlipY)
+        Some(conversion_options::ImageTransform::Y)
     } else {
         None
     };
@@ -248,15 +248,15 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     if options.transform.is_some() {
         let transform = options.transform.unwrap();
 
-        if transform == conversion_options::ImageTransform::FlipY
-            || transform == conversion_options::ImageTransform::FlipXY
+        if transform == conversion_options::ImageTransform::Y
+            || transform == conversion_options::ImageTransform::XY
         {
             img = img.flipv();
             info!("Flipping image on Y axis");
         }
 
-        if transform == conversion_options::ImageTransform::FlipX
-            || transform == conversion_options::ImageTransform::FlipXY
+        if transform == conversion_options::ImageTransform::X
+            || transform == conversion_options::ImageTransform::XY
         {
             img = img.fliph();
             info!("Flipping image on X axis");

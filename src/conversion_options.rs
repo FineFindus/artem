@@ -349,7 +349,7 @@ mod test_conversion_option_builder {
 
     #[test]
     fn change_transform() {
-        let builder = ConversionOptionBuilder::new().transform(Some(ImageTransform::FlipY));
+        let builder = ConversionOptionBuilder::new().transform(Some(ImageTransform::Y));
         assert_eq!(
             ConversionOption {
                 density: "",
@@ -361,7 +361,7 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: Some(ImageTransform::FlipY), //change attribute
+                transform: Some(ImageTransform::Y), //change attribute
             },
             builder.build()
         );
@@ -374,14 +374,14 @@ mod test_conversion_option_builder {
 ///By default X will be used.
 #[derive(Debug, PartialEq)]
 pub enum ImageTransform {
-    FlipX,
-    FlipY,
-    FlipXY,
+    X,
+    Y,
+    XY,
 }
 //Implement `Default` as Width
 impl Default for ImageTransform {
     fn default() -> Self {
-        ImageTransform::FlipX
+        ImageTransform::X
     }
 }
 
@@ -391,6 +391,6 @@ mod test_image_transform_enum {
 
     #[test]
     fn default_is_flip_x() {
-        assert_eq!(ImageTransform::FlipX, ImageTransform::default());
+        assert_eq!(ImageTransform::X, ImageTransform::default());
     }
 }
