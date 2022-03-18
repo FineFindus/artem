@@ -58,6 +58,14 @@ pub fn build_cli() -> Command<'static> {
                 .value_hint(ValueHint::Other)
                 .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.\
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
+        ).arg(
+            Arg::new("flipX")
+                .long("flipX")
+                .help("Flip the image along the X axis"),
+        ).arg(
+            Arg::new("flipY")
+                .long("flipY")
+                .help("Flip the image along the Y axis"),
         )
         .arg(
             Arg::new("output-file")

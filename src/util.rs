@@ -348,3 +348,13 @@ impl Default for ResizingDimension {
         ResizingDimension::Width
     }
 }
+
+#[cfg(test)]
+mod test_dimensions_enum {
+    use super::*;
+
+    #[test]
+    fn default_is_width() {
+        assert_eq!(ResizingDimension::Width, ResizingDimension::default());
+    }
+}

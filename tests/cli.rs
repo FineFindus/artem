@@ -355,6 +355,75 @@ pub mod scale {
     }
 }
 
+pub mod flip_x {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--flipX", "123"]);
+        cmd.assert().stderr(predicate::str::starts_with(
+            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--flipX");
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "XXXXKKKKKK0000OOkOOOOkxxxxxkkkkkkOkkkkkkOOO0OOOOO0O00OOO000KKKXXKXXXXXXNNNNNNWWW",
+        ));
+    }
+}
+
+pub mod flip_y {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--flipY", "123"]);
+        cmd.assert().stderr(predicate::str::starts_with(
+            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--flipY");
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "      .    ..       .. .....                                                    ",
+        ));
+    }
+}
+
+pub mod flip_x_y {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--flipY", "--flipX"]);
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "                                                    ..... ..       ..    .      ",
+        ));
+    }
+}
+
 pub mod thread {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;

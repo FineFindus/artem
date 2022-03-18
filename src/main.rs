@@ -35,7 +35,6 @@ fn main() {
         .format_timestamp(None)
         .filter_level(log_level)
         .init();
-
     trace!("Started logger with trace");
 
     let mut options_builder = ConversionOptionBuilder::new();
@@ -173,6 +172,20 @@ fn main() {
     options_builder = options_builder.border(border);
     info!("Using border: {border}");
 
+    let transform = if matches.is_present("flipX") {
+        //check if y is also present
+        if matches.is_present("flipY") {
+            Some(conversion_options::ImageTransform::FlipXY)
+        } else {
+            Some(conversion_options::ImageTransform::FlipX)
+        }
+    } else if matches.is_present("flipY") {
+        Some(conversion_options::ImageTransform::FlipY)
+    } else {
+        None
+    };
+    options_builder = options_builder.transform(transform);
+
     //convert the img to ascii string
     info!("Converting the img: {img_path}");
     let output = convert_img(img, options_builder.build());
@@ -230,7 +243,25 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
 
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
-    let img = Arc::new(img.thumbnail_exact(columns * tile_width, rows * tile_height));
+    let mut img = img.thumbnail_exact(columns * tile_width, rows * tile_height);
+
+    if options.transform.is_some() {
+        let transform = options.transform.unwrap();
+
+        if transform == conversion_options::ImageTransform::FlipY
+            || transform == conversion_options::ImageTransform::FlipXY
+        {
+            img = img.flipv();
+            info!("Flipping image on Y axis");
+        }
+
+        if transform == conversion_options::ImageTransform::FlipX
+            || transform == conversion_options::ImageTransform::FlipXY
+        {
+            img = img.fliph();
+            info!("Flipping image on X axis");
+        };
+    }
 
     debug!("Resized Image Width: {}", img.width());
     debug!("Resized Image Height: {}", img.height());
@@ -260,6 +291,8 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     //collect threads handles
     let mut handles = Vec::with_capacity(thread_count as usize);
     trace!("Allocated thread handles");
+
+    let img = Arc::new(img);
 
     //split the img into chunks for each thread
     for chunk in 0..thread_count {
