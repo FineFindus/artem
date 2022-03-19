@@ -243,25 +243,19 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
 
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
-    let mut img = img.thumbnail_exact(columns * tile_width, rows * tile_height);
+    let img = Arc::new(img.thumbnail_exact(columns * tile_width, rows * tile_height));
 
-    if options.transform.is_some() {
-        let transform = options.transform.unwrap();
+    let flip_x = match options.transform {
+        Some(conversion_options::ImageTransform::X) => true,
+        Some(conversion_options::ImageTransform::XY) => true,
+        _ => false,
+    };
 
-        if transform == conversion_options::ImageTransform::Y
-            || transform == conversion_options::ImageTransform::XY
-        {
-            img = img.flipv();
-            info!("Flipping image on Y axis");
-        }
-
-        if transform == conversion_options::ImageTransform::X
-            || transform == conversion_options::ImageTransform::XY
-        {
-            img = img.fliph();
-            info!("Flipping image on X axis");
-        };
-    }
+    let flip_y = match options.transform {
+        Some(conversion_options::ImageTransform::Y) => true,
+        Some(conversion_options::ImageTransform::XY) => true,
+        _ => false,
+    };
 
     debug!("Resized Image Width: {}", img.width());
     debug!("Resized Image Height: {}", img.height());
@@ -292,10 +286,8 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     let mut handles = Vec::with_capacity(thread_count as usize);
     trace!("Allocated thread handles");
 
-    let img = Arc::new(img);
-
     //split the img into chunks for each thread
-    for chunk in 0..thread_count {
+    for chunk in util::range(0, thread_count, flip_y) {
         //arc clone img and density
         let thread_img = Arc::clone(&img);
         let thread_density = options.density.to_owned();
@@ -320,13 +312,13 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
             };
 
             //go through the thread img chunk
-            for row in chunk * thread_tiles..chunk_end {
+            for row in util::range(chunk * thread_tiles, chunk_end, flip_y) {
                 if options.border {
                     //add bottom part before image
                     thread_output.push('║');
                 }
 
-                for col in 0..columns {
+                for col in util::range(0, columns, flip_x) {
                     //get a single tile
                     let tile_row = row * tile_height;
                     let tile_col = col * tile_width;
@@ -370,7 +362,10 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
 
     for handle in handles {
         //get thread result
-        let result = handle.join().unwrap();
+        let result = match handle.join() {
+            Ok(string) => string,
+            Err(_) => util::fatal_error("Error encountered when converting image", Some(1)),
+        };
         //add output together
         trace!("Appending output of thread");
         output.push_str(result.as_str());

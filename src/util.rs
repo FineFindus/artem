@@ -41,7 +41,7 @@ pub fn map_range(from_range: (f64, f64), to_range: (f64, f64), value: f64) -> f6
 }
 
 #[cfg(test)]
-mod test_range {
+mod test_map_range {
     use super::*;
 
     #[test]
@@ -356,5 +356,41 @@ mod test_dimensions_enum {
     #[test]
     fn default_is_width() {
         assert_eq!(ResizingDimension::Width, ResizingDimension::default());
+    }
+}
+
+pub fn range(start: u32, end: u32, rev: bool) -> impl Iterator<Item = u32> {
+    let (mut r_start, step) = if rev {
+        (end.saturating_sub(1), u32::max_value())
+    } else {
+        ((start.saturating_sub(1)), 1)
+    };
+
+    std::iter::repeat_with(move || {
+        let tmp = r_start;
+        r_start = r_start.wrapping_add(step);
+        tmp
+    })
+    .take(end as usize - start as usize)
+}
+
+#[cfg(test)]
+mod test_range {
+    use super::*;
+
+    #[test]
+    fn create_range_0_2() {
+        let mut range = range(0, 2, false);
+        assert_eq!(Some(0), range.next());
+        assert_eq!(Some(1), range.next());
+        assert_eq!(None, range.next());
+    }
+
+    #[test]
+    fn create_range_2_0() {
+        let mut range = range(0, 2, true);
+        assert_eq!(Some(1), range.next());
+        assert_eq!(Some(0), range.next());
+        assert_eq!(None, range.next());
     }
 }
