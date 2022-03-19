@@ -11,7 +11,8 @@ pub struct ConversionOption<'a> {
     pub on_background_color: bool,
     pub border: bool,
     pub dimension: ResizingDimension,
-    pub transform: Option<ImageTransform>,
+    pub transform_x: bool,
+    pub transform_y: bool,
 }
 
 impl<'a> ConversionOption<'a> {
@@ -37,7 +38,8 @@ mod test_conversion_option {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             ConversionOption::builder()
         );
@@ -56,7 +58,8 @@ pub struct ConversionOptionBuilder<'a> {
     on_background_color: bool,
     border: bool,
     dimension: ResizingDimension,
-    transform: Option<ImageTransform>,
+    transform_x: bool,
+    transform_y: bool,
 }
 
 impl<'a> ConversionOptionBuilder<'a> {
@@ -122,9 +125,15 @@ impl<'a> ConversionOptionBuilder<'a> {
         self
     }
 
-    ///Change in which direction the image should be flipped.
-    pub fn transform(mut self, transform: Option<ImageTransform>) -> Self {
-        self.transform = transform;
+    ///Flip the image along the X-axis
+    pub fn transform_x(mut self, transform: bool) -> Self {
+        self.transform_x = transform;
+        self
+    }
+
+    ///Flip the image along the Y-axis
+    pub fn transform_y(mut self, transform: bool) -> Self {
+        self.transform_y = transform;
         self
     }
 
@@ -140,7 +149,8 @@ impl<'a> ConversionOptionBuilder<'a> {
             on_background_color: self.on_background_color,
             border: self.border,
             dimension: self.dimension,
-            transform: self.transform,
+            transform_x: self.transform_x,
+            transform_y: self.transform_y,
         }
     }
 }
@@ -161,7 +171,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             ConversionOptionBuilder::new().build()
         );
@@ -181,7 +192,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -201,7 +213,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -221,7 +234,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -241,7 +255,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -261,7 +276,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -281,7 +297,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -301,7 +318,8 @@ mod test_conversion_option_builder {
                 on_background_color: true, //change attribute
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -321,7 +339,8 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: true, //change attribute
                 dimension: util::ResizingDimension::Width,
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
@@ -341,15 +360,16 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Height, //change attribute
-                transform: None,
+                transform_x: false,
+                transform_y: false,
             },
             builder.build()
         );
     }
 
     #[test]
-    fn change_transform() {
-        let builder = ConversionOptionBuilder::new().transform(Some(ImageTransform::Y));
+    fn change_transform_x() {
+        let builder = ConversionOptionBuilder::new().transform_x(true);
         assert_eq!(
             ConversionOption {
                 density: "",
@@ -361,36 +381,31 @@ mod test_conversion_option_builder {
                 on_background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
-                transform: Some(ImageTransform::Y), //change attribute
+                transform_x: true, //change attribute
+                transform_y: false,
             },
             builder.build()
         );
     }
-}
-
-///Preferred image transform
-///
-///This flips the image along the x or y axis.
-///By default X will be used.
-#[derive(Debug, PartialEq)]
-pub enum ImageTransform {
-    X,
-    Y,
-    XY,
-}
-//Implement `Default` as Width
-impl Default for ImageTransform {
-    fn default() -> Self {
-        ImageTransform::X
-    }
-}
-
-#[cfg(test)]
-mod test_image_transform_enum {
-    use super::*;
 
     #[test]
-    fn default_is_flip_x() {
-        assert_eq!(ImageTransform::X, ImageTransform::default());
+    fn change_transform_y() {
+        let builder = ConversionOptionBuilder::new().transform_y(true);
+        assert_eq!(
+            ConversionOption {
+                density: "",
+                thread_count: 0,
+                scale: 0.0f64,
+                target_size: 0,
+                color: false,
+                invert: false,
+                on_background_color: false,
+                border: false,
+                dimension: util::ResizingDimension::Width,
+                transform_x: false,
+                transform_y: true, //change attribute
+            },
+            builder.build()
+        );
     }
 }

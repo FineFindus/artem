@@ -168,23 +168,20 @@ fn main() {
     };
     options_builder = options_builder.color(color);
 
+    //get flag for border around image
     let border = matches.is_present("border");
     options_builder = options_builder.border(border);
     info!("Using border: {border}");
 
-    let transform = if matches.is_present("flipX") {
-        //check if y is also present
-        if matches.is_present("flipY") {
-            Some(conversion_options::ImageTransform::XY)
-        } else {
-            Some(conversion_options::ImageTransform::X)
-        }
-    } else if matches.is_present("flipY") {
-        Some(conversion_options::ImageTransform::Y)
-    } else {
-        None
-    };
-    options_builder = options_builder.transform(transform);
+    //get flags for flipping along x axis
+    let transform_x = matches.is_present("flipX");
+    options_builder = options_builder.transform_x(transform_x);
+    debug!("Flipping X-Axis: {transform_x}");
+
+    //get flags for flipping along y axis
+    let transform_y = matches.is_present("flipY");
+    options_builder = options_builder.transform_y(transform_y);
+    debug!("Flipping Y-Axis: {transform_y}");
 
     //convert the img to ascii string
     info!("Converting the img: {img_path}");
@@ -245,18 +242,6 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
     let img = Arc::new(img.thumbnail_exact(columns * tile_width, rows * tile_height));
 
-    let flip_x = match options.transform {
-        Some(conversion_options::ImageTransform::X) => true,
-        Some(conversion_options::ImageTransform::XY) => true,
-        _ => false,
-    };
-
-    let flip_y = match options.transform {
-        Some(conversion_options::ImageTransform::Y) => true,
-        Some(conversion_options::ImageTransform::XY) => true,
-        _ => false,
-    };
-
     debug!("Resized Image Width: {}", img.width());
     debug!("Resized Image Height: {}", img.height());
 
@@ -287,7 +272,7 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     trace!("Allocated thread handles");
 
     //split the img into chunks for each thread
-    for chunk in util::range(0, thread_count, flip_y) {
+    for chunk in util::range(0, thread_count, options.transform_y) {
         //arc clone img and density
         let thread_img = Arc::clone(&img);
         let thread_density = options.density.to_owned();
@@ -312,13 +297,13 @@ fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
             };
 
             //go through the thread img chunk
-            for row in util::range(chunk * thread_tiles, chunk_end, flip_y) {
+            for row in util::range(chunk * thread_tiles, chunk_end, options.transform_y) {
                 if options.border {
                     //add bottom part before image
                     thread_output.push('║');
                 }
 
-                for col in util::range(0, columns, flip_x) {
+                for col in util::range(0, columns, options.transform_x) {
                     //get a single tile
                     let tile_row = row * tile_height;
                     let tile_col = col * tile_width;
