@@ -1,7 +1,16 @@
+use std::fs;
+
+fn load_correct_file() -> String {
+    let desired_output = fs::read_to_string("assets/abraham_lincoln.txt").unwrap(); //ignore errors
+    desired_output
+}
+
 pub mod input {
     use assert_cmd::prelude::*; // Add methods on commands
     use predicates::prelude::*; // Used for writing assertions
-    use std::process::Command; // Run programs
+    use std::process::Command;
+
+    use crate::load_correct_file;
 
     #[test]
     fn input_does_not_exist() {
@@ -29,9 +38,9 @@ pub mod input {
 
         cmd.arg("examples/abraham_lincoln.jpg");
         //check only the first line, the rest is likely to be correct as well
-        cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
-        ));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::starts_with(load_correct_file()));
     }
 }
 
@@ -39,6 +48,8 @@ pub mod density {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;
     use std::process::Command;
+
+    use crate::load_correct_file;
 
     #[test]
     fn arg_is_none() {
@@ -78,7 +89,7 @@ pub mod density {
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "####WWWWW$$$$$999$98887776777776666676665555456555555433345566656677788888999$$9",
+                "####WWWWW$$$$$999$9888777777777666667666555555655555543334556665667778888899$$$9",
             ));
         }
     }
@@ -89,9 +100,9 @@ pub mod density {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
-            cmd.assert().success().stdout(predicate::str::starts_with(
-                "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
-            ));
+            cmd.assert()
+                .success()
+                .stdout(predicate::str::starts_with(load_correct_file()));
         }
     }
 
@@ -102,7 +113,7 @@ pub mod density {
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "W&&WMMM#*oaaaahhaahbbdqqwwwppwwmwmmmwwZmO0O0Q0Z000000CUJJC0OZmm0Zmqqqdbbdbkkaaah",
+                "W&&WMMM#*oaaaahhaahbbdqqwwwppwwmwmmmwwZmO0O0Q0Z000000CUJCC0OZmm0Zmqqqdbbbbkkaoah",
             ));
         }
     }
@@ -194,7 +205,7 @@ pub mod size {
         cmd.arg("examples/abraham_lincoln.jpg").args(["-s", "75"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNXXXXXXKXXKKK000O0000OOOOOO0OOOkkkkkOkkkkkkxxxxkkOOOkOO0000KKKKKXXXX",
+            "WWWNNNNNXXXXXXXXXKKK000O00000OOOOO0OOOkkkkkOkkkkkkxxxxkkOOOkOO000KKKKKKXXXX",
         ));
     }
 }
@@ -339,7 +350,7 @@ pub mod scale {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", f64::MAX.to_string().as_str()]);
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "NWWNNNNNXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOOO00KKK00KKXXXX",
+            "NWWNNNNNXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOO000KKK00KKXXXX",
         ));
     }
 
@@ -350,7 +361,7 @@ pub mod scale {
             .args(["--ratio", "0.75"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "NWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOkOOkOxkkkxkOkkkkkkxxddxkkOOOkOO000KKK0KKKXXXX",
+            "NWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOOOOOOxkkkxkOkkkkkkxxdxxkkOOOkOO000KKK0KKKXXXX",
         ));
     }
 }
@@ -376,7 +387,7 @@ pub mod flip_x {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--flipX");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "XXXXKKKKKK0000OOkOOOOkxxxxxkkkkkkOkkkkkkOOO0OOOOO0O00OOO000KKKXXKXXXXXXNNNNNNWWW",
+            "XXXXKKKKKK0000OOkOOOOkxxxxxkkkkkkOkkkOkkOOO0OOOOO0000OOO000KKKXXKXXXXXXNNNNNNWWW",
         ));
     }
 }
@@ -402,7 +413,7 @@ pub mod flip_y {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--flipY");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "      .    ..       .. .....                                                    ",
+            ".....................................................                           ",
         ));
     }
 }
@@ -419,7 +430,7 @@ pub mod flip_x_y {
             .args(["--flipY", "--flipX"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "                                                    ..... ..       ..    .      ",
+            "                           .....................................................",
         ));
     }
 }
@@ -428,6 +439,8 @@ pub mod thread {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;
     use std::process::Command;
+
+    use crate::load_correct_file;
 
     #[test]
     fn arg_is_none() {
@@ -479,9 +492,9 @@ pub mod thread {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", u32::MAX.to_string().as_str()]);
         //since its clamped, it should return the normal img
-        cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
-        ));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::starts_with(load_correct_file()));
     }
 
     #[test]
@@ -490,9 +503,9 @@ pub mod thread {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", "3"]);
         //only check first line
-        cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
-        ));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::starts_with(load_correct_file()));
     }
 }
 
@@ -519,7 +532,7 @@ pub mod output_file {
             .args(["-o", "/tmp/test.txt"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "Written 3563 bytes to /tmp/test.txt",
+            "Written 3617 bytes to /tmp/test.txt",
         ));
         //delete output file
         fs::remove_file("/tmp/test.txt")
@@ -547,7 +560,7 @@ pub mod invert {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--invert");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "         ...............'''..'.'''''.''',,,,,,',,,,,,;;;;;,'''',''..............",
+            "         ...............'''....'''''.''',,',,,',,,,,,;;;;;,'''',''..............",
         ));
     }
 }
@@ -556,6 +569,8 @@ pub mod background {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;
     use std::process::Command;
+
+    use crate::load_correct_file;
 
     #[test]
     fn arg_with_value() {
@@ -572,9 +587,9 @@ pub mod background {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--background");
         //only check first line
-        cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
-        ));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::starts_with(load_correct_file()));
     }
 }
 
@@ -582,6 +597,8 @@ pub mod no_color {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;
     use std::process::Command;
+
+    use crate::load_correct_file;
 
     #[test]
     fn arg_with_value() {
@@ -598,9 +615,9 @@ pub mod no_color {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--no-color");
         //only check first line
-        cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNNXXXXXXKXXKKK000OOO00O0OOOOO0OOOkkkkkkOkkkkkkxxxxxkOOOOkOO0000KKKKKKXXXX",
-        ));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::starts_with(load_correct_file()));
     }
 }
 
