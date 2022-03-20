@@ -3,8 +3,20 @@ use std::{env, process};
 use colored::{ColoredString, Colorize};
 use log::error;
 
-///Checks if the terminal supports truecolor mode.
-/// Returns false if not.
+///Returns if the terminal supports truecolor mode.
+///
+/// It checks the `COLORTERM` environnement variable,
+/// if it is either set to
+/// `truecolor` or `24bit` true is returned.
+///
+/// In all other cases false will be returned.
+///
+/// # Examples
+/// ```
+/// //only true when run in a shell that supports true color
+/// let color_support = supports_truecolor();
+/// assert!(color_support);
+/// ```
 pub fn supports_truecolor() -> bool {
     match env::var("COLORTERM") {
         Ok(var) => var.contains("truecolor") || var.contains("24bit"),
@@ -36,6 +48,16 @@ mod test_color_support {
 }
 
 ///Remap a value from one range to another.
+///
+/// If the value is outside of the specified range, it will still be
+/// converted as if it was in the range. This means it could be much larger or smaller than expected.
+/// This can be fixed by using the `clamp` function after the remapping.
+///
+///# Examples
+/// ```
+/// let remapped = map_range((0f64, 10f64), (0f64, 20f64), 2f64)
+/// assert_eq!(4f64, remapped);
+/// ```
 pub fn map_range(from_range: (f64, f64), to_range: (f64, f64), value: f64) -> f64 {
     to_range.0 + (value - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
@@ -63,9 +85,19 @@ mod test_map_range {
     }
 }
 
-///Converts the given input string to an ansi colored string, somewhat matching given rgb values
-/// Since only 8 ansi colors are supported
-pub fn convert_rgb_ansi(input: &str, r: u8, g: u8, b: u8) -> ColoredString {
+///Converts the given input string to an ansi colored string
+///
+/// It tries to match the ANSI-Color as closely as possible by calculating the distance between all
+/// 8 colors and the given input color from `r`, `b` and `b`, then returning the nearest.
+/// It will not be 100% accurate, since every terminal has slightly different
+/// ANSI-Colors. It used the VGA-Colors as ANSI-Color.
+///
+/// # Examples
+/// ```
+/// //convert black to ansi black color
+/// assert_eq!("input".black(), rgb_to_ansi("input", 0, 0, 0));
+/// ```
+pub fn rgb_to_ansi(input: &str, r: u8, g: u8, b: u8) -> ColoredString {
     //get rgb values and convert them to i32, since later on the could negative when subtracting
     let r = r as i32;
     let g = g as i32;
@@ -135,70 +167,68 @@ mod test_convert_rgb_ansi {
     #[test]
     fn convert_vga_normal_values() {
         //convert black to ansi black color
-        assert_eq!("input".black(), convert_rgb_ansi("input", 0, 0, 0));
+        assert_eq!("input".black(), rgb_to_ansi("input", 0, 0, 0));
         //convert red to ansi red color
-        assert_eq!("input".red(), convert_rgb_ansi("input", 170, 0, 0));
+        assert_eq!("input".red(), rgb_to_ansi("input", 170, 0, 0));
         //convert green to ansi green color
-        assert_eq!("input".green(), convert_rgb_ansi("input", 0, 170, 0));
+        assert_eq!("input".green(), rgb_to_ansi("input", 0, 170, 0));
         //convert yellow to ansi yellow color
-        assert_eq!("input".yellow(), convert_rgb_ansi("input", 170, 85, 0));
+        assert_eq!("input".yellow(), rgb_to_ansi("input", 170, 85, 0));
         //convert blue to ansi blue color
-        assert_eq!("input".blue(), convert_rgb_ansi("input", 0, 0, 170));
+        assert_eq!("input".blue(), rgb_to_ansi("input", 0, 0, 170));
         //convert magenta to ansi magenta color
-        assert_eq!("input".magenta(), convert_rgb_ansi("input", 170, 0, 170));
+        assert_eq!("input".magenta(), rgb_to_ansi("input", 170, 0, 170));
         //convert cyan to ansi cyan color
-        assert_eq!("input".cyan(), convert_rgb_ansi("input", 0, 170, 170));
+        assert_eq!("input".cyan(), rgb_to_ansi("input", 0, 170, 170));
         //convert white to ansi white color
-        assert_eq!("input".white(), convert_rgb_ansi("input", 170, 170, 170));
+        assert_eq!("input".white(), rgb_to_ansi("input", 170, 170, 170));
     }
 
     #[test]
     fn convert_vga_bright_values() {
         //convert bright black to ansi bright black color
-        assert_eq!(
-            "input".bright_black(),
-            convert_rgb_ansi("input", 128, 128, 128)
-        );
+        assert_eq!("input".bright_black(), rgb_to_ansi("input", 128, 128, 128));
         //convert bright red to ansi bright red color
-        assert_eq!("input".bright_red(), convert_rgb_ansi("input", 255, 0, 0));
+        assert_eq!("input".bright_red(), rgb_to_ansi("input", 255, 0, 0));
         //convert bright green to ansi bright green color
-        assert_eq!("input".bright_green(), convert_rgb_ansi("input", 0, 255, 0));
+        assert_eq!("input".bright_green(), rgb_to_ansi("input", 0, 255, 0));
         //convert bright yellow to ansi bright yellow color
-        assert_eq!(
-            "input".bright_yellow(),
-            convert_rgb_ansi("input", 255, 255, 0)
-        );
+        assert_eq!("input".bright_yellow(), rgb_to_ansi("input", 255, 255, 0));
         //convert bright blue to ansi bright blue color
-        assert_eq!("input".bright_blue(), convert_rgb_ansi("input", 0, 0, 255));
+        assert_eq!("input".bright_blue(), rgb_to_ansi("input", 0, 0, 255));
         //convert bright magenta to ansi bright magenta color
-        assert_eq!(
-            "input".bright_magenta(),
-            convert_rgb_ansi("input", 255, 0, 255)
-        );
+        assert_eq!("input".bright_magenta(), rgb_to_ansi("input", 255, 0, 255));
         //convert bright cyan to ansi bright cyan color
-        assert_eq!(
-            "input".bright_cyan(),
-            convert_rgb_ansi("input", 0, 255, 255)
-        );
+        assert_eq!("input".bright_cyan(), rgb_to_ansi("input", 0, 255, 255));
         //convert bright white to ansi bright white color
-        assert_eq!(
-            "input".bright_white(),
-            convert_rgb_ansi("input", 255, 255, 255)
-        );
+        assert_eq!("input".bright_white(), rgb_to_ansi("input", 255, 255, 255));
     }
 
     #[test]
     fn rgb_blue() {
         //convert a blue rgb tone to ansi blue
-        assert_eq!("input".blue(), convert_rgb_ansi("input", 0, 0, 88));
+        assert_eq!("input".blue(), rgb_to_ansi("input", 0, 0, 88));
     }
 }
 
-///Function for fatal errors,
-///which are errors from which it is not possible to recover, (e.g. non-existing file).
-///This function logs the error as a error and exits the program with the error code,
-///if none is provided it uses code 1
-///Use the exit codes defined by <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
+///Function for fatal errors.
+///
+///A fatal error is an error, from which the program can no recover, meaning the only option left ist to print
+/// an error message letting the user know what went wrong. For example if a non-existing file was passed in,
+/// this program can not work correctly and should print an error message and exit.
+///
+/// This function will print the passed in error message as well as a exit message, then it will exit the program with the exit code.
+/// If non is specified, it will use exit code 1 by default.
+/// A list of exit code can be found here: <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
+///
+/// # Examples
+/// ```
+/// let f = File::open("hello.txt");
+/// let f = match f {
+///     Ok(file) => file,
+///     Err(error) => fatal_error(error.to_string().as_str(), Some(66)),
+/// };
+/// ```
 pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
     //This function never returns, since it always exit the program
     error!("{}", message);
@@ -207,9 +237,19 @@ pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
 }
 
 /// Calculate image dimension related values.
+///
 /// This calculates the number of columns, rows, and the tile dimensions (tile_width, tile_height) for these
 /// values based on a target_size. It returns them as a tuple, the elements are in the previously named order.
-/// The dimension property can be used to change what dimension will be scaled. See [ResizingDimension] for more information.
+/// The dimension property can be used to change what dimension will be scaled. Since terminal character are a bit higher the wide,
+/// Width and Height of the output needs to be based on either one, so the other can be calculated.
+///
+/// # Examples
+/// ```
+/// assert_eq!(
+/// (100, 46, 5, 11),
+/// //image with a size of 512x512, split into 100 columns with no border
+/// calculate_dimensions(100, 512, 512, 0.42, false, ResizingDimension::Width));
+/// ```
 pub fn calculate_dimensions(
     target_size: u32,
     height: u32,
@@ -337,6 +377,11 @@ mod test_calculate_dimensions {
 ///For example, to fully use one dimension (e.g. width), the height can not be scaled
 ///up as well, since it already would be larger than the maximum terminal height.
 ///By default width will be used.
+///
+/// # Examples
+/// ```
+/// assert_eq!(ResizingDimension::Width, ResizingDimension::default());
+/// ```
 #[derive(Debug, PartialEq)]
 pub enum ResizingDimension {
     Width,
@@ -359,6 +404,29 @@ mod test_dimensions_enum {
     }
 }
 
+/// Iterator from inclusive start to exclusive end.
+///
+/// Returns a iterator from start to end - 1. If `rev` is set to true,
+/// it will be iterating in reverse.
+///
+/// # Examples
+///
+/// ## Forward Iterator
+/// ```
+/// let mut range = range(0, 2, false);
+/// assert_eq!(Some(0), range.next());
+/// assert_eq!(Some(1), range.next());
+/// assert_eq!(None, range.next());
+/// ```
+///
+/// ## Reverse Iterator
+/// ```
+/// let mut range = range(0, 2, true);
+/// assert_eq!(Some(1), range.next());
+/// assert_eq!(Some(0), range.next());
+/// assert_eq!(None, range.next());
+/// ```
+///
 pub fn range(start: u32, end: u32, rev: bool) -> impl Iterator<Item = u32> {
     let (mut r_start, step) = if rev {
         (end.saturating_sub(1), u32::max_value())

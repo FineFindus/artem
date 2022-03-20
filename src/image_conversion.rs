@@ -16,7 +16,7 @@ use crate::{conversion_options::ConversionOption, util};
 ///It uses the [ConversionOption] to set specific options on how to convert the image.
 pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     debug!("Using Color: {}", options.color);
-    debug!("Using colored background: {}", options.on_background_color);
+    debug!("Using colored background: {}", options.background_color);
     debug!("Using inverted color: {}", options.invert);
     //get img dimensions
     let input_width = img.width();
@@ -58,7 +58,7 @@ pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     }
 
     //clamp threads
-    let thread_count = options.thread_count.clamp(
+    let thread_count = options.threads.clamp(
         1,    //there has to be at least 1 thread to convert the img
         rows, //there should no be more threads than rows
     );
@@ -122,7 +122,7 @@ pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
                         &thread_density,
                         options.color,
                         options.invert,
-                        options.on_background_color,
+                        options.background_color,
                     );
 
                     //clear the vec for the next iteration
@@ -228,7 +228,7 @@ fn get_pixel_density(
             }
         } else {
             //otherwise use basic (8 color) ansi color
-            util::convert_rgb_ansi(density_char.to_string().as_str(), red, green, blue).to_string()
+            util::rgb_to_ansi(density_char.to_string().as_str(), red, green, blue).to_string()
         }
     } else {
         density_char.to_string()

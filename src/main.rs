@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, path::Path};
+use std::{fs::File, io::Write, num::NonZeroU32, path::Path};
 
 use log::{debug, info, trace, warn, LevelFilter};
 
@@ -64,7 +64,12 @@ fn main() {
             }
             _ => {
                 info!("Using user provided characters");
-                matches.value_of("density").unwrap()
+                let chars = matches.value_of("density").unwrap();
+                if chars.is_empty() {
+                    util::fatal_error("Characters cannot be empty", Some(64))
+                } else {
+                    chars
+                }
             }
         }
     } else {
@@ -98,15 +103,17 @@ fn main() {
             .unwrap() //this should always be at least "80", so it should be safe to unwrap
             .parse::<u32>()
         {
-            Ok(v) => v.clamp(
-                20,  //min should be 20 to ensure a somewhat visible picture
-                230, //img above 230 might not be displayed properly
-            ),
+            Ok(v) => v,
             Err(_) => util::fatal_error("Could not work with size input value", Some(65)),
         }
-    };
+    }
+    .clamp(
+        20,  //min should be 20 to ensure a somewhat visible picture
+        230, //img above 230 might not be displayed properly
+    );
+
     debug!("Target Size: {target_size}");
-    options_builder = options_builder.target_size(target_size);
+    options_builder = options_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
 
     //best ratio between height and width is 0.43
     let scale = match matches
@@ -132,7 +139,7 @@ fn main() {
         Ok(v) => v,
         Err(_) => util::fatal_error("Could not work with thread input value", Some(65)),
     };
-    options_builder = options_builder.thread_count(thread_count);
+    options_builder = options_builder.threads(NonZeroU32::new(thread_count).unwrap()); //safe to unwrap, since it is clamped before
 
     if !matches.is_present("no-color") && matches.is_present("output-file") {
         warn!("Output-file flag is present, ignoring colors")

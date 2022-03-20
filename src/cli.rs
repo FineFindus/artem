@@ -1,6 +1,18 @@
 use clap::{Arg, Command, ValueHint};
 
-///Build the clap command-line-interface using clap  
+/// Get arguments from the command line.
+///
+/// It uses clap to build and return a [Command] struct, which then can be used
+/// configuration.
+///
+/// # Examples
+/// ```
+/// //get clap matches
+/// let matches = build_cli();
+/// //for example check if an arg is present
+/// matches.is_present("arg");
+/// ```
+///   
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
         .version("0.6.0")

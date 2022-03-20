@@ -1,14 +1,17 @@
+use std::num::NonZeroU32;
+
 use crate::util::{self, ResizingDimension};
 
+///Configuration for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
 pub struct ConversionOption<'a> {
     pub density: &'a str,
-    pub thread_count: u32,
+    pub threads: u32,
     pub scale: f64,
     pub target_size: u32,
     pub color: bool,
     pub invert: bool,
-    pub on_background_color: bool,
+    pub background_color: bool,
     pub border: bool,
     pub dimension: ResizingDimension,
     pub transform_x: bool,
@@ -16,7 +19,12 @@ pub struct ConversionOption<'a> {
 }
 
 impl<'a> ConversionOption<'a> {
-    // This method will help users to discover the builder
+    /// Create [ConversionOptionBuilder] with default properties.
+    ///
+    /// # Examples
+    /// ```
+    /// let default = ConversionOption::builder();
+    /// ```
     pub fn builder() -> ConversionOptionBuilder<'a> {
         ConversionOptionBuilder::default()
     }
@@ -30,12 +38,12 @@ mod test_conversion_option {
         assert_eq!(
             ConversionOptionBuilder {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -46,16 +54,16 @@ mod test_conversion_option {
     }
 }
 
+///A builder to create a [ConversionOption] struct.
 #[derive(Default, PartialEq, Debug)]
 pub struct ConversionOptionBuilder<'a> {
-    // Probably lots of optional fields.
     density: &'a str,
-    thread_count: u32,
+    threads: u32,
     scale: f64,
     target_size: u32,
     color: bool,
     invert: bool,
-    on_background_color: bool,
+    background_color: bool,
     border: bool,
     dimension: ResizingDimension,
     transform_x: bool,
@@ -63,90 +71,202 @@ pub struct ConversionOptionBuilder<'a> {
 }
 
 impl<'a> ConversionOptionBuilder<'a> {
+    ///Create a new ConversionOptionBuilder.
+    ///
+    /// If an option is not specified, the rust default value will be used, unless specified otherwise.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// ```
     pub fn new(/* ... */) -> ConversionOptionBuilder<'a> {
-        // These values will be all overwritten anyways
         ConversionOption::builder()
     }
 
-    ///Set the used density
+    ///Set the density.
+    ///
+    /// The density will determine how 'visible'/light/dark a character will be perceived.
+    ///
+    /// # Errors
+    /// When the given density is empty, the density will not be changed.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.density("Mkl. ");
+    /// ```
     pub fn density(mut self, density: &'a str) -> Self {
+        if density.is_empty() {
+            return self;
+        }
         self.density = density;
         self
     }
 
-    ///Set the number of threads used to convert the image.
-    ///Should be at least 1.
-    pub fn thread_count(mut self, thread_count: u32) -> Self {
-        self.thread_count = thread_count;
+    /// Set the number of threads used to convert the image.
+    ///
+    /// Should be at least 1 and not more then the number of tiles that will be converted.
+    /// More threads can lead to greater performance, but too many can also reduced performance,
+    /// since each thread has an creation cost.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.thread(4);
+    /// ```
+    pub fn threads(mut self, threads: NonZeroU32) -> Self {
+        self.threads = threads.get();
         self
     }
 
-    ///Set the used scale.
+    /// Set the scale.
+    ///
     /// Used to change the ratio between width and height of an character.
+    /// Since a char is a bit higher than wide, the scale should compensate for that.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.scale(0.42f64);
+    /// ```
     pub fn scale(mut self, scale: f64) -> Self {
         self.scale = scale;
         self
     }
 
-    ///Set the used target_size.
-    /// Used to change the ratio between width and height of an character.
-    pub fn target_size(mut self, target_size: u32) -> Self {
-        self.target_size = target_size;
+    /// Set the target_size.
+    ///
+    /// This is the number of characters that the resulting ascii image will be heigh/wide.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.target_size(80);
+    /// ```
+    pub fn target_size(mut self, target_size: NonZeroU32) -> Self {
+        self.target_size = target_size.get();
         self
     }
 
-    ///Set if the img should be converted to colored chars.
+    /// Set if the img should be converted to colored chars.
+    ///
+    /// By default truecolor chars will be used, if there are not supported,
+    /// ANSI-Colors will be used as a fallback.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.color(true);
+    /// ```
     pub fn color(mut self, color: bool) -> Self {
         self.color = color;
         self
     }
 
-    ///Invert to used density map.
+    ///Invert to density map/character.
+    ///
+    /// This inverts the mapping from light to dark characters. It can be useful when
+    /// the image has a dark background. It defaults to false.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.invert(true);
+    /// ```
     pub fn invert(mut self, invert: bool) -> Self {
         self.invert = invert;
         self
     }
 
     ///Set the color to the ascii char background instead of the char directly.
+    ///
+    /// The density will determine how 'visible'/light/dark a character will be perceived.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.density("Mkl. ");
+    /// ```
     pub fn on_background(mut self, on_background: bool) -> Self {
-        self.on_background_color = on_background;
+        self.background_color = on_background;
         self
     }
 
-    ///Enable the use of a border surrounding the image.
+    ///Enable a border surrounding the image.
+    ///
+    /// The border will take reduced the space of the ascii image, since it will still
+    /// use the same target size.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.border(true);
+    /// ```
     pub fn border(mut self, border: bool) -> Self {
         self.border = border;
         self
     }
 
-    ///Set which dimension should be scaled first.
+    /// Set which dimension should be scaled first.
+    ///
+    /// See [ResizingDimension] for more information.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.dimension(util::ResizingDimension:.Height);
+    /// ```
     pub fn dimension(mut self, dimension: util::ResizingDimension) -> Self {
         self.dimension = dimension;
         self
     }
 
     ///Flip the image along the X-axis
+    ///
+    /// This will flip the image horizontally by reversing reading of the horizontal part of the image.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.transform_x(true);
+    /// ```
     pub fn transform_x(mut self, transform: bool) -> Self {
         self.transform_x = transform;
         self
     }
 
     ///Flip the image along the Y-axis
+    ///
+    /// This will flip the image vertically by reversing reading of the vertical part of the image.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder = builder.transform_y(true);
+    /// ```
     pub fn transform_y(mut self, transform: bool) -> Self {
         self.transform_y = transform;
         self
     }
 
-    ///Build the ConversionOptions struct
+    ///Build the ConversionOptions struct.
+    ///
+    /// This returns a [ConversionOption], which can than be used for the image conversion.
+    /// If values are not explicitly specified, the default values will be used.
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// let options = builder.build();
+    /// ```
     pub fn build(self) -> ConversionOption<'a> {
         ConversionOption {
             density: self.density,
-            thread_count: self.thread_count,
+            threads: self.threads,
             scale: self.scale,
             target_size: self.target_size,
             color: self.color,
             invert: self.invert,
-            on_background_color: self.on_background_color,
+            background_color: self.background_color,
             border: self.border,
             dimension: self.dimension,
             transform_x: self.transform_x,
@@ -163,12 +283,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -184,12 +304,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "density", //change attribute
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -201,16 +321,16 @@ mod test_conversion_option_builder {
 
     #[test]
     fn change_thread_count() {
-        let builder = ConversionOptionBuilder::new().thread_count(314);
+        let builder = ConversionOptionBuilder::new().threads(NonZeroU32::new(314).unwrap());
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 314, //change attribute
+                threads: 314, //change attribute
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -226,12 +346,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 3.14f64, //change attribute
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -243,16 +363,16 @@ mod test_conversion_option_builder {
 
     #[test]
     fn change_target_size() {
-        let builder = ConversionOptionBuilder::new().target_size(314);
+        let builder = ConversionOptionBuilder::new().target_size(NonZeroU32::new(314).unwrap());
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 314, //change attribute
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -268,12 +388,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: true, //change attribute
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -289,12 +409,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: true, //change attribute
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -310,12 +430,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: true, //change attribute
+                background_color: true, //change attribute
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -331,12 +451,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: true, //change attribute
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
@@ -352,12 +472,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Height, //change attribute
                 transform_x: false,
@@ -373,12 +493,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: true, //change attribute
@@ -394,12 +514,12 @@ mod test_conversion_option_builder {
         assert_eq!(
             ConversionOption {
                 density: "",
-                thread_count: 0,
+                threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
                 color: false,
                 invert: false,
-                on_background_color: false,
+                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
