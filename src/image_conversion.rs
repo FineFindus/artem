@@ -236,6 +236,8 @@ fn get_pixel_density(
 }
 #[cfg(test)]
 mod test_pixel_density {
+    use std::env;
+
     use super::*;
 
     #[test]
@@ -275,6 +277,8 @@ mod test_pixel_density {
 
     #[test]
     fn colored_char() {
+        //set needed env vars
+        env::set_var("COLORTERM", "truecolor");
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
             "\u{1b}[38;2;0;0;255m \u{1b}[0m", //blue color
@@ -283,7 +287,21 @@ mod test_pixel_density {
     }
 
     #[test]
+    fn ansi_colored_char() {
+        //set no color support
+        env::set_var("COLORTERM", "");
+        //just some random color
+        let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
+        assert_eq!(
+            "\u{1b}[35m.\u{1b}[0m",
+            get_pixel_density(&pixels, "#k. ", true, false, false)
+        );
+    }
+
+    #[test]
     fn colored_background_char() {
+        //set needed env vars
+        env::set_var("COLORTERM", "truecolor");
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
             "\u{1b}[48;2;0;0;255m \u{1b}[0m",
