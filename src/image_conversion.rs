@@ -279,6 +279,9 @@ mod test_pixel_density {
     fn colored_char() {
         //set needed env vars
         env::set_var("COLORTERM", "truecolor");
+        //force color, this is not printed to the terminal anyways
+        env::set_var("CLICOLOR_FORCE", "1");
+
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
             "\u{1b}[38;2;0;0;255m \u{1b}[0m", //blue color
@@ -290,6 +293,8 @@ mod test_pixel_density {
     fn ansi_colored_char() {
         //set no color support
         env::set_var("COLORTERM", "");
+        //force color, this is not printed to the terminal anyways
+        env::set_var("CLICOLOR_FORCE", "1");
         //just some random color
         let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
         assert_eq!(
@@ -302,6 +307,9 @@ mod test_pixel_density {
     fn colored_background_char() {
         //set needed env vars
         env::set_var("COLORTERM", "truecolor");
+        //force color, this is not printed to the terminal anyways
+        env::set_var("CLICOLOR_FORCE", "1");
+
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
             "\u{1b}[48;2;0;0;255m \u{1b}[0m",
