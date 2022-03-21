@@ -78,10 +78,10 @@ fn main() {
         r#"MWNXK0Okxdolc:;,'...   "#
     };
     debug!("Characters used: \"{density}\"");
-    options_builder = options_builder.density(density);
+    options_builder.density(density.to_string());
 
     //set the default resizing dimension to width
-    options_builder = options_builder.dimension(util::ResizingDimension::Width);
+    options_builder.dimension(util::ResizingDimension::Width);
 
     //get target size from args
     //only one arg should be present
@@ -89,7 +89,7 @@ fn main() {
         //use max terminal height
         trace!("Using terminal height as target size");
         //change dimension to height
-        options_builder = options_builder.dimension(util::ResizingDimension::Height);
+        options_builder.dimension(util::ResizingDimension::Height);
         terminal_size::terminal_size().unwrap().1 .0 as u32
     } else if matches.is_present("width") {
         //use max terminal width
@@ -113,7 +113,7 @@ fn main() {
     );
 
     debug!("Target Size: {target_size}");
-    options_builder = options_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
+    options_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
 
     //best ratio between height and width is 0.43
     let scale = match matches
@@ -128,7 +128,7 @@ fn main() {
         Err(_) => util::fatal_error("Could not work with ratio input value", Some(65)),
     };
     debug!("Scale: {scale}");
-    options_builder = options_builder.scale(scale);
+    options_builder.scale(scale);
 
     //number rof threads used to convert the image
     let thread_count: u32 = match matches
@@ -139,7 +139,7 @@ fn main() {
         Ok(v) => v,
         Err(_) => util::fatal_error("Could not work with thread input value", Some(65)),
     };
-    options_builder = options_builder.threads(NonZeroU32::new(thread_count).unwrap()); //safe to unwrap, since it is clamped before
+    options_builder.threads(NonZeroU32::new(thread_count).unwrap()); //safe to unwrap, since it is clamped before
 
     if !matches.is_present("no-color") && matches.is_present("output-file") {
         warn!("Output-file flag is present, ignoring colors")
@@ -147,11 +147,11 @@ fn main() {
 
     let invert = matches.is_present("invert-density");
     debug!("Invert is set to: {invert}");
-    options_builder = options_builder.invert(invert);
+    options_builder.invert(invert);
 
     let on_background_color = matches.is_present("background-color");
     debug!("BackgroundColor is set to: {on_background_color}");
-    options_builder = options_builder.on_background(on_background_color);
+    options_builder.background_color(on_background_color);
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
@@ -173,21 +173,21 @@ fn main() {
         }
         true
     };
-    options_builder = options_builder.color(color);
+    options_builder.color(color);
 
     //get flag for border around image
     let border = matches.is_present("border");
-    options_builder = options_builder.border(border);
+    options_builder.border(border);
     info!("Using border: {border}");
 
     //get flags for flipping along x axis
     let transform_x = matches.is_present("flipX");
-    options_builder = options_builder.transform_x(transform_x);
+    options_builder.transform_x(transform_x);
     debug!("Flipping X-Axis: {transform_x}");
 
     //get flags for flipping along y axis
     let transform_y = matches.is_present("flipY");
-    options_builder = options_builder.transform_y(transform_y);
+    options_builder.transform_y(transform_y);
     debug!("Flipping Y-Axis: {transform_y}");
 
     // //get output file extension, will be empty if non is specified

@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- More Documentation to better describe the code
 - The `--border` flag can be used to create a border around the ascii image
 - The `--flipX` flag can be used horizontally flip the image
 - The `--flipY` flag can be used vertically flip the image
 - Two more tests, which fully compare the results
+
+### Changed
+
+- Major refactoring
 
 ## [0.5.1] - 2022-03-14
 

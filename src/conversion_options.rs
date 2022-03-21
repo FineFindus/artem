@@ -4,8 +4,8 @@ use crate::util::{self, ResizingDimension};
 
 ///Configuration for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
-pub struct ConversionOption<'a> {
-    pub density: &'a str,
+pub struct ConversionOption {
+    pub density: String,
     pub threads: u32,
     pub scale: f64,
     pub target_size: u32,
@@ -18,14 +18,14 @@ pub struct ConversionOption<'a> {
     pub transform_y: bool,
 }
 
-impl<'a> ConversionOption<'a> {
+impl ConversionOption {
     /// Create [ConversionOptionBuilder] with default properties.
     ///
     /// # Examples
     /// ```
     /// let default = ConversionOption::builder();
     /// ```
-    pub fn builder() -> ConversionOptionBuilder<'a> {
+    pub fn builder() -> ConversionOptionBuilder {
         ConversionOptionBuilder::default()
     }
 }
@@ -37,7 +37,7 @@ mod test_conversion_option {
     fn builder_default() {
         assert_eq!(
             ConversionOptionBuilder {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -56,8 +56,8 @@ mod test_conversion_option {
 
 ///A builder to create a [ConversionOption] struct.
 #[derive(Default, PartialEq, Debug)]
-pub struct ConversionOptionBuilder<'a> {
-    density: &'a str,
+pub struct ConversionOptionBuilder {
+    density: String,
     threads: u32,
     scale: f64,
     target_size: u32,
@@ -70,7 +70,48 @@ pub struct ConversionOptionBuilder<'a> {
     transform_y: bool,
 }
 
-impl<'a> ConversionOptionBuilder<'a> {
+/// Generate a builder property.
+///
+/// This macro generates a function, which sets the specified property of the Builder.
+/// It does NOT check the value passed in, so for example it would be possible to pass in an empty string, which could lead to
+/// errors later this. This should be done before setting the value.
+///
+/// # Examples
+///
+/// ```
+/// property!{
+/// ///Example doc
+/// ///This generates a name setter function.
+/// => name, String
+/// }
+/// ```
+/// ## Generated function
+/// ```
+/// ///Example doc
+/// ///This generates a name setter function.
+/// pub fn name<'a>(&'a mut self, name: String) -> &'a Self {
+///     self.name = name;
+///     self
+/// }
+/// ```
+macro_rules! property {
+    ($(#[$attr:meta])* => $field:ident, $field_type:ty) => {
+        $(#[$attr])*
+        pub fn $field<'a>(&'a mut self, $field: $field_type) -> &'a mut Self {
+            self.$field = $field;
+            self
+        }
+    };
+    ($(#[$attr:meta])* => $field:ident, $field_type:ty, $func:ident) => {
+        $(#[$attr])*
+        pub fn $field<'a>(&'a mut self, $field: $field_type) -> &'a mut Self {
+            self.$field = $field.$func();
+            self
+        }
+    };
+}
+
+impl ConversionOptionBuilder {
     ///Create a new ConversionOptionBuilder.
     ///
     /// If an option is not specified, the rust default value will be used, unless specified otherwise.
@@ -79,7 +120,7 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
     /// ```
-    pub fn new(/* ... */) -> ConversionOptionBuilder<'a> {
+    pub fn new() -> ConversionOptionBuilder {
         ConversionOption::builder()
     }
 
@@ -95,7 +136,8 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.density("Mkl. ");
     /// ```
-    pub fn density(mut self, density: &'a str) -> Self {
+    #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
+    pub fn density<'a>(&'a mut self, density: String) -> &'a Self {
         if density.is_empty() {
             return self;
         }
@@ -103,6 +145,7 @@ impl<'a> ConversionOptionBuilder<'a> {
         self
     }
 
+    property! {
     /// Set the number of threads used to convert the image.
     ///
     /// Should be at least 1 and not more then the number of tiles that will be converted.
@@ -114,11 +157,10 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.thread(4);
     /// ```
-    pub fn threads(mut self, threads: NonZeroU32) -> Self {
-        self.threads = threads.get();
-        self
+    => threads, NonZeroU32, get
     }
 
+    property! {
     /// Set the scale.
     ///
     /// Used to change the ratio between width and height of an character.
@@ -129,11 +171,14 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.scale(0.42f64);
     /// ```
-    pub fn scale(mut self, scale: f64) -> Self {
-        self.scale = scale;
-        self
+       => scale, f64
     }
+    // pub fn scale(&'a mut self, scale: f64) -> &'a mut Self {
+    //     self.scale = scale;
+    //     self
+    // }
 
+    property! {
     /// Set the target_size.
     ///
     /// This is the number of characters that the resulting ascii image will be heigh/wide.
@@ -143,11 +188,10 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.target_size(80);
     /// ```
-    pub fn target_size(mut self, target_size: NonZeroU32) -> Self {
-        self.target_size = target_size.get();
-        self
+    => target_size, NonZeroU32, get
     }
 
+    property! {
     /// Set if the img should be converted to colored chars.
     ///
     /// By default truecolor chars will be used, if there are not supported,
@@ -158,11 +202,13 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.color(true);
     /// ```
-    pub fn color(mut self, color: bool) -> Self {
-        self.color = color;
-        self
+    => color, bool
+    // pub fn color(mut self, color: bool) -> Self {
+    //     self.color = color;
+    //     self
     }
 
+    property! {
     ///Invert to density map/character.
     ///
     /// This inverts the mapping from light to dark characters. It can be useful when
@@ -173,11 +219,13 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.invert(true);
     /// ```
-    pub fn invert(mut self, invert: bool) -> Self {
-        self.invert = invert;
-        self
+    => invert, bool
+    // pub fn invert(mut self, invert: bool) -> Self {
+    //     self.invert = invert;
+    //     self
     }
 
+    property! {
     ///Set the color to the ascii char background instead of the char directly.
     ///
     /// The density will determine how 'visible'/light/dark a character will be perceived.
@@ -187,11 +235,13 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.density("Mkl. ");
     /// ```
-    pub fn on_background(mut self, on_background: bool) -> Self {
-        self.background_color = on_background;
-        self
+    => background_color, bool
+    // pub fn on_background(mut self, on_background: bool) -> Self {
+    //     self.background_color = on_background;
+    //     self
     }
 
+    property! {
     ///Enable a border surrounding the image.
     ///
     /// The border will take reduced the space of the ascii image, since it will still
@@ -202,9 +252,10 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.border(true);
     /// ```
-    pub fn border(mut self, border: bool) -> Self {
-        self.border = border;
-        self
+    => border, bool
+    // pub fn border(mut self, border: bool) -> Self {
+    //     self.border = border;
+    //     self
     }
 
     /// Set which dimension should be scaled first.
@@ -216,11 +267,13 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.dimension(util::ResizingDimension:.Height);
     /// ```
-    pub fn dimension(mut self, dimension: util::ResizingDimension) -> Self {
+    #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
+    pub fn dimension<'a>(&'a mut self, dimension: util::ResizingDimension) -> &'a Self {
         self.dimension = dimension;
         self
     }
 
+    property! {
     ///Flip the image along the X-axis
     ///
     /// This will flip the image horizontally by reversing reading of the horizontal part of the image.
@@ -230,11 +283,13 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.transform_x(true);
     /// ```
-    pub fn transform_x(mut self, transform: bool) -> Self {
-        self.transform_x = transform;
-        self
+    => transform_x, bool
+    // pub fn transform_x(mut self, transform: bool) -> Self {
+    //     self.transform_x = transform;
+    //     self
     }
 
+    property! {
     ///Flip the image along the Y-axis
     ///
     /// This will flip the image vertically by reversing reading of the vertical part of the image.
@@ -244,9 +299,10 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// builder = builder.transform_y(true);
     /// ```
-    pub fn transform_y(mut self, transform: bool) -> Self {
-        self.transform_y = transform;
-        self
+    => transform_y, bool
+    // pub fn transform_y(mut self, transform: bool) -> Self {
+    //     self.transform_y = transform;
+    //     self
     }
 
     ///Build the ConversionOptions struct.
@@ -258,9 +314,9 @@ impl<'a> ConversionOptionBuilder<'a> {
     /// let mut builder = ConversionOptionBuilder::new();
     /// let options = builder.build();
     /// ```
-    pub fn build(self) -> ConversionOption<'a> {
+    pub fn build(&self) -> ConversionOption {
         ConversionOption {
-            density: self.density,
+            density: self.density.to_owned(),
             threads: self.threads,
             scale: self.scale,
             target_size: self.target_size,
@@ -282,7 +338,7 @@ mod test_conversion_option_builder {
     fn build_default() {
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -300,10 +356,9 @@ mod test_conversion_option_builder {
 
     #[test]
     fn change_density() {
-        let builder = ConversionOptionBuilder::new().density("density");
         assert_eq!(
             ConversionOption {
-                density: "density", //change attribute
+                density: "density".to_string(), //change attribute
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -315,16 +370,17 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new()
+                .density("density".to_string())
+                .build()
         );
     }
 
     #[test]
     fn change_thread_count() {
-        let builder = ConversionOptionBuilder::new().threads(NonZeroU32::new(314).unwrap());
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 314, //change attribute
                 scale: 0.0f64,
                 target_size: 0,
@@ -336,16 +392,17 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new()
+                .threads(NonZeroU32::new(314).unwrap())
+                .build()
         );
     }
 
     #[test]
     fn change_scale() {
-        let builder = ConversionOptionBuilder::new().scale(3.14f64);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 3.14f64, //change attribute
                 target_size: 0,
@@ -357,16 +414,15 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new().scale(3.14f64).build()
         );
     }
 
     #[test]
     fn change_target_size() {
-        let builder = ConversionOptionBuilder::new().target_size(NonZeroU32::new(314).unwrap());
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 314, //change attribute
@@ -378,16 +434,17 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new()
+                .target_size(NonZeroU32::new(314).unwrap())
+                .build()
         );
     }
 
     #[test]
     fn change_color() {
-        let builder = ConversionOptionBuilder::new().color(true);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -399,16 +456,15 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new().color(true).build()
         );
     }
 
     #[test]
     fn change_invert() {
-        let builder = ConversionOptionBuilder::new().invert(true);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -420,16 +476,15 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new().invert(true).build()
         );
     }
 
     #[test]
     fn change_on_background_color() {
-        let builder = ConversionOptionBuilder::new().on_background(true);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -441,16 +496,17 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new()
+                .background_color(true)
+                .build()
         );
     }
 
     #[test]
     fn change_border() {
-        let builder = ConversionOptionBuilder::new().border(true);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -462,16 +518,15 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new().border(true).build()
         );
     }
 
     #[test]
     fn change_dimension() {
-        let builder = ConversionOptionBuilder::new().dimension(util::ResizingDimension::Height);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -483,16 +538,17 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new()
+                .dimension(util::ResizingDimension::Height)
+                .build()
         );
     }
 
     #[test]
     fn change_transform_x() {
-        let builder = ConversionOptionBuilder::new().transform_x(true);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -504,16 +560,15 @@ mod test_conversion_option_builder {
                 transform_x: true, //change attribute
                 transform_y: false,
             },
-            builder.build()
+            ConversionOptionBuilder::new().transform_x(true).build()
         );
     }
 
     #[test]
     fn change_transform_y() {
-        let builder = ConversionOptionBuilder::new().transform_y(true);
         assert_eq!(
             ConversionOption {
-                density: "",
+                density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
@@ -525,7 +580,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: true, //change attribute
             },
-            builder.build()
+            ConversionOptionBuilder::new().transform_y(true).build()
         );
     }
 }
