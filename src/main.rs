@@ -1,8 +1,13 @@
-use std::{fs::File, io::Write, num::NonZeroU32, path::Path};
+use std::{
+    fs::File,
+    io::Write,
+    num::NonZeroU32,
+    path::{Path, PathBuf},
+};
 
 use log::{debug, info, trace, warn, LevelFilter};
 
-use crate::conversion_options::ConversionOptionBuilder;
+use crate::conversion_options::{ConversionOptionBuilder, ConversionTargetType};
 
 //import cli
 mod cli;
@@ -14,6 +19,9 @@ mod conversion_options;
 
 //import functions for conversion
 mod image_conversion;
+
+//pixel to string
+mod pixel;
 
 fn main() {
     //get args from cli
@@ -149,13 +157,12 @@ fn main() {
     debug!("Invert is set to: {invert}");
     options_builder.invert(invert);
 
-    let on_background_color = matches.is_present("background-color");
-    debug!("BackgroundColor is set to: {on_background_color}");
-    options_builder.background_color(on_background_color);
+    let background_color = matches.is_present("background-color");
+    debug!("BackgroundColor is set to: {background_color}");
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
-    let color = if matches.is_present("no-color") || matches.is_present("output-file") {
+    let color = if matches.is_present("no-color") {
         //print the "normal" non-colored conversion
         info!("Using non-colored ascii");
         false
@@ -164,7 +171,7 @@ fn main() {
         info!("Using colored ascii");
         let truecolor = util::supports_truecolor();
         if !truecolor {
-            if on_background_color {
+            if background_color {
                 warn!("Background flag will be ignored, since truecolor is not supported.")
             }
             warn!("Truecolor is not supported. Using ansi color")
@@ -173,7 +180,6 @@ fn main() {
         }
         true
     };
-    options_builder.color(color);
 
     //get flag for border around image
     let border = matches.is_present("border");
@@ -190,16 +196,32 @@ fn main() {
     options_builder.transform_y(transform_y);
     debug!("Flipping Y-Axis: {transform_y}");
 
-    // //get output file extension, will be empty if non is specified
-    // let file_path = PathBuf::from(matches.value_of("output-file").unwrap_or_default());
-    // let file_extension = file_path.extension().unwrap_or_default().to_str();
+    //get output file extension for specific output, default to plain text
+    if matches.is_present("output-file") {
+        let file_path = PathBuf::from(matches.value_of("output-file").unwrap()); //save to unwrap, checked before
+        let file_extension = file_path.extension().and_then(std::ffi::OsStr::to_str);
+        debug!("FileExtension: {:?}", file_extension);
+        options_builder.target(match file_extension {
+            Some("html") | Some("htm") => {
+                debug!("Target: Html-File");
+                ConversionTargetType::HtmlFile(color, background_color)
+            }
+            Some("ansi") | Some("ans") => {
+                debug!("Target: Ansi-File");
+                ConversionTargetType::AnsiFile(background_color)
+            }
+            _ => {
+                debug!("Target: File");
+                ConversionTargetType::File
+            }
+        });
+    } else {
+        debug!("Target: Shell");
+        options_builder.target(ConversionTargetType::Shell(color, background_color));
+    }
 
     //convert the img to ascii string
     info!("Converting the img: {img_path}");
-    // let output = match file_extension {
-    //     Some("html") => "".to_string(),
-    //     _ => image_conversion::convert_img(img, options_builder.build()),
-    // };
     let output = image_conversion::convert_img(img, options_builder.build());
 
     //create and write to output file

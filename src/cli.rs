@@ -103,6 +103,7 @@ pub fn build_cli() -> Command<'static> {
         .arg(
             Arg::new("background-color")
                 .long("background")
+                .conflicts_with("no-color")
                 .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor"),
         )
         .arg(
@@ -177,6 +178,18 @@ mod test {
             "../example/abraham_lincoln.jpg",
             "-h",
             "-w",
+        ]);
+        assert!(matches.is_err());
+    }
+
+    #[test]
+    fn fail_conflicting_args_no_color_background() {
+        //height and width conflict
+        let matches = build_cli().try_get_matches_from([
+            "artem",
+            "../example/abraham_lincoln.jpg",
+            "--no-color",
+            "--backgrounds",
         ]);
         assert!(matches.is_err());
     }

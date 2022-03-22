@@ -1,10 +1,13 @@
-use std::{ops::Div, sync::Arc, thread};
+use std::{sync::Arc, thread};
 
-use colored::Colorize;
 use image::{DynamicImage, GenericImageView, Rgba};
 use log::{debug, info, trace};
 
-use crate::{conversion_options::ConversionOption, util};
+use crate::{
+    conversion_options::{ConversionOption, ConversionTargetType},
+    pixel::get_pixel_density,
+    util,
+};
 
 ///Returns the given image as ascii representation string.
 ///
@@ -15,8 +18,9 @@ use crate::{conversion_options::ConversionOption, util};
 /// ```
 ///It uses the [ConversionOption] to set specific options on how to convert the image.
 pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
-    debug!("Using Color: {}", options.color);
-    debug!("Using colored background: {}", options.background_color);
+    //TODO print color support
+    // debug!("Using Color: {}", options.color);
+    // debug!("Using colored background: {}", options.background_color);
     debug!("Using inverted color: {}", options.invert);
     //get img dimensions
     let input_width = img.width();
@@ -48,6 +52,13 @@ pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     //output string
     let mut output = String::new();
     trace!("Created output string");
+
+    if std::mem::discriminant(&options.target)
+        == std::mem::discriminant(&ConversionTargetType::HtmlFile(true, true))
+    {
+        trace!("Adding html top part");
+        output.push_str(&push_html_top());
+    }
 
     if options.border {
         //add top part of border before conversion
@@ -120,9 +131,8 @@ pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
                     let char = get_pixel_density(
                         &pixel_block,
                         &thread_density,
-                        options.color,
                         options.invert,
-                        options.background_color,
+                        options.target,
                     );
 
                     //clear the vec for the next iteration
@@ -165,246 +175,89 @@ pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
         trace!("Adding bottom part of border");
     }
 
+    if std::mem::discriminant(&options.target)
+        == std::mem::discriminant(&ConversionTargetType::HtmlFile(true, true))
+    {
+        trace!("Adding html bottom part");
+        output.push_str(&push_html_bottom());
+    }
+
     output.trim_end().to_string()
 }
 
-/// Convert a pixel block to a char (as a String) from the given density string.
+///Returns the top part of the output html file.
+///
+/// This contains the html elements needed for a correct html file.
+/// The title will be set to `Artem Ascii Image`, whilst the will be set to `Courier` ( a monospace font)
+/// It will also have the pre tag for correct spacing/line breaking
 ///
 /// # Examples
-///
 /// ```
-/// //example pixels, use them from the directly if possible
-/// let pixels = vec![
-///     Rgba::<u8>::from([255, 255, 255, 255]),
-///     Rgba::<u8>::from([0, 0, 0, 255]),
-/// ];
-///
-/// assert_eq!(".", get_pixel_density(&pixels, " .k#", false, false, false));
+/// let string = String::new();
+/// string.push_str(&push_html_top())
 /// ```
-///
-/// To use color, use the `color` argument, if only the background should be colored, use the `on_background_color` arg instead.
-///
-/// The `invert` arg, inverts the mapping from pixel luminosity to density string.
-fn get_pixel_density(
-    block: &[Rgba<u8>],
-    density: &str,
-    color: bool,
-    invert: bool,
-    on_background_color: bool,
-) -> String {
-    let (red, blue, green, luminosity) = get_pixel_color_luminosity(block);
-
-    //swap to range for white to black values
-    //convert from rgb values (0 - 255) to the density string index (0 - string length)
-    let density_index = util::map_range(
-        (0f64, 255f64),
-        if invert {
-            (0f64, density.len() as f64)
-        } else {
-            (density.len() as f64, 0f64)
-        },
-        luminosity,
-    )
-    .floor()
-    .clamp(0f64, density.len() as f64);
-
-    //get correct char from map, default to a space
-    let density_char = density.chars().nth(density_index as usize).unwrap_or(' ');
-    //return if needed a colored or non colored string
-    if color {
-        //check if true color is supported
-        if util::supports_truecolor() {
-            //return true color string
-            if on_background_color {
-                density_char
-                    .to_string()
-                    .on_truecolor(red, green as u8, blue as u8)
-                    .to_string()
-            } else {
-                density_char
-                    .to_string()
-                    .truecolor(red, green, blue as u8)
-                    .to_string()
-            }
-        } else {
-            //otherwise use basic (8 color) ansi color
-            util::rgb_to_ansi(density_char.to_string().as_str(), red, green, blue).to_string()
-        }
-    } else {
-        density_char.to_string()
-    }
-}
-#[cfg(test)]
-mod test_pixel_density {
-    use std::env;
-
-    use super::*;
-
-    #[test]
-    fn empty_returns_last_char() {
-        let pixels: Vec<Rgba<u8>> = Vec::new();
-        assert_eq!("#", get_pixel_density(&pixels, "# ", false, false, false));
-    }
-
-    #[test]
-    fn invert_returns_first_instead_of_last_char() {
-        let pixels = vec![
-            Rgba::<u8>::from([255, 255, 255, 255]),
-            Rgba::<u8>::from([255, 255, 255, 255]),
-            Rgba::<u8>::from([0, 0, 0, 255]),
-        ];
-        assert_eq!(" ", get_pixel_density(&pixels, "# ", false, true, false));
-    }
-
-    #[test]
-    fn medium_density_char() {
-        let pixels = vec![
-            Rgba::<u8>::from([255, 255, 255, 255]),
-            Rgba::<u8>::from([0, 0, 0, 255]),
-        ];
-        assert_eq!("k", get_pixel_density(&pixels, "#k. ", false, false, false));
-    }
-
-    #[test]
-    fn dark_density_char() {
-        let pixels = vec![
-            Rgba::<u8>::from([255, 255, 255, 255]),
-            Rgba::<u8>::from([255, 255, 255, 255]),
-            Rgba::<u8>::from([0, 0, 0, 255]),
-        ];
-        assert_eq!("#", get_pixel_density(&pixels, "#k. ", false, false, false));
-    }
-
-    #[test]
-    fn colored_char() {
-        //set needed env vars
-        env::set_var("COLORTERM", "truecolor");
-        //force color, this is not printed to the terminal anyways
-        env::set_var("CLICOLOR_FORCE", "1");
-
-        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
-        assert_eq!(
-            "\u{1b}[38;2;0;0;255m \u{1b}[0m", //blue color
-            get_pixel_density(&pixels, "#k. ", true, false, false)
-        );
-    }
-
-    #[test]
-    fn ansi_colored_char() {
-        //set no color support
-        env::set_var("COLORTERM", "");
-        //force color, this is not printed to the terminal anyways
-        env::set_var("CLICOLOR_FORCE", "1");
-        //just some random color
-        let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
-        assert_eq!(
-            "\u{1b}[35m.\u{1b}[0m",
-            get_pixel_density(&pixels, "#k. ", true, false, false)
-        );
-    }
-
-    #[test]
-    fn colored_background_char() {
-        //set needed env vars
-        env::set_var("COLORTERM", "truecolor");
-        //force color, this is not printed to the terminal anyways
-        env::set_var("CLICOLOR_FORCE", "1");
-
-        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
-        assert_eq!(
-            "\u{1b}[48;2;0;0;255m \u{1b}[0m",
-            get_pixel_density(&pixels, "#k. ", true, false, true)
-        );
-    }
-}
-
-/// Returns the rbg colors as well as the luminosity of multiple pixel.
-///
-/// First the average pixel color will be calculated, the based on those result the luminosity
-/// will be calculated, suing the formula `0.21 * red + 0.72 * green + 0.07 * blue`.
-///
-/// If the input block is empty, all pixels are seen and calculated as if there were black.
-///
-/// # Examples
-///
-/// ```
-/// let pixels: Vec<Rgba<u8>> = Vec::new();
-/// assert_eq!((0, 0, 0, 0.0), get_pixel_color_luminosity(&pixels));
-/// ```
-///
-/// The formula for calculating the rbg colors is based an a minutephysics video <https://www.youtube.com/watch?v=LKnqECcg6Gw><br>
-/// whilst the luminosity formulas is from <http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/>
-fn get_pixel_color_luminosity(block: &[Rgba<u8>]) -> (u8, u8, u8, f64) {
-    //color as f64 for square rooting later
-    let mut red: f64 = 0f64;
-    let mut blue: f64 = 0f64;
-    let mut green: f64 = 0f64;
-
-    //average all pixel in a block
-    for pixel in block {
-        let r = pixel.0[0] as f64;
-        let g = pixel.0[1] as f64;
-        let b = pixel.0[2] as f64;
-
-        //rgb values have to squared and rooted to get avg color
-        red += r * r;
-        blue += b * b;
-        green += g * g;
-    }
-
-    //block average color
-    red = red.div(block.len() as f64).sqrt();
-    blue = blue.div(block.len() as f64).sqrt();
-    green = green.div(block.len() as f64).sqrt();
-
-    //calculate luminosity from avg. pixel color
-    let luminosity = 0.21 * red + 0.72 * green + 0.07 * blue;
-
-    (
-        red.round() as u8,
-        blue.round() as u8,
-        green.round() as u8,
-        luminosity,
-    )
+fn push_html_top() -> String {
+    r#"<!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Artem Ascii Image</title>
+        <style>* {font-family: Courier;}</style>
+    </head>
+    
+    <body>
+        <pre>"#
+        .to_string()
 }
 
 #[cfg(test)]
-mod test_pixel_color_luminosity {
+mod test_push_html_top {
+    use super::*;
+    #[test]
+    fn push_top_html_returns_correct_string() {
+        assert_eq!(
+            r#"<!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Artem Ascii Image</title>
+        <style>* {font-family: Courier;}</style>
+    </head>
+    
+    <body>
+        <pre>"#,
+            push_html_top()
+        )
+    }
+}
+
+///Returns the bottom part of the output html file.
+///
+/// The matching closing tags fro [push_html_top]. It will close
+/// the pres, body and html tag.
+///
+/// # Examples
+/// ```
+/// let string = String::new();
+/// string.push_str(&push_html_top())
+/// string.push_str(&push_html_bottom())
+/// ```
+fn push_html_bottom() -> String {
+    "</pre></body></html>".to_string()
+}
+
+#[cfg(test)]
+mod test_push_html_bottom {
     use super::*;
 
     #[test]
-    fn red_green() {
-        let pixels = vec![
-            Rgba::<u8>::from([255, 0, 0, 255]),
-            Rgba::<u8>::from([0, 255, 0, 255]),
-        ];
-
-        assert_eq!(
-            (180, 0, 180, 167.69037315838978), //float values... https://imgs.xkcd.com/comics/e_to_the_pi_minus_pi.png
-            get_pixel_color_luminosity(&pixels)
-        );
-    }
-
-    #[test]
-    fn green_blue() {
-        let pixels = vec![
-            Rgba::<u8>::from([0, 255, 0, 255]),
-            Rgba::<u8>::from([0, 0, 255, 255]),
-        ];
-
-        assert_eq!(
-            (0, 180, 180, 142.44666107003002),
-            get_pixel_color_luminosity(&pixels)
-        );
-    }
-
-    #[test]
-    fn empty_input() {
-        let pixels: Vec<Rgba<u8>> = Vec::new();
-        let (r, g, b, l) = get_pixel_color_luminosity(&pixels);
-        assert_eq!(0, r);
-        assert_eq!(0, g);
-        assert_eq!(0, b);
-        assert!(l.is_nan())
+    fn push_bottom_html_returns_correct_string() {
+        assert_eq!("</pre></body></html>", push_html_bottom())
     }
 }

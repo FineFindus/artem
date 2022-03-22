@@ -56,7 +56,7 @@ pub mod density {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.arg("examples/abraham_lincoln.jpg").arg("-c");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--characters <density>' requires a value but none was supplied",
         ));
     }
@@ -129,7 +129,7 @@ pub mod size {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.arg("examples/abraham_lincoln.jpg").arg("-s");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--size <size>' requires a value but none was supplied",
         ));
     }
@@ -139,7 +139,7 @@ pub mod size {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg").arg("-s string");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with size input value",
         ));
     }
@@ -149,7 +149,7 @@ pub mod size {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg").arg("-s 0.6");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with size input value",
         ));
     }
@@ -159,7 +159,7 @@ pub mod size {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg").arg("-s -6");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with size input value",
         ));
     }
@@ -170,7 +170,7 @@ pub mod size {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .arg(format!("-s {}", u32::MAX));
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with size input value",
         ));
     }
@@ -182,7 +182,7 @@ pub mod size {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["-s", "75"])
             .arg("-w");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--size <size>' cannot be used with '--width'",
         ));
     }
@@ -194,7 +194,7 @@ pub mod size {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["-s", "75"])
             .arg("-h");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--size <size>' cannot be used with '--height'",
         ));
     }
@@ -219,7 +219,7 @@ pub mod width {
     fn arg_with_value() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").args(["-w", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -231,7 +231,7 @@ pub mod width {
             .arg("-w")
             .args(["-s", "75"]);
         //should panic when trying using both args
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--width' cannot be used with '--size <size>'",
         ));
     }
@@ -241,7 +241,7 @@ pub mod width {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying using both args
         cmd.arg("examples/abraham_lincoln.jpg").arg("-w").arg("-h");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--width' cannot be used with '--height'",
         ));
     }
@@ -267,7 +267,7 @@ pub mod height {
     fn arg_with_value() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").args(["-h", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -279,7 +279,7 @@ pub mod height {
             .arg("-h")
             .args(["-s", "75"]);
         //should panic when trying using both args
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--height' cannot be used with '--size <size>'",
         ));
     }
@@ -289,7 +289,7 @@ pub mod height {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying using both args
         cmd.arg("examples/abraham_lincoln.jpg").arg("-h").arg("-w");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--height' cannot be used with '--width'",
         ));
     }
@@ -316,7 +316,7 @@ pub mod scale {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.arg("examples/abraham_lincoln.jpg").arg("--ratio");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--ratio <scale>' requires a value but none was supplied",
         ));
     }
@@ -327,7 +327,7 @@ pub mod scale {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", "string"]);
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with ratio input value",
         ));
     }
@@ -338,7 +338,7 @@ pub mod scale {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", "-6"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '-6' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -376,7 +376,7 @@ pub mod flip_x {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--flipX", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -402,7 +402,7 @@ pub mod flip_y {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--flipY", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -447,7 +447,7 @@ pub mod thread {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.arg("examples/abraham_lincoln.jpg").arg("--thread");
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "The argument '--thread <threads>' requires a value but none was supplied",
         ));
     }
@@ -458,7 +458,7 @@ pub mod thread {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", "string"]);
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with thread input value",
         ));
     }
@@ -469,7 +469,7 @@ pub mod thread {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", "0.6"]);
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "Could not work with thread input value",
         ));
     }
@@ -480,7 +480,7 @@ pub mod thread {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--thread", "-6"]);
-        cmd.assert().stderr(predicate::str::contains(
+        cmd.assert().failure().stderr(predicate::str::contains(
             "error: Found argument '-6' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -518,7 +518,7 @@ pub mod output_file {
     fn arg_is_none() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("-o");
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: The argument '--output <output-file>' requires a value but none was supplied",
         ));
     }
@@ -549,7 +549,7 @@ pub mod invert {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--invert", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -577,8 +577,18 @@ pub mod background {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--background", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_conflict_no_color() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--background", "--no-color"]);
+        cmd.assert().failure().stderr(predicate::str::starts_with(
+            "error: The argument '--background' cannot be used with '--no-color'",
         ));
     }
 
@@ -605,8 +615,18 @@ pub mod no_color {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--no-color", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_conflict_background() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--no-color", "--background"]);
+        cmd.assert().failure().stderr(predicate::str::starts_with(
+            "error: The argument '--no-color' cannot be used with '--background'",
         ));
     }
 
@@ -631,7 +651,7 @@ pub mod border {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--border", "123"]);
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: Found argument '123' which wasn't expected, or isn't valid in this context",
         ));
     }
@@ -660,7 +680,7 @@ pub mod verbosity {
     fn arg_is_none() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").arg("--verbose");
-        cmd.assert().stderr(predicate::str::starts_with(
+        cmd.assert().failure().stderr(predicate::str::starts_with(
             "error: The argument '--verbose <verbosity>' requires a value but none was supplied",
         ));
     }
@@ -671,7 +691,9 @@ pub mod verbosity {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--verbose", "info"]);
         //only check first line
-        cmd.assert().stderr(predicate::str::contains("INFO"));
+        cmd.assert()
+            .success()
+            .stderr(predicate::str::contains("INFO"));
     }
 
     #[test]
@@ -680,7 +702,9 @@ pub mod verbosity {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--verbose", "debug"]);
         //only check first line
-        cmd.assert().stderr(predicate::str::contains("DEBUG"));
+        cmd.assert()
+            .success()
+            .stderr(predicate::str::contains("DEBUG"));
     }
 
     #[test]
@@ -689,6 +713,8 @@ pub mod verbosity {
         cmd.arg("examples/abraham_lincoln.nonexisting") //this causes a fatal error
             .args(["--verbose", "error"]);
         //only check first line
-        cmd.assert().stderr(predicate::str::contains("ERROR"));
+        cmd.assert()
+            .failure()
+            .stderr(predicate::str::contains("ERROR"));
     }
 }

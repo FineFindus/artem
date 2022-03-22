@@ -2,6 +2,58 @@ use std::num::NonZeroU32;
 
 use crate::util::{self, ResizingDimension};
 
+/// Target for the Ascii conversion.
+///
+/// This changes of exactly the image is converted and if it supports color.
+/// The first boolean determines if the output should be colored, the second if the color is rhe background color.
+///
+/// An target might support none, one or both colors.
+///
+/// # Examples
+///```
+/// assert_eq!(ConversionTargetType::Shell(true, false), ConversionTargetType::default());
+///
+///```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConversionTargetType {
+    ///Shell target, Supports color and background colors.
+    Shell(bool, bool),
+    ///Special Ansi/ans file that will always have colors enabled. Can also have background colors.
+    AnsiFile(bool),
+    ///Shell target, Supports color and background colors.
+    HtmlFile(bool, bool),
+    ///Every other file, does not support either colored outputs.
+    File,
+}
+
+impl Default for ConversionTargetType {
+    ///Default ConversionTargetType
+    ///
+    /// The default [ConversionTargetType] is the shell with colors enabled.
+    /// Background colors are disabled by default.
+    ///
+    /// # Examples
+    /// ```
+    /// assert_eq!(ConversionTargetType::Shell(true, false), ConversionTargetType::default());
+    /// ```
+    fn default() -> ConversionTargetType {
+        ConversionTargetType::Shell(true, false)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default() {
+        assert_eq!(
+            ConversionTargetType::Shell(true, false),
+            ConversionTargetType::default()
+        );
+    }
+}
+
 ///Configuration for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
 pub struct ConversionOption {
@@ -9,13 +61,12 @@ pub struct ConversionOption {
     pub threads: u32,
     pub scale: f64,
     pub target_size: u32,
-    pub color: bool,
     pub invert: bool,
-    pub background_color: bool,
     pub border: bool,
     pub dimension: ResizingDimension,
     pub transform_x: bool,
     pub transform_y: bool,
+    pub target: ConversionTargetType,
 }
 
 impl ConversionOption {
@@ -41,13 +92,12 @@ mod test_conversion_option {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOption::builder()
         );
@@ -61,13 +111,12 @@ pub struct ConversionOptionBuilder {
     threads: u32,
     scale: f64,
     target_size: u32,
-    color: bool,
     invert: bool,
-    background_color: bool,
     border: bool,
     dimension: ResizingDimension,
     transform_x: bool,
     transform_y: bool,
+    target: ConversionTargetType,
 }
 
 /// Generate a builder property.
@@ -134,7 +183,7 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.density("Mkl. ");
+    /// builder.density("Mkl. ");
     /// ```
     #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
     pub fn density<'a>(&'a mut self, density: String) -> &'a Self {
@@ -155,7 +204,7 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.thread(4);
+    /// builder.thread(4);
     /// ```
     => threads, NonZeroU32, get
     }
@@ -169,7 +218,7 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.scale(0.42f64);
+    /// builder.scale(0.42f64);
     /// ```
        => scale, f64
     }
@@ -186,26 +235,9 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.target_size(80);
+    /// builder.target_size(80);
     /// ```
     => target_size, NonZeroU32, get
-    }
-
-    property! {
-    /// Set if the img should be converted to colored chars.
-    ///
-    /// By default truecolor chars will be used, if there are not supported,
-    /// ANSI-Colors will be used as a fallback.
-    ///
-    /// # Examples
-    /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.color(true);
-    /// ```
-    => color, bool
-    // pub fn color(mut self, color: bool) -> Self {
-    //     self.color = color;
-    //     self
     }
 
     property! {
@@ -217,27 +249,11 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.invert(true);
+    /// builder.invert(true);
     /// ```
     => invert, bool
     // pub fn invert(mut self, invert: bool) -> Self {
     //     self.invert = invert;
-    //     self
-    }
-
-    property! {
-    ///Set the color to the ascii char background instead of the char directly.
-    ///
-    /// The density will determine how 'visible'/light/dark a character will be perceived.
-    ///
-    /// # Examples
-    /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.density("Mkl. ");
-    /// ```
-    => background_color, bool
-    // pub fn on_background(mut self, on_background: bool) -> Self {
-    //     self.background_color = on_background;
     //     self
     }
 
@@ -250,7 +266,7 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.border(true);
+    /// builder.border(true);
     /// ```
     => border, bool
     // pub fn border(mut self, border: bool) -> Self {
@@ -258,6 +274,7 @@ impl ConversionOptionBuilder {
     //     self
     }
 
+    property! {
     /// Set which dimension should be scaled first.
     ///
     /// See [ResizingDimension] for more information.
@@ -265,12 +282,9 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.dimension(util::ResizingDimension:.Height);
+    /// builder.dimension(util::ResizingDimension:.Height);
     /// ```
-    #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
-    pub fn dimension<'a>(&'a mut self, dimension: util::ResizingDimension) -> &'a Self {
-        self.dimension = dimension;
-        self
+    => dimension, util::ResizingDimension
     }
 
     property! {
@@ -281,7 +295,7 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.transform_x(true);
+    /// builder.transform_x(true);
     /// ```
     => transform_x, bool
     // pub fn transform_x(mut self, transform: bool) -> Self {
@@ -297,12 +311,28 @@ impl ConversionOptionBuilder {
     /// # Examples
     /// ```
     /// let mut builder = ConversionOptionBuilder::new();
-    /// builder = builder.transform_y(true);
+    /// builder.transform_y(true);
     /// ```
     => transform_y, bool
     // pub fn transform_y(mut self, transform: bool) -> Self {
     //     self.transform_y = transform;
     //     self
+    }
+
+    property! {
+        ///Set the target type
+        ///
+        /// This will effect the output, for example if the [ConversionTargetType] is set to html,
+        /// the output will be the content of a Html-file.
+        ///
+        /// See [ConversionTargetType] for more information. It defaults to the shell as the target.
+        ///
+        /// # Examples
+        /// ```
+        /// let mut builder = ConversionOptionBuilder::new();
+        /// builder.file_type(ConversionFileType::Html);
+        /// ```
+        => target,  ConversionTargetType
     }
 
     ///Build the ConversionOptions struct.
@@ -320,13 +350,12 @@ impl ConversionOptionBuilder {
             threads: self.threads,
             scale: self.scale,
             target_size: self.target_size,
-            color: self.color,
             invert: self.invert,
-            background_color: self.background_color,
             border: self.border,
             dimension: self.dimension,
             transform_x: self.transform_x,
             transform_y: self.transform_y,
+            target: self.target,
         }
     }
 }
@@ -342,13 +371,12 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().build()
         );
@@ -362,13 +390,12 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
                 .density("density".to_string())
@@ -384,13 +411,12 @@ mod test_conversion_option_builder {
                 threads: 314, //change attribute
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
                 .threads(NonZeroU32::new(314).unwrap())
@@ -406,13 +432,12 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 3.14f64, //change attribute
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().scale(3.14f64).build()
         );
@@ -426,37 +451,16 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 314, //change attribute
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
                 .target_size(NonZeroU32::new(314).unwrap())
                 .build()
-        );
-    }
-
-    #[test]
-    fn change_color() {
-        assert_eq!(
-            ConversionOption {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
-                color: true, //change attribute
-                invert: false,
-                background_color: false,
-                border: false,
-                dimension: util::ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-            },
-            ConversionOptionBuilder::new().color(true).build()
         );
     }
 
@@ -468,37 +472,14 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: true, //change attribute
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().invert(true).build()
-        );
-    }
-
-    #[test]
-    fn change_on_background_color() {
-        assert_eq!(
-            ConversionOption {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
-                color: false,
-                invert: false,
-                background_color: true, //change attribute
-                border: false,
-                dimension: util::ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-            },
-            ConversionOptionBuilder::new()
-                .background_color(true)
-                .build()
         );
     }
 
@@ -510,13 +491,12 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: true, //change attribute
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().border(true).build()
         );
@@ -530,13 +510,12 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Height, //change attribute
                 transform_x: false,
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
                 .dimension(util::ResizingDimension::Height)
@@ -552,13 +531,12 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: true, //change attribute
                 transform_y: false,
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().transform_x(true).build()
         );
@@ -572,15 +550,35 @@ mod test_conversion_option_builder {
                 threads: 0,
                 scale: 0.0f64,
                 target_size: 0,
-                color: false,
                 invert: false,
-                background_color: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: true, //change attribute
+                target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().transform_y(true).build()
+        );
+    }
+
+    #[test]
+    fn change_file_type() {
+        assert_eq!(
+            ConversionOption {
+                density: String::new(),
+                threads: 0,
+                scale: 0.0f64,
+                target_size: 0,
+                invert: false,
+                border: false,
+                dimension: util::ResizingDimension::Width,
+                transform_x: false,
+                transform_y: false,
+                target: ConversionTargetType::AnsiFile(false), //change attribute
+            },
+            ConversionOptionBuilder::new()
+                .target(ConversionTargetType::AnsiFile(false))
+                .build()
         );
     }
 }
