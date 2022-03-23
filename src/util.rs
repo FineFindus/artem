@@ -19,7 +19,7 @@ use log::error;
 /// ```
 pub fn supports_truecolor() -> bool {
     match env::var("COLORTERM") {
-        Ok(var) => var.contains("truecolor") || var.contains("24bit"),
+        Ok(value) => value.contains("truecolor") || value.contains("24bit"),
         Err(_) => false, //not found, true colors are not supported
     }
 }

@@ -526,7 +526,37 @@ pub mod output_file {
     #[test]
     //windows does not like this test, it can not create the file
     #[cfg(not(target_os = "windows"))]
-    fn arg_is_correct() -> Result<(), std::io::Error> {
+    fn file_is_ansi() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["-o", "/tmp/ascii.ans"]);
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "Written 3617 bytes to /tmp/ascii.ans",
+        ));
+        //delete output file
+        fs::remove_file("/tmp/ascii.ans").unwrap();
+    }
+
+    #[test]
+    //windows does not like this test, it can not create the file
+    #[cfg(not(target_os = "windows"))]
+    fn file_is_html() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["-o", "/tmp/ascii.html"]);
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "Written 133621 bytes to /tmp/ascii.html",
+        ));
+        //delete output file
+        fs::remove_file("/tmp/ascii.html").unwrap();
+    }
+
+    #[test]
+    //windows does not like this test, it can not create the file
+    #[cfg(not(target_os = "windows"))]
+    fn file_plain_text() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["-o", "/tmp/test.txt"]);
@@ -535,7 +565,7 @@ pub mod output_file {
             "Written 3617 bytes to /tmp/test.txt",
         ));
         //delete output file
-        fs::remove_file("/tmp/test.txt")
+        fs::remove_file("/tmp/test.txt").unwrap();
     }
 }
 

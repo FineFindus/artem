@@ -156,15 +156,15 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                conversion_options::ConversionTargetType::default()
+                conversion_options::ConversionTargetType::Shell(true, false)
             )
         );
     }
 
     #[test]
-    fn ansi_colored_char() {
+    fn ansi_colored_char_shell() {
         //set no color support
-        env::set_var("COLORTERM", "");
+        env::set_var("COLORTERM", "false");
         //force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
         //just some random color
@@ -175,13 +175,31 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                conversion_options::ConversionTargetType::default()
+                conversion_options::ConversionTargetType::Shell(true, false)
             )
         );
     }
 
     #[test]
-    fn colored_background_char() {
+    fn ansi_colored_char_ansi() {
+        //set no color support
+        env::set_var("COLORTERM", "false");
+        //force color, this is not printed to the terminal anyways
+        env::set_var("CLICOLOR_FORCE", "1");
+        let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
+        assert_eq!(
+            "\u{1b}[35m.\u{1b}[0m",
+            get_pixel_density(
+                &pixels,
+                "#k. ",
+                false,
+                conversion_options::ConversionTargetType::AnsiFile(false)
+            )
+        );
+    }
+
+    #[test]
+    fn colored_background_char_shell() {
         //set needed env vars
         env::set_var("COLORTERM", "truecolor");
         //force color, this is not printed to the terminal anyways
@@ -200,7 +218,94 @@ mod test_pixel_density {
     }
 
     #[test]
-    fn feature() {}
+    fn colored_background_char_ansi() {
+        //set needed env vars
+        env::set_var("COLORTERM", "truecolor");
+        //force color, this is not printed to the terminal anyways
+        env::set_var("CLICOLOR_FORCE", "1");
+        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        assert_eq!(
+            "\u{1b}[48;2;0;0;255m \u{1b}[0m",
+            get_pixel_density(
+                &pixels,
+                "#k. ",
+                false,
+                conversion_options::ConversionTargetType::AnsiFile(true)
+            )
+        );
+    }
+
+    #[test]
+    fn target_file_returns_non_colored_string() {
+        //force color, this is not printed to the terminal anyways
+        env::set_var("COLORTERM", "truecolor");
+        env::set_var("CLICOLOR_FORCE", "1");
+
+        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        assert_eq!(
+            " ",
+            get_pixel_density(
+                &pixels,
+                "#k. ",
+                false,
+                conversion_options::ConversionTargetType::File
+            )
+        );
+    }
+
+    #[test]
+    fn target_html_colored_string() {
+        //force color, this is not printed to the terminal anyways
+        env::set_var("COLORTERM", "truecolor");
+        env::set_var("CLICOLOR_FORCE", "1");
+
+        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        assert_eq!(
+            "<span style=\"color: #0000FF\"> </span>",
+            get_pixel_density(
+                &pixels,
+                "#k. ",
+                false,
+                conversion_options::ConversionTargetType::HtmlFile(true, false)
+            )
+        );
+    }
+
+    #[test]
+    fn target_html_background_string() {
+        //force color, this is not printed to the terminal anyways
+        env::set_var("COLORTERM", "truecolor");
+        env::set_var("CLICOLOR_FORCE", "1");
+
+        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        assert_eq!(
+            "<span style=\"background-color: #0000FF\"> </span>",
+            get_pixel_density(
+                &pixels,
+                "#k. ",
+                false,
+                conversion_options::ConversionTargetType::HtmlFile(true, true)
+            )
+        );
+    }
+
+    #[test]
+    fn target_html_no_color() {
+        //force color, this is not printed to the terminal anyways
+        env::set_var("COLORTERM", "truecolor");
+        env::set_var("CLICOLOR_FORCE", "1");
+
+        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        assert_eq!(
+            " ",
+            get_pixel_density(
+                &pixels,
+                "#k. ",
+                false,
+                conversion_options::ConversionTargetType::HtmlFile(false, false)
+            )
+        );
+    }
 }
 
 /// Returns the rbg colors as well as the luminosity of multiple pixel.
