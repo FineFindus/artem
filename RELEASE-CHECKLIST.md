@@ -15,6 +15,7 @@ These steps should be performed when making a new release. Do not commit marked 
 - [ ] Updated the version number in in cli.rs
 - [ ] Example images still represents the project accurately
 - [ ] Example commands still represents the project accurately
+- [ ] Copied completions file from the OUT_DIR to deployment/assets
 - [ ] Copied the changes to a new release
 - [ ] Build artifacts have been attached to the release through continuous delivery
 - [ ] Cargo deb builds the correct package

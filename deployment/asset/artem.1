@@ -1,0 +1,62 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH artem 1  "artem 0.6.0" 
+.SH NAME
+artem \- artem is a small cli program written in rust to easily convert images to ascii art.
+.SH SYNOPSIS
+\fBartem\fR [\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] [\fB\-c\fR|\fB\-\-characters\fR] [\fB\-s\fR|\fB\-\-size\fR] [\fB\-h\fR|\fB\-\-height\fR] [\fB\-w\fR|\fB\-\-width\fR] [\fB\-\-ratio\fR] [\fB\-\-flipX\fR] [\fB\-\-flipY\fR] [\fB\-o\fR|\fB\-\-output\fR] [\fB\-\-thread\fR] [\fB\-\-invert\fR] [\fB\-\-background\fR] [\fB\-\-border\fR] [\fB\-\-no\-color\fR] [\fB\-\-verbose\fR] <\fIINPUT\fR> 
+.SH DESCRIPTION
+artem is a small cli program written in rust to easily convert images to ascii art.
+.SH OPTIONS
+.TP
+\fB\-\-help\fR
+Print help information
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version information
+.TP
+\fB\-c\fR, \fB\-\-characters\fR
+Change the characters that are used to display the image.The first character should have the highest \*(Aqdensity\*(Aq and the last should have the least (probably a space).A lower detail map is recommend for smaller images.
+.TP
+\fB\-s\fR, \fB\-\-size\fR [default: 80]
+Change the size of the output image.The minimum size is 20, the maximum 230. Values outside of the range will beignored and changed to the nearest usable value. This argument is conflicting with \-\-width and \-\-height
+.TP
+\fB\-h\fR, \fB\-\-height\fR
+Use the terminal maximum terminal height to display the image.This argument is conflicting with \-\-size and \-\-width 
+.TP
+\fB\-w\fR, \fB\-\-width\fR
+Use the terminal maximum terminal height to display the image.This argument is conflicting with \-\-size and \-\-height 
+.TP
+\fB\-\-ratio\fR [default: 0.42]
+Change the ratio between height and width, since Ascii chars are a bit higher than long.The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting.
+.TP
+\fB\-\-flipX\fR
+Flip the image along the X axis
+.TP
+\fB\-\-flipY\fR
+Flip the image along the Y axis
+.TP
+\fB\-o\fR, \fB\-\-output\fR
+Output file for non\-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an .ansi extension, or an .html file, to convert the output to html.
+.TP
+\fB\-\-thread\fR [default: 4]
+OutputNumber of threads used to convert the image. A larger number can lead to grater performance. Defaults to 4
+.TP
+\fB\-\-invert\fR
+Inverts the characters used for the image, so light characters will as dark ones. Can be useful if the image has a dark background.
+.TP
+\fB\-\-background\fR
+Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor. This argument is mutually exclusive with the no\-color argument.
+.TP
+\fB\-\-border\fR
+Adds a decorative border surrounding the ascii image. This will make the image overall a bit smaller, since it respects the user given size.
+.TP
+\fB\-\-no\-color\fR
+Do not use color when printing the image to the terminal.
+.TP
+\fB\-\-verbose\fR
+Choose the verbosity of the logging level.
+.TP
+Path to the target image. Does NOT alter the original image
+.SH VERSION
+v0.6.0

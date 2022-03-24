@@ -116,9 +116,11 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [ ] Convert multiple files at once
 
+- [x] Automate copying of completion files from OUT_DIR to deployment/assets
+
 - [x] Change name
 
-- [ ] Publish
+- [x] Publish
 
 ### Ideas
 

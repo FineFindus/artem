@@ -5,13 +5,15 @@ use clap_complete::{
 };
 use std::ffi::OsString;
 use std::path::PathBuf;
-use std::{env, fs, path};
+use std::{env, path};
 
 use std::io::Error;
 
 include!("src/cli.rs");
 //from https://docs.rs/clap_complete/3.0.6/clap_complete/generator/fn.generate_to.html
 fn main() -> Result<(), Error> {
+    println!("cargo:rerun-if-changed=src/cli.rs");
+
     let out_dir = match env::var_os("OUT_DIR") {
         None => return Ok(()),
         Some(dir) => dir,
@@ -19,45 +21,11 @@ fn main() -> Result<(), Error> {
 
     let mut cmd = build_cli();
     //this is only generated when the git ref changes???
-    let shells_paths = vec![
-        generate_shell_completion(&mut cmd, &out_dir, Bash),
-        generate_shell_completion(&mut cmd, &out_dir, PowerShell),
-        generate_shell_completion(&mut cmd, &out_dir, Zsh),
-        generate_shell_completion(&mut cmd, &out_dir, Fish),
-        generate_shell_completion(&mut cmd, &out_dir, Elvish),
-    ];
-
-    //get output file location
-    let project_dir = match env::var_os("CARGO_MANIFEST_DIR") {
-        None => return Ok(()),
-        Some(dir) => path::PathBuf::from(dir),
-    };
-
-    //create a deployment/asset directory
-    println!("cargo:warning=creating deployment directory");
-    fs::create_dir_all(project_dir.join("deployment/asset")).expect("Failed to create project dir");
-
-    for path in shells_paths {
-        if path.is_err() {
-            continue;
-        }
-
-        let unwrapped = &path.unwrap();
-
-        let file_name = match &unwrapped.file_name() {
-            Some(v) => v.to_str().unwrap(),
-            None => "",
-        };
-
-        let completion_path = project_dir.join(format!("deployment/asset/{}", file_name));
-        println!(
-            "cargo:warning=copying completion file to: {}",
-            completion_path.to_str().unwrap()
-        );
-
-        //copy generated completion script to deployment dir
-        fs::copy(&unwrapped, completion_path).unwrap();
-    }
+    generate_shell_completion(&mut cmd, &out_dir, Bash).unwrap();
+    generate_shell_completion(&mut cmd, &out_dir, PowerShell).unwrap();
+    generate_shell_completion(&mut cmd, &out_dir, Zsh).unwrap();
+    generate_shell_completion(&mut cmd, &out_dir, Fish).unwrap();
+    generate_shell_completion(&mut cmd, &out_dir, Elvish).unwrap();
 
     let man = clap_mangen::Man::new(cmd);
     let mut buffer: Vec<u8> = Default::default();
@@ -68,17 +36,6 @@ fn main() -> Result<(), Error> {
     std::fs::write(&man_page_path, buffer)?;
 
     println!("cargo:warning=man page is generated: {:?}", man_page_path);
-
-    //copy man page to deployment dir
-    println!(
-        "cargo:warning=copying man page to: {:?}",
-        project_dir.join("deployment/asset/artem.1")
-    );
-    fs::copy(
-        &man_page_path,
-        &project_dir.join("deployment/asset/artem.1"),
-    )
-    .expect("failed to copy man page");
 
     Ok(())
 }
