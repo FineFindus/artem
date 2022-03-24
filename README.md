@@ -42,7 +42,7 @@ By default preset `1` is used.
 artem PATH --characters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>|,.-#+!$%&/()=?*'_:; "
 ```
 
-To change the size at which the converted image is displayed, use::
+To change the size at which the converted image is displayed, use:
 
 ```bash
 #for auto sizing height
@@ -53,9 +53,25 @@ artem PATH --width
 artem PATH --size 100
 ```
 
+To save the the image to a file, use the `--output` flag.
+
+```bash
+artem PATH --output ascii.txt
+#if the output file is an html file, the resulting ascii art will be saved as html ascii art
+artem PATH --output ascii.html
+# or alternatively, use an .asn file for colored ascii art
+artem PATH --output ascii.ans
+```
+
 ## Installation
 
-If you are on Debian/Ubuntu download the `.deb` file from the releases tab and install it with:
+The easiest way to install artem is using `cargo` with
+
+```bash
+cargo install artem
+```
+
+Alternatively, if you are on Debian/Ubuntu download the `.deb` file from the releases tab and install it with:
 
 ```bash
 sudo dpkg -i artem.deb
@@ -90,7 +106,7 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [x] Support ANSI terminal colors
 
-- [ ] Convert output to colored html
+- [x] Convert output to colored html
 
 - [x] Use multithreading
 
@@ -108,7 +124,7 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [ ] Use edge detection and directional ascii
 
-- [ ] Implement a faster resizing algorithm
+- [ ] Implement better resizing
 
 ## License
 

@@ -1,3 +1,12 @@
+//! # artem
+//! artem is a small cli program written in rust to easily convert images to ascii art.
+//! It uses the image-rs library to read images from different image formats.
+//!
+//! # Example usage
+//! ```bash
+//! artem examples/abraham_lincoln.jpg
+//! ```
+
 use std::{
     fs::File,
     io::Write,

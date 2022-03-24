@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.0] - 2022-03-24
 
 ### Added
 
+- When using an html output file, artem will now converted the result to html, this also works with .ans files respectively
 - More Documentation to better describe the code
 - The `--border` flag can be used to create a border around the ascii image
 - The `--flipX` flag can be used horizontally flip the image

@@ -16,7 +16,7 @@ use clap::{Arg, Command, ValueHint};
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
         .version("0.6.0")
-        .about("A small rust cli program to convert an image into an ascii art representation.")
+        .about("artem is a small cli program written in rust to easily convert images to ascii art.")
         .arg(
             Arg::new("INPUT")
                 .help("Path to the target image. Does NOT alter the original image")
@@ -85,7 +85,7 @@ pub fn build_cli() -> Command<'static> {
                 .long("output")
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
-                .help("Output file for non-colored ascii. There is mutually exclusive with --color and --background, so they will be ignored."),
+                .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an .ansi extension, or an .html file, to convert the output to html."),
         )
         .arg(
             Arg::new("threads")
@@ -104,7 +104,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("background-color")
                 .long("background")
                 .conflicts_with("no-color")
-                .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor"),
+                .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor. This argument is mutually exclusive with the no-color argument."),
         )
         .arg(
             Arg::new("border")
