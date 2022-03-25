@@ -24,6 +24,9 @@ jobs:
         #compile for x86 and armv8 (64-Bit)
          - x86_64-unknown-linux-gnu
          - aarch64-unknown-linux-gnu
+        #compile with musl
+         - x86_64-unknown-linux-musl
+         - aarch64-unknown-linux-musl
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
