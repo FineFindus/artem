@@ -32,7 +32,7 @@ pub fn build_cli() -> Command<'static> {
                 .value_hint(ValueHint::Other)
                 //use "\" to keep this readable but still as a single line string
                 .help("Change the characters that are used to display the image.\
-                The first character should have the highest 'density' and the last should have the least (probably a space).\
+                The first character should have the highest 'darkness' and the last should have the least (recommended to be the space character ' ').\
                 A lower detail map is recommend for smaller images."),
         )
         .arg(

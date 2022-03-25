@@ -160,6 +160,13 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        
+        #copy to completion files from the out directory to the deployment/assets dir
+      - name: Copy completion files and man page
+        shell: bash
+        run: |
+          mkdir -p deployment/assets
+          cp -u target/*/release/build/artem-*/out/* deployment/assets/
 
       - name: Install cargo deb
         uses: actions-rs/cargo@v1
