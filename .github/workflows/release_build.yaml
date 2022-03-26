@@ -64,12 +64,12 @@ jobs:
 
       - name: Compress release files
         shell: bash
-        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.tar.gz -C target/${{ matrix.target }}/release/ artem
+        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release/ artem
 
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
         with:
-          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.tar.gz
+          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.tar.gz
           draft: true
           prerelease: true
 
@@ -122,13 +122,13 @@ jobs:
         #create zip file from .exe release build 
       - name: Create zip file for Windows
         shell: bash
-        run: zip artem-v$PROJECT_VERSION-${{ matrix.target }}-${{ matrix.platform }}.zip -j target/${{ matrix.target }}/release/artem.exe
+        run: zip artem-v$PROJECT_VERSION-${{ matrix.target }}.zip -j target/${{ matrix.target }}/release/artem.exe
 
         #upload zip file
       - name: Upload Release Build for Windows
         uses: softprops/action-gh-release@v1
         with:
-          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}-${{ matrix.platform }}.zip
+          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.zip
           draft: true
           prerelease: true
 
