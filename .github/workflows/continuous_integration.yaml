@@ -80,7 +80,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest] # test all supported platforms, except windows
+        platform: [ubuntu-latest] # test only on ubuntu, since artem itself does not use platform specific functions, it should work the same on all othe rplatforms
         rust:
           - stable
           - beta
