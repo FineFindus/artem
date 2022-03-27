@@ -80,7 +80,7 @@ jobs:
     runs-on: ${{ matrix.platform }} 
     strategy:
       matrix:
-        platform: [ubuntu-latest]
+        platform: [windows-latest]
         rust:
           - stable
         target:
@@ -223,7 +223,15 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        
+      
+      #build release, so it contains the completion files
+      - name: Build artem release
+        uses: actions-rs/cargo@v1
+        continue-on-error: false 
+        with:
+          command: build 
+          args: --locked --release --verbose
+
         #copy to completion files from the out directory to the deployment/assets dir
       - name: Copy completion files and man page
         shell: bash

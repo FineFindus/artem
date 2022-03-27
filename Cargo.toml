@@ -47,13 +47,13 @@ priority = "optional"
 assets = [
       #file locations are from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
       ["target/release/artem", "usr/bin/", "755"],
-      ["deployment/asset/artem.1", "usr/share/man/man1/artem.1", "644"],
+      ["deployment/assets/artem.1", "usr/share/man/man1/artem.1", "644"],
       ["CHANGELOG.md", "usr/share/doc/artem/CHANGELOG", "644"],
       ["LICENSE", "usr/share/doc/artem/", "644"],
       #the completion files and man page is generated and copied by the build script
-      ["deployment/asset/artem.bash", "usr/share/bash-completion/completions/artem", "644"],
-      ["deployment/asset/artem.fish", "usr/share/fish/vendor_completions.d/aretem.fish", "644"],
-      ["deployment/asset/_artem", "usr/share/zsh/vendor-completions/", "644"],
+      ["deployment/assets/artem.bash", "usr/share/bash-completion/completions/artem", "644"],
+      ["deployment/assets/artem.fish", "usr/share/fish/vendor_completions.d/aretem.fish", "644"],
+      ["deployment/assets/_artem", "usr/share/zsh/vendor-completions/", "644"],
 ]
 extended-description = """\
 artem is a cli programm to convert images to ascii art. 
