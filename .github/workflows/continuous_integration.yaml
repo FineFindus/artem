@@ -80,7 +80,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest] # test all supported platforms
+        platform: [ubuntu-latest, macos-latest] # test all supported platforms, except windows
         rust:
           - stable
           - beta

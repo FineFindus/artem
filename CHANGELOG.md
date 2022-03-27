@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Linux Binaries will now also be compiled with `musl`
 - Completion scripts for the `.deb``will be copied in the CD process
-- Tests will now be run all ubuntu, windows and macos
+- Tests will now be run all ubuntu and macos
 - With mscv compiled windows binaries are available as an alternative to the gnu compiled ones
 - MacOS binaries for (x86 and arm) have been added to the CD process
 
