@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Linux Binaries will now also be compiled with `musl`
+- Completion scripts for the `.deb``will be copied in the CD process
+- Tests will now be run all ubuntu, windows and macos
+- With mscv compiled windows binaries are available as an alternative to the gnu compiled ones
+- MacOS binaries for (x86 and arm) have been added to the CD process
+
 ## [0.6.0] - 2022-03-24
 
 ### Added

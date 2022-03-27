@@ -1,6 +1,7 @@
 # Reference:
 # https://eugene-babichenko.github.io/blog/2020/05/09/github-actions-cross-platform-auto-releases/
 # https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
+# https://github.com/BurntSushi/ripgrep/blob/master/.github/workflows/release.yml
 
 name: Build Release files
 on: 
@@ -12,9 +13,9 @@ on:
 jobs:
 
   release_assets:
-    name: Release assets
-    # needs: create_release # we need to know the upload URL
-    runs-on: ${{ matrix.platform }} # we run many different builds
+    name: Release Linux Assets
+    #create and release different linux builds for arm and x86 
+    runs-on: ${{ matrix.platform }} 
     strategy:
       matrix:
         platform: [ubuntu-latest]
@@ -75,8 +76,8 @@ jobs:
 
   release_assets_windows:
   #this is only to release the windows build, since it has a .exe extensions will be uploaded as a zip file
-    name: Release Windows Build
-    runs-on: ${{ matrix.platform }} # we run many different builds
+    name: Release Windows Assets
+    runs-on: ${{ matrix.platform }} 
     strategy:
       matrix:
         platform: [ubuntu-latest]
@@ -85,6 +86,8 @@ jobs:
         target:
          #windows gnu
          - x86_64-pc-windows-gnu
+         # mscv
+         - x86_64-pc-windows-msvc
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -132,6 +135,63 @@ jobs:
           draft: true
           prerelease: true
 
+  release_assets_macos:
+    name: Release MacOS Assets
+    runs-on: ${{ matrix.platform }} 
+    strategy:
+      matrix:
+        platform: [macos-latest]
+        rust:
+          - stable
+        target:
+        #compile for x86 mac os
+         - x86_64-apple-darwin
+        #compile arm version for M1 macs (BigSur+)
+         - aarch64-apple-darwin
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          profile: minimal
+          override: true
+      #use caching for cargo build 
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build artem release
+        uses: actions-rs/cargo@v1
+        continue-on-error: false 
+        with:
+          command: build 
+          use-cross: true
+          args: --locked --release --verbose --target=${{ matrix.target }}
+
+      - name: Extract Version Number
+        shell: bash
+        run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
+
+      - name: Compress release files
+        shell: bash
+        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release/ artem
+
+      - name: Upload Release Build
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.tar.gz
+          draft: true
+          prerelease: true
 
   release_deb:
     name: Create Debian

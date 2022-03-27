@@ -80,7 +80,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest] 
+        platform: [ubuntu-latest, macos-latest, windows-latest] # test all supported platforms
         rust:
           - stable
           - beta
@@ -118,7 +118,7 @@ jobs:
           command: build 
 
       - name: Run tests
-        if: contains(${{ matrix.target }}, "x86_64")
+        if: contains(${{ matrix.target }}, "x86_64") #arm build can not run tests
         uses: actions-rs/cargo@v1
         continue-on-error: false 
         with:
