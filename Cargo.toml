@@ -1,6 +1,6 @@
 [package]
 name = "artem"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Jonathan (@FineFindus)"]
 edition = "2021"
 description = "artem is a small cli program written in rust to easily convert images to ascii art"
@@ -37,7 +37,7 @@ image = "0.24.1"
 colored = "2"
 clap = "3.1.6"
 terminal_size = "0.1.17"
-log = "0.4.14"
+log = "0.4.16"
 env_logger = "0.9.0"
 
 
