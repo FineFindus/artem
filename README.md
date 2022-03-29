@@ -77,7 +77,7 @@ Alternatively, if you are on Debian/Ubuntu download the `.deb` file from the rel
 sudo dpkg -i artem.deb
 ```
 
-One other distributions use the binary file provided in the release tab.
+One other distributions use the binary file provided in the [release](https://github.com/FineFindus/artem/releases) tab.
 
 ## Building from source
 
