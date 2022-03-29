@@ -3,6 +3,12 @@
 # https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
 # https://github.com/BurntSushi/ripgrep/blob/master/.github/workflows/release.yml
 
+
+# This workflow creates all the needed binaries, uploads the binaries to github releases and updates the crate as well as the
+# homebrew tap.
+# The binaries include versions from linux x86_64 and arm, windows gnu and mscv and macos x86_64 and arm versions.
+# It also creates a .deb package using the cargo-deb crate.
+
 name: Build Release files
 on: 
 #switch for debugging
@@ -195,6 +201,7 @@ jobs:
 
   release_deb:
     name: Create Debian
+    #create a .deb package using cargo-deb
     runs-on: ${{ matrix.platform }} 
     strategy:
       matrix:
@@ -278,3 +285,17 @@ cargo_publish:
         with:
           command: publish
           args: --token ${{ secrets.CARGO_API_KEY }}
+
+update_homebrew_formula:
+    name: Update Homebrew Formula
+    # Update the released version in the homebrew tap (https://github.com/finefindus/homebrew-tap)
+    # using action from: https://github.com/dawidd6/action-homebrew-bump-formula
+    runs-on: ubuntu-latest # this could alternatively be run on macos
+    steps:
+      - uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          # this token will expire after 90 days and should be manually renewed
+          # use this link to create a new one: https://github.com/settings/tokens/new?scopes=public_repo,workflow
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }} 
+          tap: finefindus/homebrew-tap
+          formula: artem

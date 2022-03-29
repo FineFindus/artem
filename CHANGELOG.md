@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [Unreleased]
+### Added
+- A [homebrew tap](https://github.com/FineFindus/homebrew-tap) is now available
+- Cargo publishing is now  done in the release workflow
+- The release workflow now updates the homebrew tap
+
+### Changed
+- Overhauled the installation section in the README, it now contains much more detailed installations instructions
 ## [0.6.1] - 2022-03-24
 
 ### Added

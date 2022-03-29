@@ -64,28 +64,54 @@ artem PATH --output ascii.ans
 ```
 
 ## Installation
-
+## All platforms (recommended)
 The easiest way to install artem is using `cargo` with
 
 ```bash
 cargo install artem
 ```
+It will automatically add `artem` to your PATH variable, so it can used like shown in the [usage section](#usage).
 
-Alternatively, if you are on Debian/Ubuntu download the `.deb` file from the releases tab and install it with:
+If `cargo` is not installed, visit the [cargo book](https://doc.rust-lang.org/cargo/getting-started/installation.html) for installation instructions.
+
+## Linux
+### Debian-based Distributions (e.g. Ubuntu)
+For Debian-based Distributions, like Ubuntu, download the `.deb` file from the [release](https://github.com/FineFindus/artem/releases) page and install it with:
 
 ```bash
 sudo dpkg -i artem.deb
 ```
+The `.deb` package also contains tab completions (for bash, zsh and fish) and a man page. 
 
-One other distributions use the binary file provided in the [release](https://github.com/FineFindus/artem/releases) tab.
+### Other Distributions
+On other distributions use the binary file provided in the [release tab](https://github.com/FineFindus/artem/releases).
+
+Alternatively, if `brew` is installed, you can also use `brew` to install it. See the [MacOS Homebrew section](#using-homebrew) for more information.
+
+## MacOS
+### Using Homebrew
+The recommended way to install `artem` on MacOS is using a Homebrew [tap](https://github.com/FineFindus/homebrew-tap):
+
+```bash
+brew install finefindus/tap/artem
+```
+The homebrew version has the added benefit of also installing the man page and tab completions for bash, zsh and fish.
+
+### Binary files
+Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or (more recommended) [`cargo`](#all-platforms-recommended).
+
+## Windows
+To install the windows version, without using `cargo` download either the gnu- or the mscv compiled `.zip` files from [release tab](https://github.com/FineFindus/artem/releases) and extract the `.exe`. It should be noted that you will have to add the `.exe` manually to the PATH variable.
 
 ## Building from source
 
-If you have rust/cargo installed, you can build the project with:
+Assuming you have rust/cargo installed, you can build the project with:
 
 ```bash
 cargo build
 ```
+
+Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed. 
 
 ## Contributing
 
