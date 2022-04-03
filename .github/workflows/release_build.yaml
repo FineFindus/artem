@@ -69,9 +69,25 @@ jobs:
         shell: bash
         run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
 
+      - name: Copy completion files and man page
+        shell: bash
+        run: |
+          #create a completions and doc folder
+          mkdir -p deployment/completions
+          mkdir -p deployment/doc
+          #copy completion files and man page
+          cp -u target/*/release/build/artem-*/out/* deployment/completions/
+          #move man page to doc folder
+          mv deployment/completions/artem.1 deployment/doc/
+          #copy binary file
+          cp -u target/*/release/artem deployment
+
       - name: Compress release files
         shell: bash
-        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release/ artem
+        run: |
+          #compress deployment directory
+          cd deployment/
+          tar -czvf ../artem-v$PROJECT_VERSION-${{ matrix.target }}.tar.gz *
 
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
@@ -126,12 +142,27 @@ jobs:
 
       - name: Extract Version Number
         shell: bash
-        run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
-      
-        #create zip file from .exe release build 
-      - name: Create zip file for Windows
+        run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $
+
+      - name: Copy completion files and man page
         shell: bash
-        run: zip artem-v$PROJECT_VERSION-${{ matrix.target }}.zip -j target/${{ matrix.target }}/release/artem.exe
+        run: |
+          #create a completions and doc folder
+          mkdir -p deployment/completions
+          mkdir -p deployment/doc
+          #copy completion files and man page
+          cp -u target/*/release/build/artem-*/out/* deployment/completions/
+          #move man page to doc folder
+          mv deployment/completions/artem.1 deployment/doc/
+          #copy binary file
+          cp -u target/${{ matrix.target }}/release/artem.exe deployment
+
+        #create zip file from .exe release build 
+      - name: Create zip file
+        shell: bash
+        run: |
+          cd deployment/
+          zip ../artem-v$PROJECT_VERSION-${{ matrix.target }}.zip -r *
 
         #upload zip file
       - name: Upload Release Build for Windows
@@ -188,9 +219,25 @@ jobs:
         shell: bash
         run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
 
+      - name: Copy completion files and man page
+        shell: bash
+        run: |
+          #create a completions and doc folder
+          mkdir -p deployment/completions
+          mkdir -p deployment/doc
+          #copy completion files and man page
+          cp -u target/*/release/build/artem-*/out/* deployment/completions/
+          #move man page to doc folder
+          mv deployment/completions/artem.1 deployment/doc/
+          #copy binary file
+          cp -u target/*/release/artem deployment
+
       - name: Compress release files
         shell: bash
-        run: tar -czvf artem-v$PROJECT_VERSION-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release/ artem
+        run: |
+          #compress deployment directory
+          cd deployment/
+          tar -czvf ../artem-v$PROJECT_VERSION-${{ matrix.target }}.tar.gz *
 
       - name: Upload Release Build
         uses: softprops/action-gh-release@v1
@@ -265,7 +312,7 @@ jobs:
           draft: true
           prerelease: true
 
-cargo_publish:
+  cargo_publish:
     name: Publish to Cargo
     # update the cargo version, using cargo publish.
     # this can fail, so it should be locally checked with cargo publish --dry-run before
@@ -286,7 +333,7 @@ cargo_publish:
           command: publish
           args: --token ${{ secrets.CARGO_API_KEY }}
 
-update_homebrew_formula:
+  update_homebrew_formula:
     name: Update Homebrew Formula
     # Update the released version in the homebrew tap (https://github.com/finefindus/homebrew-tap)
     # using action from: https://github.com/dawidd6/action-homebrew-bump-formula

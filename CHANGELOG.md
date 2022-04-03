@@ -6,19 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # [Unreleased]
+
 ### Added
+
 - A [homebrew tap](https://github.com/FineFindus/homebrew-tap) is now available
-- Cargo publishing is now  done in the release workflow
+- Cargo publishing is now done in the release workflow
 - The release workflow now updates the homebrew tap
+- Shell completion files and the man page are now contained in the compressed released files
+- A new README sections explains how to install the completion files
 
 ### Changed
+
 - Overhauled the installation section in the README, it now contains much more detailed installations instructions
+
 ## [0.6.1] - 2022-03-24
 
 ### Added
 
 - Linux Binaries will now also be compiled with `musl`
-- Completion scripts for the `.deb``will be copied in the CD process
+- Completion scripts for the `.deb` will be copied in the CD process
 - With mscv compiled windows binaries are available as an alternative to the gnu compiled ones
 - MacOS binaries for (x86 and arm) have been added to the CD process
 

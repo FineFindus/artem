@@ -64,44 +64,95 @@ artem PATH --output ascii.ans
 ```
 
 ## Installation
+
 ## All platforms (recommended)
+
 The easiest way to install artem is using `cargo` with
 
 ```bash
 cargo install artem
 ```
+
 It will automatically add `artem` to your PATH variable, so it can used like shown in the [usage section](#usage).
 
 If `cargo` is not installed, visit the [cargo book](https://doc.rust-lang.org/cargo/getting-started/installation.html) for installation instructions.
 
 ## Linux
+
 ### Debian-based Distributions (e.g. Ubuntu)
+
 For Debian-based Distributions, like Ubuntu, download the `.deb` file from the [release](https://github.com/FineFindus/artem/releases) page and install it with:
 
 ```bash
 sudo dpkg -i artem.deb
 ```
-The `.deb` package also contains tab completions (for bash, zsh and fish) and a man page. 
+
+The `.deb` package also contains tab completions (for bash, zsh and fish) and a man page.
 
 ### Other Distributions
+
 On other distributions use the binary file provided in the [release tab](https://github.com/FineFindus/artem/releases).
 
 Alternatively, if `brew` is installed, you can also use `brew` to install it. See the [MacOS Homebrew section](#using-homebrew) for more information.
 
 ## MacOS
+
 ### Using Homebrew
+
 The recommended way to install `artem` on MacOS is using a Homebrew [tap](https://github.com/FineFindus/homebrew-tap):
 
 ```bash
 brew install finefindus/tap/artem
 ```
+
 The homebrew version has the added benefit of also installing the man page and tab completions for bash, zsh and fish.
 
 ### Binary files
+
 Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or (more recommended) [`cargo`](#all-platforms-recommended).
 
 ## Windows
+
 To install the windows version, without using `cargo` download either the gnu- or the mscv compiled `.zip` files from [release tab](https://github.com/FineFindus/artem/releases) and extract the `.exe`. It should be noted that you will have to add the `.exe` manually to the PATH variable.
+
+## Shell completions
+
+`artem` has shell completions and a man page available. When using the homebrew version or the `.deb` package, they are installed automatically, whilst for using the binary files with shell completions, the completion files, which be can be found in the compressed release file, have to be copied to the correct locations.
+Assuming the compressed file has been uncompressed, use following commands to copy the files to their correct location for unix-like systems:
+
+### Shell Completions and Man page
+
+For **bash**:
+
+```bash
+#copy the bash completion file
+sudo cp completions/artem.bash  /etc/bash_completion.d/
+```
+
+For **zsh** add the file to a `$fpath` directory:
+
+```zsh
+#copy the zsh completion file
+cp completions/_artem $fpath
+```
+
+For **fish** add the file to the fish completions directory:
+
+```fish
+#copy the fish completion file
+cp completions/artem.fish $HOME/.config/fish/completions/
+```
+
+For Windows add `. /path/to/_artem.ps1` (including the dot) to the PowerShell [profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.2).
+
+### Man Page
+
+`artem` also provides a man page for the binary releases contained in the `doc` directory. To view it using the `-l` flag for `man` to view a local file.
+
+```bash
+#view the local man page
+man -l doc/artem.1
+```
 
 ## Building from source
 
@@ -111,7 +162,7 @@ Assuming you have rust/cargo installed, you can build the project with:
 cargo build
 ```
 
-Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed. 
+Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed.
 
 ## Contributing
 
