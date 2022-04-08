@@ -347,13 +347,13 @@ fn get_pixel_color_luminosity(block: &[Rgba<u8>]) -> (u8, u8, u8, f64) {
     green = green.div(block.len() as f64).sqrt();
 
     //calculate luminosity from avg. pixel color
-    let luminosity = get_luminosity(red as u8, green as u8, blue as u8);
+    let luminosity = get_luminosity(red, green, blue);
 
     (
         red.round() as u8,
         blue.round() as u8,
         green.round() as u8,
-        luminosity as f64,
+        luminosity,
     )
 }
 
@@ -409,8 +409,8 @@ mod test_pixel_color_luminosity {
 /// ```
 ///
 /// The formula/weighting for the colors comes from <http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/>
-fn get_luminosity(red: u8, green: u8, blue: u8) -> u8 {
-    ((0.21 * red as f64) + (0.72 * green as f64) + (0.07 * blue as f64)).round() as u8
+fn get_luminosity(red: f64, green: f64, blue: f64) -> f64 {
+    (0.21 * red) + (0.72 * green) + (0.07 * blue)
 }
 
 #[cfg(test)]
@@ -419,17 +419,20 @@ mod tests {
 
     #[test]
     fn luminosity_black_is_zero() {
-        assert_eq!(0, get_luminosity(0, 0, 0))
+        assert_eq!(0f64, get_luminosity(0f64, 0f64, 0f64))
     }
 
     #[test]
     fn luminosity_white_is_255() {
-        assert_eq!(255, get_luminosity(255, 255, 255))
+        assert_eq!(
+            254.99999999999997f64,
+            get_luminosity(255f64, 255f64, 255f64)
+        )
     }
 
     #[test]
     fn luminosity_rust_color_is_255() {
-        assert_eq!(97, get_luminosity(154, 85, 54))
+        assert_eq!(97.32f64, get_luminosity(154f64, 85f64, 54f64))
     }
 }
 /// Returns an colored string with the given colors.
