@@ -322,8 +322,7 @@ mod test_pixel_density {
 /// assert_eq!((0, 0, 0, 0.0), get_pixel_color_luminosity(&pixels));
 /// ```
 ///
-/// The formula for calculating the rbg colors is based an a minutephysics video <https://www.youtube.com/watch?v=LKnqECcg6Gw><br>
-/// whilst the luminosity formulas is from <http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/>
+/// The formula for calculating the rbg colors is based an a minutephysics video <https://www.youtube.com/watch?v=LKnqECcg6Gw>
 fn get_pixel_color_luminosity(block: &[Rgba<u8>]) -> (u8, u8, u8, f64) {
     //color as f64 for square rooting later
     let mut red: f64 = 0f64;
@@ -348,13 +347,13 @@ fn get_pixel_color_luminosity(block: &[Rgba<u8>]) -> (u8, u8, u8, f64) {
     green = green.div(block.len() as f64).sqrt();
 
     //calculate luminosity from avg. pixel color
-    let luminosity = 0.21 * red + 0.72 * green + 0.07 * blue;
+    let luminosity = get_luminosity(red as u8, green as u8, blue as u8);
 
     (
         red.round() as u8,
         blue.round() as u8,
         green.round() as u8,
-        luminosity,
+        luminosity as f64,
     )
 }
 
@@ -399,6 +398,40 @@ mod test_pixel_color_luminosity {
     }
 }
 
+/// Returns the luminosity of the given rgb colors as an integer.
+/// It converts the rgb values to floats, adds them with weightings and then returns them
+/// rounded to the nearest integer.
+///
+/// # Examples
+/// ```
+/// let luminosity = get_luminosity(154, 85, 54);
+/// assert_eq!(97, luminosity);
+/// ```
+///
+/// The formula/weighting for the colors comes from <http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/>
+fn get_luminosity(red: u8, green: u8, blue: u8) -> u8 {
+    ((0.21 * red as f64) + (0.72 * green as f64) + (0.07 * blue as f64)).round() as u8
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn luminosity_black_is_zero() {
+        assert_eq!(0, get_luminosity(0, 0, 0))
+    }
+
+    #[test]
+    fn luminosity_white_is_255() {
+        assert_eq!(255, get_luminosity(255, 255, 255))
+    }
+
+    #[test]
+    fn luminosity_rust_color_is_255() {
+        assert_eq!(97, get_luminosity(154, 85, 54))
+    }
+}
 /// Returns an colored string with the given colors.
 ///
 /// Checks if true_colors are supported, by checking the `COLORTERM` environnement variable,
