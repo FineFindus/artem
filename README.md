@@ -1,3 +1,4 @@
+[![artem crate](https://img.shields.io/crates/v/artem.svg)](https://crates.io/crates/artem)
 ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
 [![Continuous Integration](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml/badge.svg)](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
@@ -5,7 +6,7 @@
 # Artem
 
 Artem is a small cli program written in rust to easily convert images
-to ascii art, named after the latin word for art. It will take a while to generate the ascii characters, especially for larger images. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI. When the ascii image is written to a file, the image will not use colors.
+to ascii art, named after the latin word for art. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI. When the ascii image is written to a file, the image will not use colors.
 It supports `.jpeg`, `.png`, `.gif`, `.webp` and many more.
 
 ## Examples
@@ -65,7 +66,7 @@ artem PATH --output ascii.ans
 
 ## Installation
 
-## All platforms (recommended)
+### All platforms (recommended)
 
 The easiest way to install artem is using `cargo` with
 
@@ -77,9 +78,9 @@ It will automatically add `artem` to your PATH variable, so it can used like sho
 
 If `cargo` is not installed, visit the [cargo book](https://doc.rust-lang.org/cargo/getting-started/installation.html) for installation instructions.
 
-## Linux
+### Linux
 
-### Debian-based Distributions (e.g. Ubuntu)
+#### Debian-based Distributions (e.g. Ubuntu)
 
 For Debian-based Distributions, like Ubuntu, download the `.deb` file from the [release](https://github.com/FineFindus/artem/releases) page and install it with:
 
@@ -89,15 +90,15 @@ sudo dpkg -i artem.deb
 
 The `.deb` package also contains tab completions (for bash, zsh and fish) and a man page.
 
-### Other Distributions
+#### Other Distributions
 
 On other distributions use the binary file provided in the [release tab](https://github.com/FineFindus/artem/releases).
 
 Alternatively, if `brew` is installed, you can also use `brew` to install it. See the [MacOS Homebrew section](#using-homebrew) for more information.
 
-## MacOS
+### MacOS
 
-### Using Homebrew
+#### Using Homebrew
 
 The recommended way to install `artem` on MacOS is using a Homebrew [tap](https://github.com/FineFindus/homebrew-tap):
 
@@ -107,11 +108,11 @@ brew install finefindus/tap/artem
 
 The homebrew version has the added benefit of also installing the man page and tab completions for bash, zsh and fish.
 
-### Binary files
+#### Binary files
 
 Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or (more recommended) [`cargo`](#all-platforms-recommended).
 
-## Windows
+### Windows
 
 To install the windows version, without using `cargo` download either the gnu- or the mscv compiled `.zip` files from [release tab](https://github.com/FineFindus/artem/releases) and extract the `.exe`. It should be noted that you will have to add the `.exe` manually to the PATH variable.
 
