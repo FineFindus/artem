@@ -16,13 +16,14 @@ use clap::{Arg, Command, ValueHint};
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
         .version("0.6.1")
-        .about("artem is a small cli program written in rust to easily convert images to ascii art.")
+        .about(
+            "artem is a small cli program written in rust to easily convert images to ascii art.",
+        )
         .arg(
             Arg::new("INPUT")
                 .help("Path to the target image. Does NOT alter the original image")
                 .required(true)
                 .value_hint(ValueHint::FilePath)
-                .index(1),
         )
         .arg(
             Arg::new("density")
@@ -66,7 +67,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("scale")
                 .long("ratio")
                 .takes_value(true)
-                .default_value("0.42") 
+                .default_value("0.42")
                 .value_hint(ValueHint::Other)
                 .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.\
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
@@ -116,18 +117,18 @@ pub fn build_cli() -> Command<'static> {
                 .long("no-color")
                 .help("Do not use color when printing the image to the terminal."),
         )
-        .arg(Arg::new("verbosity")
+        .arg(
+            Arg::new("outline")
+                .long("outline")
+                .help("Do not use color when printing the image to the terminal."),
+        )
+        .arg(
+            Arg::new("verbosity")
                 .long("verbose")
                 .takes_value(false)
-                .possible_values([
-                    "trace",
-                    "debug",
-                    "info",
-                    "warn",
-                    "error",
-                    ])
+                .possible_values(["trace", "debug", "info", "warn", "error"])
                 .help("Choose the verbosity of the logging level."),
-    )
+        )
 }
 
 #[cfg(test)]

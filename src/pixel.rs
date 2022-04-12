@@ -409,7 +409,7 @@ mod test_pixel_color_luminosity {
 /// ```
 ///
 /// The formula/weighting for the colors comes from <http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/>
-fn get_luminosity(red: f64, green: f64, blue: f64) -> f64 {
+pub fn get_luminosity(red: f64, green: f64, blue: f64) -> f64 {
     (0.21 * red) + (0.72 * green) + (0.07 * blue)
 }
 

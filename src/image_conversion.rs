@@ -1,6 +1,6 @@
-use std::{sync::Arc, thread};
+use std::{f64::consts::PI, sync::Arc, thread};
 
-use image::{DynamicImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView, GrayImage, ImageBuffer, RgbImage, Rgba};
 use log::{debug, info, trace};
 
 use crate::{
@@ -260,4 +260,165 @@ mod test_push_html_bottom {
     fn push_bottom_html_returns_correct_string() {
         assert_eq!("</pre></body></html>", push_html_bottom())
     }
+}
+
+pub fn convert_outline(img: DynamicImage) -> DynamicImage {
+    let img = blur(img, 6.4f64);
+    edge_detection(&img)
+}
+
+pub fn blur(img: DynamicImage, sigma: f64) -> DynamicImage {
+    //Convert the image into grayscale and obtain the matrix.
+    let kernel = create_gauss_kernel(sigma);
+
+    let offset = (kernel.len() / 2) as u32;
+
+    //create empty target img
+    let mut destination_img: RgbImage = ImageBuffer::new(img.width(), img.height());
+
+    for x in 0..img.width() {
+        for y in 0..img.height() {
+            //kernel values for rgb
+            let mut kernel_values_r = 0f64;
+            let mut kernel_values_g = 0f64;
+            let mut kernel_values_b = 0f64;
+
+            //iterate through the kernel for this pixel
+            for k_x in 0..kernel.len() {
+                for k_y in 0..kernel.len() {
+                    //get pixel pos for kernel
+                    let pixel_pos_x = (x + k_x as u32)
+                        .saturating_sub(offset)
+                        .clamp(0, img.width() - 1);
+                    let pixel_pos_y = (y + k_y as u32)
+                        .saturating_sub(offset)
+                        .clamp(0, img.height() - 1);
+
+                    //check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
+                    if img.in_bounds(pixel_pos_x, pixel_pos_y) {
+                        //get the current pixel
+                        let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
+                        //add rgb values
+                        kernel_values_r += pixel.0[0] as f64 * kernel[k_x][k_y];
+                        kernel_values_g += pixel.0[1] as f64 * kernel[k_x][k_y];
+                        kernel_values_b += pixel.0[2] as f64 * kernel[k_x][k_y];
+                    }
+                }
+            }
+
+            //add filtered pixel to new img
+            destination_img.put_pixel(
+                x,
+                y,
+                image::Rgb([
+                    (kernel_values_r as u8), // .saturating_mul(10)
+                    (kernel_values_g as u8), // .saturating_mul(10)
+                    (kernel_values_b as u8), // .saturating_mul(10)
+                ]),
+            );
+        }
+    }
+
+    destination_img.save("blur.png").unwrap();
+    DynamicImage::ImageRgb8(destination_img)
+}
+
+//https://www.geeksforgeeks.org/gaussian-filter-generation-c/
+fn create_gauss_kernel(sigma: f64) -> [[f64; 3]; 3] {
+    let mut kernel = [[0f64; 3]; 3];
+
+    let mut r = 2f64 * sigma * sigma;
+    let s = r.clone();
+
+    let mut sum = 0f64;
+
+    for x in -1..=1isize {
+        for y in -1..=1isize {
+            r = ((x * x + y * y) as f64).sqrt();
+            let value = (f64::exp(-(r * r) / s)) / (PI * s);
+            kernel[(x + 1) as usize][(y + 1) as usize] = value;
+            sum += value;
+        }
+    }
+
+    for i in 0..3 {
+        for j in 0..3 {
+            kernel[i][j] /= sum;
+        }
+    }
+
+    kernel
+}
+
+fn edge_detection(img: &DynamicImage) -> DynamicImage {
+    //Convert the image into grayscale and obtain the matrix.
+    // img.grayscale();
+    let kernel_x = &[
+        [1f64, 2f64, 1f64],
+        [0f64, 0f64, 0f64],
+        [-1f64, -2f64, -1f64],
+    ];
+
+    let kernel_y = &[
+        [1f64, 0f64, -1f64],
+        [2f64, 0f64, -2f64],
+        [1f64, 0f64, -1f64],
+    ];
+
+    let kernel_length = kernel_x.len();
+
+    let offset = (kernel_length / 2) as u32;
+
+    trace!("Img: {:?}", img.dimensions());
+
+    //create empty target img
+    let mut destination_img: GrayImage = ImageBuffer::new(img.width(), img.height());
+
+    for y in 0..img.height() {
+        for x in 0..img.width() {
+            //kernel values for rgb
+            let mut kernel_values_x = 0f64;
+            let mut kernel_values_y = 0f64;
+
+            //iterate through the kernel for this pixel
+            for k_y in 0..kernel_length {
+                for k_x in 0..kernel_length {
+                    //get pixel pos for kernel
+                    let pixel_pos_x = (x + k_x as u32)
+                        .saturating_sub(offset)
+                        .clamp(0, img.width() - 1);
+                    let pixel_pos_y = (y + k_y as u32)
+                        .saturating_sub(offset)
+                        .clamp(0, img.height() - 1);
+
+                    //check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
+                    // if img.in_bounds(pixel_pos_x, pixel_pos_y) {
+                    //get the current pixel
+                    let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
+                    let pixel_gray = crate::pixel::get_luminosity(
+                        pixel.0[0] as f64, //100 as f64,
+                        pixel.0[1] as f64, //100 as f64,
+                        pixel.0[2] as f64, //100 as f64,
+                    );
+
+                    //add rgb values
+                    kernel_values_x += pixel_gray as f64 * kernel_x[k_x][k_y];
+                    kernel_values_y += pixel_gray as f64 * kernel_y[k_x][k_y];
+                }
+            }
+            //add filtered pixel to new img
+            destination_img.put_pixel(
+                x,
+                y,
+                image::Luma([((kernel_values_x * kernel_values_x
+                    + kernel_values_y * kernel_values_y)
+                    .sqrt()
+                    .round() as u8)
+                    .saturating_mul(3)]),
+            );
+        }
+    }
+
+    destination_img.save("dest.png").unwrap();
+    DynamicImage::ImageLuma8(destination_img)
 }

@@ -66,10 +66,18 @@ fn main() {
     }
 
     //try to open img
-    let img = match image::open(img_path) {
+    let mut img = match image::open(img_path) {
         Ok(img) => img,
         Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
     };
+
+    if matches.is_present("outline") {
+        //Todo this is a temporary solution
+        img = image_conversion::convert_outline(img.clone());
+        // img.save("return.png");
+        // img = img.blur(1.4f32);
+        // img.save("return_blur.png");
+    }
 
     //density char map
     let density = if matches.is_present("density") {
