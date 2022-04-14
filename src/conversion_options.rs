@@ -66,6 +66,7 @@ pub struct ConversionOption {
     pub dimension: ResizingDimension,
     pub transform_x: bool,
     pub transform_y: bool,
+    pub outline: bool,
     pub target: ConversionTargetType,
 }
 
@@ -97,6 +98,7 @@ mod test_conversion_option {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOption::builder()
@@ -116,6 +118,7 @@ pub struct ConversionOptionBuilder {
     dimension: ResizingDimension,
     transform_x: bool,
     transform_y: bool,
+    outline: bool,
     target: ConversionTargetType,
 }
 
@@ -298,9 +301,6 @@ impl ConversionOptionBuilder {
     /// builder.transform_x(true);
     /// ```
     => transform_x, bool
-    // pub fn transform_x(mut self, transform: bool) -> Self {
-    //     self.transform_x = transform;
-    //     self
     }
 
     property! {
@@ -314,9 +314,22 @@ impl ConversionOptionBuilder {
     /// builder.transform_y(true);
     /// ```
     => transform_y, bool
-    // pub fn transform_y(mut self, transform: bool) -> Self {
-    //     self.transform_y = transform;
-    //     self
+    }
+
+    property! {
+    ///Convert the image to it's outline
+    ///
+    /// This will use gaussian blur and sobel operators to only it's outline,
+    /// it might not produce the best result on all images.
+    /// Caution, this will take some additional time.
+    /// Defaults to false.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder.outline(true);
+    /// ```
+    => outline, bool
     }
 
     property! {
@@ -355,6 +368,7 @@ impl ConversionOptionBuilder {
             dimension: self.dimension,
             transform_x: self.transform_x,
             transform_y: self.transform_y,
+            outline: self.outline,
             target: self.target,
         }
     }
@@ -376,6 +390,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().build()
@@ -395,6 +410,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -416,6 +432,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -437,6 +454,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().scale(3.14f64).build()
@@ -456,6 +474,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -477,6 +496,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().invert(true).build()
@@ -496,6 +516,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().border(true).build()
@@ -515,6 +536,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Height, //change attribute
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -536,6 +558,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: true, //change attribute
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().transform_x(true).build()
@@ -555,9 +578,30 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: true, //change attribute
+                outline: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().transform_y(true).build()
+        );
+    }
+
+    #[test]
+    fn change_outline() {
+        assert_eq!(
+            ConversionOption {
+                density: String::new(),
+                threads: 0,
+                scale: 0.0f64,
+                target_size: 0,
+                invert: false,
+                border: false,
+                dimension: util::ResizingDimension::Width,
+                transform_x: false,
+                transform_y: false,
+                outline: true, //change attribute
+                target: ConversionTargetType::default(),
+            },
+            ConversionOptionBuilder::new().outline(true).build()
         );
     }
 
@@ -574,6 +618,7 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                outline: false,
                 target: ConversionTargetType::AnsiFile(false), //change attribute
             },
             ConversionOptionBuilder::new()

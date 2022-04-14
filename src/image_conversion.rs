@@ -1,4 +1,9 @@
-use std::{f64::consts::PI, sync::Arc, thread};
+use std::{
+    f64::consts::PI,
+    sync::{Arc, Mutex},
+    thread,
+    time::Instant,
+};
 
 use image::{DynamicImage, GenericImageView, GrayImage, ImageBuffer, RgbImage, Rgba};
 use log::{debug, info, trace};
@@ -18,9 +23,6 @@ use crate::{
 /// ```
 ///It uses the [ConversionOption] to set specific options on how to convert the image.
 pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
-    //TODO print color support
-    // debug!("Using Color: {}", options.color);
-    // debug!("Using colored background: {}", options.background_color);
     debug!("Using inverted color: {}", options.invert);
     //get img dimensions
     let input_width = img.width();
@@ -42,9 +44,16 @@ pub fn convert_img(img: DynamicImage, options: ConversionOption) -> String {
     debug!("Tile Width: {tile_width}");
     debug!("Tile Height: {tile_height}");
 
+    let mut input_img = img;
+
+    if options.outline {
+        input_img = blur(input_img, 6.4f64, options.threads);
+        input_img = edge_detection(input_img, options.threads);
+    }
+
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
-    let img = Arc::new(img.thumbnail_exact(columns * tile_width, rows * tile_height));
+    let img = Arc::new(input_img.thumbnail_exact(columns * tile_width, rows * tile_height));
 
     debug!("Resized Image Width: {}", img.width());
     debug!("Resized Image Height: {}", img.height());
@@ -262,73 +271,191 @@ mod test_push_html_bottom {
     }
 }
 
-pub fn convert_outline(img: DynamicImage) -> DynamicImage {
-    let img = blur(img, 6.4f64);
-    edge_detection(&img)
-}
+///Blur the given image using an gaussian blur, based on the given sigma.
+///
+/// The given `thread_count` increases the amount of threads used. It should be greater than one, but lower than the height
+/// of the image. If that is not the case, the `thread_count` will be changed to fit the requirements.
+///
+/// This returns a new (blurred) image.
+///
+/// # Examples
+/// ```
+/// let blurred = blur(image, 1.4f64, 4)
+/// ```
+fn blur(img: DynamicImage, sigma: f64, thread_count: u32) -> DynamicImage {
+    info!("Blurring image");
+    //measure timing for this step
+    let now = Instant::now();
 
-pub fn blur(img: DynamicImage, sigma: f64) -> DynamicImage {
-    //Convert the image into grayscale and obtain the matrix.
     let kernel = create_gauss_kernel(sigma);
 
     let offset = (kernel.len() / 2) as u32;
 
+    let (width, height) = img.dimensions();
+
+    //clamp threads to be non-zero and not more than the img
+    let thread_count = thread_count.clamp(1, height);
+
     //create empty target img
-    let mut destination_img: RgbImage = ImageBuffer::new(img.width(), img.height());
+    let destination_img: Arc<Mutex<RgbImage>> =
+        Arc::new(Mutex::new(ImageBuffer::new(img.width(), img.height())));
 
-    for x in 0..img.width() {
-        for y in 0..img.height() {
-            //kernel values for rgb
-            let mut kernel_values_r = 0f64;
-            let mut kernel_values_g = 0f64;
-            let mut kernel_values_b = 0f64;
+    let img = Arc::new(img);
 
-            //iterate through the kernel for this pixel
-            for k_x in 0..kernel.len() {
-                for k_y in 0..kernel.len() {
-                    //get pixel pos for kernel
-                    let pixel_pos_x = (x + k_x as u32)
-                        .saturating_sub(offset)
-                        .clamp(0, img.width() - 1);
-                    let pixel_pos_y = (y + k_y as u32)
-                        .saturating_sub(offset)
-                        .clamp(0, img.height() - 1);
+    let thread_chunk = height / thread_count;
 
-                    //check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
-                    if img.in_bounds(pixel_pos_x, pixel_pos_y) {
-                        //get the current pixel
-                        let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
-                        //add rgb values
-                        kernel_values_r += pixel.0[0] as f64 * kernel[k_x][k_y];
-                        kernel_values_g += pixel.0[1] as f64 * kernel[k_x][k_y];
-                        kernel_values_b += pixel.0[2] as f64 * kernel[k_x][k_y];
+    //collect threads handles
+    let mut handles = Vec::with_capacity(thread_count as usize);
+    for chunk in 0..thread_count {
+        //copy img from arv
+        let thread_img = img.clone();
+        let thread_dest_img = Arc::clone(&destination_img);
+
+        //check so that only pixels in the image are accessed
+        let chunk_end = if height > (chunk + 1) * thread_chunk {
+            (chunk + 1) * thread_chunk
+        } else {
+            height
+        };
+
+        let handle = thread::spawn(move || {
+            for y in (chunk * thread_chunk)..chunk_end {
+                for x in 0..width {
+                    //kernel values for rgb
+                    let mut kernel_values_r = 0f64;
+                    let mut kernel_values_g = 0f64;
+                    let mut kernel_values_b = 0f64;
+
+                    //iterate through the kernel for this pixel
+                    for k_x in 0..kernel.len() {
+                        for k_y in 0..kernel.len() {
+                            //get pixel pos for kernel
+                            let pixel_pos_x =
+                                (x + k_x as u32).saturating_sub(offset).clamp(0, width - 1);
+                            let pixel_pos_y =
+                                (y + k_y as u32).saturating_sub(offset).clamp(0, height - 1);
+
+                            //check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
+                            if thread_img.in_bounds(pixel_pos_x, pixel_pos_y) {
+                                //get the current pixel
+                                let pixel = thread_img.get_pixel(pixel_pos_x, pixel_pos_y);
+                                //add rgb values
+                                kernel_values_r += pixel.0[0] as f64 * kernel[k_x][k_y];
+                                kernel_values_g += pixel.0[1] as f64 * kernel[k_x][k_y];
+                                kernel_values_b += pixel.0[2] as f64 * kernel[k_x][k_y];
+                            }
+                        }
                     }
+
+                    //add filtered pixel to new img
+                    let mut unlocked = thread_dest_img.lock().unwrap();
+                    unlocked.put_pixel(
+                        x,
+                        y,
+                        image::Rgb([
+                            (kernel_values_r as u8), // .saturating_mul(10)
+                            (kernel_values_g as u8), // .saturating_mul(10)
+                            (kernel_values_b as u8), // .saturating_mul(10)
+                        ]),
+                    );
                 }
             }
-
-            //add filtered pixel to new img
-            destination_img.put_pixel(
-                x,
-                y,
-                image::Rgb([
-                    (kernel_values_r as u8), // .saturating_mul(10)
-                    (kernel_values_g as u8), // .saturating_mul(10)
-                    (kernel_values_b as u8), // .saturating_mul(10)
-                ]),
-            );
-        }
+            true
+        });
+        handles.push(handle);
+    }
+    for handle in handles {
+        match handle.join() {
+            Ok(true) => {}
+            _ => util::fatal_error("Error encountered when blurring image", Some(1)),
+        };
     }
 
-    destination_img.save("blur.png").unwrap();
-    DynamicImage::ImageRgb8(destination_img)
+    match Arc::try_unwrap(destination_img) {
+        Ok(value) => match value.into_inner() {
+            Ok(value) => {
+                info!(
+                    "Successfully outlined image in {:3} ms",
+                    now.elapsed().as_millis()
+                );
+                DynamicImage::ImageRgb8(value)
+            }
+            _ => util::fatal_error("Error encountered when blurring image", Some(1)),
+        },
+        Err(_) => util::fatal_error("Error encountered when blurring image", Some(1)),
+    }
 }
 
-//https://www.geeksforgeeks.org/gaussian-filter-generation-c/
+#[cfg(test)]
+mod test_blur {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn panic_sigma_0() {
+        //create black image
+        let img = DynamicImage::ImageRgb8(ImageBuffer::new(3, 3));
+        blur(img, 0f64, 4);
+    }
+
+    #[test]
+    #[should_panic]
+    fn panic_sigma_negative() {
+        let img = DynamicImage::ImageRgb8(ImageBuffer::new(3, 3));
+        blur(img, -1f64, 4);
+    }
+
+    #[test]
+    fn black_img_remains_black() {
+        let img = DynamicImage::ImageRgb8(ImageBuffer::new(3, 3));
+        let blur = blur(img.clone(), 1.4f64, 4);
+        assert_eq!(img, blur);
+    }
+    #[test]
+    fn img_middle_white() {
+        //
+        // █
+        //
+        let img = DynamicImage::ImageRgb8(ImageBuffer::from_fn(3, 3, |x, y| {
+            if y == 1 && x == 1 {
+                image::Rgb([255, 255, 255])
+            } else {
+                image::Rgb([0, 0, 0])
+            }
+        }));
+        let blur = blur(img.clone(), 1.4f64, 4);
+        assert_ne!(img, blur);
+        let result = DynamicImage::ImageRgb8(ImageBuffer::from_fn(3, 3, |x, y| {
+            if y == 1 && x == 1 {
+                image::Rgb([39, 39, 39])
+            } else if y != 1 && x != 1 {
+                image::Rgb([23, 23, 23])
+            } else {
+                image::Rgb([30, 30, 30])
+            }
+        }));
+        assert_eq!(result, blur);
+    }
+}
+
+///Creates a gaussian kernel based on the given sigma.
+///
+/// This is based on the c++ implementation on <https://www.geeksforgeeks.org/gaussian-filter-generation-c/>
+///
+/// # Panics
+/// This will panic if the given `sigma` is smaller or equal to zero.
+/// # Examples
+/// ```
+/// let kernel = create_gauss_kernel(1.4f64);
+/// ```
 fn create_gauss_kernel(sigma: f64) -> [[f64; 3]; 3] {
+    if sigma <= 0f64 {
+        panic!("The given sigma {} was smaller or equal to zero", sigma)
+    }
     let mut kernel = [[0f64; 3]; 3];
 
     let mut r = 2f64 * sigma * sigma;
-    let s = r.clone();
+    let s = r;
 
     let mut sum = 0f64;
 
@@ -341,18 +468,68 @@ fn create_gauss_kernel(sigma: f64) -> [[f64; 3]; 3] {
         }
     }
 
-    for i in 0..3 {
-        for j in 0..3 {
-            kernel[i][j] /= sum;
+    for row in kernel.iter_mut() {
+        for value in row.iter_mut() {
+            *value /= sum;
         }
     }
 
     kernel
 }
 
-fn edge_detection(img: &DynamicImage) -> DynamicImage {
-    //Convert the image into grayscale and obtain the matrix.
-    // img.grayscale();
+#[cfg(test)]
+mod test_create_gauss_kernel {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn sigma_zero_panics() {
+        create_gauss_kernel(0f64);
+    }
+
+    #[test]
+    #[should_panic]
+    fn sigma_minus_one_panics() {
+        create_gauss_kernel(-1f64);
+    }
+
+    #[test]
+    fn sigma_1_4() {
+        assert_eq!(
+            [
+                [
+                    0.09235312168033234,
+                    0.11919032075339754,
+                    0.09235312168033234
+                ],
+                [0.11919032075339754, 0.1538262302650804, 0.11919032075339754],
+                [
+                    0.09235312168033234,
+                    0.11919032075339754,
+                    0.09235312168033234
+                ]
+            ],
+            create_gauss_kernel(1.4f64)
+        )
+    }
+}
+
+/// Detect edges in an image by using the sobel operators.
+///
+/// The given `thread_count` increases the amount of threads used. It should be greater than one, but lower than the height
+/// of the image. If that is not the case, the `thread_count` will be changed to fit the requirements.
+///
+/// This returns a new, grayscale image with only the edges in white visible.
+///
+/// # Examples
+/// ```
+/// let outline = edge_detection(image, 4)
+/// ```
+fn edge_detection(img: DynamicImage, thread_count: u32) -> DynamicImage {
+    info!("Creating outline image");
+    //create stop watch
+    let now = Instant::now();
+    //sobel kernels
     let kernel_x = &[
         [1f64, 2f64, 1f64],
         [0f64, 0f64, 0f64],
@@ -369,56 +546,146 @@ fn edge_detection(img: &DynamicImage) -> DynamicImage {
 
     let offset = (kernel_length / 2) as u32;
 
-    trace!("Img: {:?}", img.dimensions());
+    let (width, height) = img.dimensions();
+
+    //clamp threads to be non-zero and not more than the img
+    let thread_count = thread_count.clamp(1, height);
 
     //create empty target img
-    let mut destination_img: GrayImage = ImageBuffer::new(img.width(), img.height());
+    let destination_img: Arc<Mutex<GrayImage>> =
+        Arc::new(Mutex::new(ImageBuffer::new(img.width(), img.height())));
 
-    for y in 0..img.height() {
-        for x in 0..img.width() {
-            //kernel values for rgb
-            let mut kernel_values_x = 0f64;
-            let mut kernel_values_y = 0f64;
+    let img = Arc::new(img);
 
-            //iterate through the kernel for this pixel
-            for k_y in 0..kernel_length {
-                for k_x in 0..kernel_length {
-                    //get pixel pos for kernel
-                    let pixel_pos_x = (x + k_x as u32)
-                        .saturating_sub(offset)
-                        .clamp(0, img.width() - 1);
-                    let pixel_pos_y = (y + k_y as u32)
-                        .saturating_sub(offset)
-                        .clamp(0, img.height() - 1);
+    let thread_chunk = height / thread_count;
 
-                    //check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
-                    // if img.in_bounds(pixel_pos_x, pixel_pos_y) {
-                    //get the current pixel
-                    let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
-                    let pixel_gray = crate::pixel::get_luminosity(
-                        pixel.0[0] as f64, //100 as f64,
-                        pixel.0[1] as f64, //100 as f64,
-                        pixel.0[2] as f64, //100 as f64,
+    //collect threads handles
+    let mut handles = Vec::with_capacity(thread_count as usize);
+
+    for chunk in 0..thread_count {
+        //copy img from arv
+        let thread_img = img.clone();
+        let thread_dest_img = Arc::clone(&destination_img);
+
+        //check so that only pixels in the image are accessed
+        let chunk_end = if height > (chunk + 1) * thread_chunk {
+            (chunk + 1) * thread_chunk
+        } else {
+            height
+        };
+
+        let handle = thread::spawn(move || {
+            for y in (chunk * thread_chunk)..chunk_end {
+                for x in 0..width {
+                    //kernel values for rgb
+                    let mut kernel_values_x = 0f64;
+                    let mut kernel_values_y = 0f64;
+
+                    //iterate through the kernel for this pixel
+                    for k_y in 0..kernel_length {
+                        for k_x in 0..kernel_length {
+                            //get pixel pos for kernel
+                            let pixel_pos_x =
+                                (x + k_x as u32).saturating_sub(offset).clamp(0, width - 1);
+                            let pixel_pos_y =
+                                (y + k_y as u32).saturating_sub(offset).clamp(0, height - 1);
+
+                            //get the current pixel, it will always be inside, since of the previous clamping
+                            let pixel = thread_img.get_pixel(pixel_pos_x, pixel_pos_y);
+                            let pixel_gray = crate::pixel::get_luminosity(
+                                pixel.0[0] as f64,
+                                pixel.0[1] as f64,
+                                pixel.0[2] as f64,
+                            );
+
+                            //add rgb values
+                            kernel_values_x += pixel_gray as f64 * kernel_x[k_x][k_y];
+                            kernel_values_y += pixel_gray as f64 * kernel_y[k_x][k_y];
+                        }
+                    }
+                    //add filtered pixel to new img
+                    let mut unlocked = thread_dest_img.lock().unwrap();
+                    unlocked.put_pixel(
+                        x,
+                        y,
+                        image::Luma([((kernel_values_x * kernel_values_x
+                            + kernel_values_y * kernel_values_y)
+                            .sqrt()
+                            .round() as u8)
+                            .saturating_mul(3)]),
                     );
-
-                    //add rgb values
-                    kernel_values_x += pixel_gray as f64 * kernel_x[k_x][k_y];
-                    kernel_values_y += pixel_gray as f64 * kernel_y[k_x][k_y];
                 }
             }
-            //add filtered pixel to new img
-            destination_img.put_pixel(
-                x,
-                y,
-                image::Luma([((kernel_values_x * kernel_values_x
-                    + kernel_values_y * kernel_values_y)
-                    .sqrt()
-                    .round() as u8)
-                    .saturating_mul(3)]),
-            );
-        }
+            true
+        });
+        handles.push(handle);
     }
 
-    destination_img.save("dest.png").unwrap();
-    DynamicImage::ImageLuma8(destination_img)
+    for handle in handles {
+        match handle.join() {
+            Ok(true) => {}
+            _ => util::fatal_error("Error encountered when outlining image", Some(1)),
+        };
+    }
+
+    match Arc::try_unwrap(destination_img) {
+        Ok(value) => match value.into_inner() {
+            Ok(value) => {
+                info!(
+                    "Successfully outlined image in {:3} ms",
+                    now.elapsed().as_millis()
+                );
+                DynamicImage::ImageLuma8(value)
+            }
+            _ => util::fatal_error("Error encountered when outlining image", Some(1)),
+        },
+        Err(_) => util::fatal_error("Error encountered when outlining image", Some(1)),
+    }
+}
+
+#[cfg(test)]
+mod test_edge_detection {
+    use super::*;
+
+    #[test]
+    fn no_edge() {
+        //create empty image with no edge
+        let img = DynamicImage::ImageLuma8(ImageBuffer::new(3, 3));
+        let edge_img = edge_detection(img.clone(), 4);
+        assert_eq!(img, edge_img);
+    }
+
+    #[test]
+    fn edge_vertical() {
+        //create empty image with vertical edge
+        //█ █
+        //█ █
+        //█ █
+        let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, _| {
+            if x == 1 {
+                image::Luma([0u8])
+            } else {
+                image::Luma([255u8])
+            }
+        }));
+        let edge_img = edge_detection(img.clone(), 4);
+        assert_eq!(img, edge_img);
+    }
+
+    #[test]
+    fn edge_horizontal() {
+        //create empty image with horizontal edge
+        //███
+        //
+        //███
+        let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |_, y| {
+            if y == 1 {
+                image::Luma([0u8])
+            } else {
+                image::Luma([255u8])
+            }
+        }));
+        let edge_img = edge_detection(img.clone(), 4);
+        assert_eq!(img, edge_img);
+    }
 }

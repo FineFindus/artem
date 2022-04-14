@@ -120,7 +120,7 @@ pub fn build_cli() -> Command<'static> {
         .arg(
             Arg::new("outline")
                 .long("outline")
-                .help("Do not use color when printing the image to the terminal."),
+                .help("Only create an outline of the image. This uses filters, so it will take more resources/time to complete, especially on larger images. It might not produce the desired output, it is advised to use this only on images with a clear distinction between foreground and background"),
         )
         .arg(
             Arg::new("verbosity")
