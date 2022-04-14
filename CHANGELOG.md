@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The release workflow now updates the homebrew tap
 - Shell completion files and the man page are now contained in the compressed released files
 - A new README sections explains how to install the completion files
-
+- The new `--outline` flag will only produce an only of the image
 ### Changed
 
 - Overhauled the installation section in the README, it now contains much more detailed installations instructions
