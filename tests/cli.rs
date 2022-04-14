@@ -418,6 +418,32 @@ pub mod flip_y {
     }
 }
 
+pub mod outline {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--outline", "123"]);
+        cmd.assert().failure().stderr(predicate::str::starts_with(
+            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--outline");
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "        ................'....'''.''..'..''''',,;;,'.',,,,;,'''','',,'''','''....",
+        ));
+    }
+}
+
 pub mod flip_x_y {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;

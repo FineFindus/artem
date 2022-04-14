@@ -1,5 +1,4 @@
 use std::{
-    f64::consts::PI,
     sync::{Arc, Mutex},
     thread,
     time::Instant,
@@ -462,7 +461,7 @@ fn create_gauss_kernel(sigma: f64) -> [[f64; 3]; 3] {
     for x in -1..=1isize {
         for y in -1..=1isize {
             r = ((x * x + y * y) as f64).sqrt();
-            let value = (f64::exp(-(r * r) / s)) / (PI * s);
+            let value = (f64::exp(-(r * r) / s)) / (std::f64::consts::PI * s);
             kernel[(x + 1) as usize][(y + 1) as usize] = value;
             sum += value;
         }
