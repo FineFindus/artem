@@ -67,6 +67,7 @@ pub struct ConversionOption {
     pub transform_x: bool,
     pub transform_y: bool,
     pub outline: bool,
+    pub hysteresis: bool,
     pub target: ConversionTargetType,
 }
 
@@ -99,6 +100,7 @@ mod test_conversion_option {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOption::builder()
@@ -119,6 +121,7 @@ pub struct ConversionOptionBuilder {
     transform_x: bool,
     transform_y: bool,
     outline: bool,
+    hysteresis: bool,
     target: ConversionTargetType,
 }
 
@@ -333,6 +336,21 @@ impl ConversionOptionBuilder {
     }
 
     property! {
+    /// When converting the image to an outline, also use double threshold and hysteresis
+    ///
+    /// It will remove small imperfection in the outline for the cost of smaller/thinner lines, which can make
+    /// the resulting ascii looking less visible, which might not be desired.
+    ///
+    /// It will only be used when outlining is set to true.
+    /// # Examples
+    /// ```
+    /// let mut builder = ConversionOptionBuilder::new();
+    /// builder.hysteresis(true);
+    /// ```
+    => hysteresis, bool
+    }
+
+    property! {
         ///Set the target type
         ///
         /// This will effect the output, for example if the [ConversionTargetType] is set to html,
@@ -369,6 +387,7 @@ impl ConversionOptionBuilder {
             transform_x: self.transform_x,
             transform_y: self.transform_y,
             outline: self.outline,
+            hysteresis: self.hysteresis,
             target: self.target,
         }
     }
@@ -391,6 +410,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().build()
@@ -411,6 +431,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -433,6 +454,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -455,6 +477,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().scale(3.14f64).build()
@@ -475,6 +498,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -497,6 +521,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().invert(true).build()
@@ -517,6 +542,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().border(true).build()
@@ -537,6 +563,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new()
@@ -559,6 +586,7 @@ mod test_conversion_option_builder {
                 transform_x: true, //change attribute
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().transform_x(true).build()
@@ -579,6 +607,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: true, //change attribute
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().transform_y(true).build()
@@ -599,9 +628,31 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: true, //change attribute
+                hysteresis: false,
                 target: ConversionTargetType::default(),
             },
             ConversionOptionBuilder::new().outline(true).build()
+        );
+    }
+
+    #[test]
+    fn change_hysteresis() {
+        assert_eq!(
+            ConversionOption {
+                density: String::new(),
+                threads: 0,
+                scale: 0.0f64,
+                target_size: 0,
+                invert: false,
+                border: false,
+                dimension: util::ResizingDimension::Width,
+                transform_x: false,
+                transform_y: false,
+                outline: false,
+                hysteresis: true, //change attribute
+                target: ConversionTargetType::default(),
+            },
+            ConversionOptionBuilder::new().hysteresis(true).build()
         );
     }
 
@@ -619,6 +670,7 @@ mod test_conversion_option_builder {
                 transform_x: false,
                 transform_y: false,
                 outline: false,
+                hysteresis: false,
                 target: ConversionTargetType::AnsiFile(false), //change attribute
             },
             ConversionOptionBuilder::new()

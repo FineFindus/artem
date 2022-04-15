@@ -32,6 +32,8 @@ mod image_conversion;
 //pixel to string
 mod pixel;
 
+mod filter;
+
 fn main() {
     //get args from cli
     let matches = cli::build_cli().get_matches();
@@ -43,7 +45,8 @@ fn main() {
         Some("info") => LevelFilter::Info,
         Some("warn") => LevelFilter::Warn,
         Some("error") => LevelFilter::Error,
-        _ => LevelFilter::Error,
+        Some("off") => LevelFilter::Off, //explicit off, this will not even show errors when the file was not found
+        _ => LevelFilter::Warn,          //always show warnings and errors
     };
 
     //enable logging
@@ -70,6 +73,12 @@ fn main() {
         Ok(img) => img,
         Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
     };
+
+    trace!("Checking if img dimensions are larger than 0");
+    //the image-rs lib does not state if images can have a size 0, so check here
+    if img.height() == 0 || img.width() == 0 {
+        util::fatal_error("Image dimensions can not be 0", Some(66))
+    }
 
     //density char map
     let density = if matches.is_present("density") {
@@ -158,10 +167,6 @@ fn main() {
     };
     options_builder.threads(NonZeroU32::new(thread_count).unwrap()); //safe to unwrap, since it is clamped before
 
-    if !matches.is_present("no-color") && matches.is_present("output-file") {
-        warn!("Output-file flag is present, ignoring colors")
-    }
-
     let invert = matches.is_present("invert-density");
     debug!("Invert is set to: {invert}");
     options_builder.invert(invert);
@@ -176,18 +181,23 @@ fn main() {
         info!("Using non-colored ascii");
         false
     } else {
-        //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
-        info!("Using colored ascii");
-        let truecolor = util::supports_truecolor();
-        if !truecolor {
-            if background_color {
-                warn!("Background flag will be ignored, since truecolor is not supported.")
-            }
-            warn!("Truecolor is not supported. Using ansi color")
+        if matches.is_present("outline") {
+            warn!("Using outline, result will only be in grayscale");
+            true //still set this to true, since grayscale has different gray tones
         } else {
-            info!("Using truecolor ascii")
+            //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
+            info!("Using colored ascii");
+            let truecolor = util::supports_truecolor();
+            if !truecolor {
+                if background_color {
+                    warn!("Background flag will be ignored, since truecolor is not supported.")
+                }
+                warn!("Truecolor is not supported. Using ansi color.")
+            } else {
+                info!("Using truecolor ascii")
+            }
+            true
         }
-        true
     };
 
     //get flag for border around image
@@ -210,9 +220,20 @@ fn main() {
     options_builder.outline(outline);
     debug!("Outline: {outline}");
 
+    //if outline is set, also check for hysteresis
+    if outline {
+        let hysteresis = matches.is_present("hysteresis");
+        options_builder.hysteresis(hysteresis);
+        debug!("Hysteresis: {hysteresis}");
+        if hysteresis {
+            warn!("Using hysteresis might result in an worse looking ascii image than only using --outline")
+        }
+    }
+
     //get output file extension for specific output, default to plain text
     if matches.is_present("output-file") {
         let file_path = PathBuf::from(matches.value_of("output-file").unwrap()); //save to unwrap, checked before
+        debug!("Output-file: {}", file_path.to_str().unwrap());
         let file_extension = file_path.extension().and_then(std::ffi::OsStr::to_str);
         debug!("FileExtension: {:?}", file_extension);
         options_builder.target(match file_extension {
@@ -226,6 +247,7 @@ fn main() {
             }
             _ => {
                 debug!("Target: File");
+                warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
                 ConversionTargetType::File
             }
         });

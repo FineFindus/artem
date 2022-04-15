@@ -123,11 +123,18 @@ pub fn build_cli() -> Command<'static> {
                 .help("Only create an outline of the image. This uses filters, so it will take more resources/time to complete, especially on larger images. It might not produce the desired output, it is advised to use this only on images with a clear distinction between foreground and background"),
         )
         .arg(
+            Arg::new("hysteresis")
+                .long("hysteresis")
+                .alias("hys")
+                .requires("outline")
+                .help("When creating the outline use the hysteresis method, which will remove imperfection, but might not be as good looking in ascii form. This will require the --outline argument to be present as well."),
+        )
+        .arg(
             Arg::new("verbosity")
                 .long("verbose")
-                .takes_value(false)
-                .possible_values(["trace", "debug", "info", "warn", "error"])
-                .help("Choose the verbosity of the logging level."),
+                .takes_value(true)
+                .possible_values(["trace", "debug", "info", "warn", "error", "off"])
+                .help("Choose the verbosity of the logging level. Warnings and errors will always be shown by default. To completely disable them, use the off argument"),
         )
 }
 

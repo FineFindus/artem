@@ -64,6 +64,14 @@ artem PATH --output ascii.html
 artem PATH --output ascii.ans
 ```
 
+Using the `--outline` flag, the given input image will be filtered, to only contain an outline, which will then be converted. Please be aware, that this will take some additional time, as well as that it might not perfectly work on every image. For the best result, please use and image with a clear distinction between the background and the foreground.
+```bash
+artem PATH --outline
+```
+For an even better result, it might be worthwhile trying out the `--hysteresis`/`--hys` flag, potentially with chacracters better suited for outlines, for example.
+```bash
+artem PATH --outline --hysteresis --characters "|/\_.  "
+```
 ## Installation
 
 ### All platforms (recommended)

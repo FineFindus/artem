@@ -61,6 +61,22 @@ fn full_file_compare_border_outline() {
 }
 
 #[test]
+fn full_file_compare_outline_hysteresis() {
+    let mut cmd = Command::cargo_bin("artem").unwrap();
+
+    //this example image is not the best case for the outline, since its already grayscale, and the person is a lot darker than the background
+    cmd.arg("examples/abraham_lincoln.jpg")
+        .args(["--outline", "--hysteresis"]);
+
+    //load file contents to compare
+    let desired_output =
+        fs::read_to_string("assets/abraham_lincoln_outline_hysteresis.txt").unwrap(); //ignore errors
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains(desired_output));
+}
+
+#[test]
 #[cfg(not(target_os = "windows"))]
 fn full_file_compare_html() {
     let mut cmd = Command::cargo_bin("artem").unwrap();

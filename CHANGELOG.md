@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shell completion files and the man page are now contained in the compressed released files
 - A new README sections explains how to install the completion files
 - The new `--outline` flag will only produce an only of the image
+- When using the `--hysteresis` flag along the `--outline` flag the ascii art will be even more outlined, with less imperfections
+- Added more test cases and examples to the README to cover the newly added functionality
 ### Changed
 
 - Overhauled the installation section in the README, it now contains much more detailed installations instructions

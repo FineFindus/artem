@@ -444,6 +444,45 @@ pub mod outline {
     }
 }
 
+pub mod hysteresis {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn outline_is_required() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg").arg("--hysteresis");
+        cmd.assert()
+            .failure()
+            .stderr(predicate::str::starts_with(
+                "error: The following required arguments were not provided:",
+            ))
+            .stderr(predicate::str::contains("--outline"));
+    }
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--outline", "--hysteresis", "123"]);
+        cmd.assert().failure().stderr(predicate::str::starts_with(
+            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("examples/abraham_lincoln.jpg")
+            .args(["--outline", "--hys"]);
+        //only check first line
+        cmd.assert().success().stdout(predicate::str::starts_with(
+            "                   ....';''..:;;.;;'.,..,;::;o:dxc,':llcldc:;,:c::lc:;,;c;:,.'.,",
+        ));
+    }
+}
+
 pub mod flip_x_y {
     use assert_cmd::prelude::*;
     use predicates::prelude::*;
