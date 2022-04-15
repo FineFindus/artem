@@ -183,21 +183,21 @@ fn main() {
     } else {
         if matches.is_present("outline") {
             warn!("Using outline, result will only be in grayscale");
-            true //still set this to true, since grayscale has different gray tones
-        } else {
-            //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
-            info!("Using colored ascii");
-            let truecolor = util::supports_truecolor();
-            if !truecolor {
-                if background_color {
-                    warn!("Background flag will be ignored, since truecolor is not supported.")
-                }
-                warn!("Truecolor is not supported. Using ansi color.")
-            } else {
-                info!("Using truecolor ascii")
-            }
-            true
+            //still set colors  to true, since grayscale has different gray tones
         }
+
+        //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
+        info!("Using colored ascii");
+        let truecolor = util::supports_truecolor();
+        if !truecolor {
+            if background_color {
+                warn!("Background flag will be ignored, since truecolor is not supported.")
+            }
+            warn!("Truecolor is not supported. Using ansi color.")
+        } else {
+            info!("Using truecolor ascii")
+        }
+        true
     };
 
     //get flag for border around image
