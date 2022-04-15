@@ -154,7 +154,7 @@ fn blur(img: DynamicImage, sigma: f64, thread_count: u32) -> DynamicImage {
         Ok(value) => match value.into_inner() {
             Ok(value) => {
                 info!(
-                    "Successfully outlined image in {:3} ms",
+                    "Successfully blurred image in {:3} ms",
                     now.elapsed().as_millis()
                 );
                 DynamicImage::ImageRgb8(value)
