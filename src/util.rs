@@ -14,6 +14,7 @@ use log::error;
 /// ```
 /// use artem::util::supports_truecolor;
 ///
+/// # env::set_var("COLORTERM", "truecolor");
 /// //only true when run in a shell that supports true color
 /// let color_support = supports_truecolor();
 /// assert!(color_support);

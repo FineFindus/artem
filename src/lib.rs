@@ -12,20 +12,18 @@
 //! artem examples/abraham_lincoln.jpg
 //! ```
 
-//import utilities
+//import utilities, such as dimensions, value remapping, etc
 pub mod util;
 
 //condense all arguments into a single struct
 pub mod options;
 
-//import functions for conversion
-mod image_conversion;
-
-//pixel to string
+//functions for working with pixels
 mod pixel;
 
+//outlining filter
 mod filter;
-
+//functions for dealing with output targets/files
 mod target;
 
 use std::{sync::Arc, thread};
