@@ -5,39 +5,43 @@ use crate::util::{self, ResizingDimension};
 /// Target for the Ascii conversion.
 ///
 /// This changes of exactly the image is converted and if it supports color.
-/// The first boolean determines if the output should be colored, the second if the color is rhe background color.
+/// The first boolean determines if the output should be colored, the second if the color is the background color.
 ///
 /// An target might support none, one or both colors.
 ///
 /// # Examples
 ///```
-/// assert_eq!(ConversionTargetType::Shell(true, false), ConversionTargetType::default());
+/// use artem::options::TargetType;
+///
+/// assert_eq!(TargetType::Shell(true, false), TargetType::default());
 ///
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ConversionTargetType {
-    ///Shell target, Supports color and background colors.
+pub enum TargetType {
+    /// Shell target, Supports color and background colors.
     Shell(bool, bool),
-    ///Special Ansi/ans file that will always have colors enabled. Can also have background colors.
+    /// Special Ansi/ans file that will always have colors enabled. Can also have background colors.
     AnsiFile(bool),
-    ///Shell target, Supports color and background colors.
+    /// Shell target, Supports color and background colors.
     HtmlFile(bool, bool),
-    ///Every other file, does not support either colored outputs.
+    /// Every other file, does not support either colored outputs.
     File,
 }
 
-impl Default for ConversionTargetType {
-    ///Default ConversionTargetType
+impl Default for TargetType {
+    /// Default [`TargetType`]
     ///
-    /// The default [ConversionTargetType] is the shell with colors enabled.
+    /// The default [`TargetType`] is the shell with colors enabled.
     /// Background colors are disabled by default.
     ///
     /// # Examples
     /// ```
-    /// assert_eq!(ConversionTargetType::Shell(true, false), ConversionTargetType::default());
+    /// use artem::options::TargetType;
+    ///
+    /// assert_eq!(TargetType::Shell(true, false), TargetType::default());
     /// ```
-    fn default() -> ConversionTargetType {
-        ConversionTargetType::Shell(true, false)
+    fn default() -> TargetType {
+        TargetType::Shell(true, false)
     }
 }
 
@@ -47,16 +51,13 @@ mod tests {
 
     #[test]
     fn default() {
-        assert_eq!(
-            ConversionTargetType::Shell(true, false),
-            ConversionTargetType::default()
-        );
+        assert_eq!(TargetType::Shell(true, false), TargetType::default());
     }
 }
 
 ///Configuration for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
-pub struct ConversionOption {
+pub struct Option {
     pub density: String,
     pub threads: u32,
     pub scale: f64,
@@ -68,28 +69,30 @@ pub struct ConversionOption {
     pub transform_y: bool,
     pub outline: bool,
     pub hysteresis: bool,
-    pub target: ConversionTargetType,
+    pub target: TargetType,
 }
 
-impl ConversionOption {
-    /// Create [ConversionOptionBuilder] with default properties.
+impl Option {
+    /// Create [`OptionBuilder`] with default properties.
     ///
     /// # Examples
     /// ```
-    /// let default = ConversionOption::builder();
+    /// use artem::options::Option;
+    ///
+    /// let default = Option::builder();
     /// ```
-    pub fn builder() -> ConversionOptionBuilder {
-        ConversionOptionBuilder::default()
+    pub fn builder() -> OptionBuilder {
+        OptionBuilder::default()
     }
 }
 
 #[cfg(test)]
-mod test_conversion_option {
+mod test_option {
     use super::*;
     #[test]
     fn builder_default() {
         assert_eq!(
-            ConversionOptionBuilder {
+            OptionBuilder {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -101,16 +104,16 @@ mod test_conversion_option {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOption::builder()
+            Option::builder()
         );
     }
 }
 
-///A builder to create a [ConversionOption] struct.
+///A builder to create a [`Option`] struct.
 #[derive(Default, PartialEq, Debug)]
-pub struct ConversionOptionBuilder {
+pub struct OptionBuilder {
     density: String,
     threads: u32,
     scale: f64,
@@ -122,7 +125,7 @@ pub struct ConversionOptionBuilder {
     transform_y: bool,
     outline: bool,
     hysteresis: bool,
-    target: ConversionTargetType,
+    target: TargetType,
 }
 
 /// Generate a builder property.
@@ -166,17 +169,19 @@ macro_rules! property {
     };
 }
 
-impl ConversionOptionBuilder {
-    ///Create a new ConversionOptionBuilder.
+impl OptionBuilder {
+    ///Create a new OptionBuilder.
     ///
     /// If an option is not specified, the rust default value will be used, unless specified otherwise.
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// ```
-    pub fn new() -> ConversionOptionBuilder {
-        ConversionOption::builder()
+    pub fn new() -> OptionBuilder {
+        Option::builder()
     }
 
     ///Set the density.
@@ -188,8 +193,10 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
-    /// builder.density("Mkl. ");
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// builder.density("Mkl. ".to_string());
     /// ```
     #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
     pub fn density<'a>(&'a mut self, density: String) -> &'a Self {
@@ -209,8 +216,11 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
-    /// builder.thread(4);
+    /// use artem::options::OptionBuilder;
+    /// use core::num::NonZeroU32;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// builder.threads(NonZeroU32::new(4).unwrap());
     /// ```
     => threads, NonZeroU32, get
     }
@@ -223,7 +233,9 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.scale(0.42f64);
     /// ```
        => scale, f64
@@ -240,8 +252,11 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
-    /// builder.target_size(80);
+    /// use artem::options::OptionBuilder;
+    /// use core::num::NonZeroU32;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// builder.target_size(NonZeroU32::new(80).unwrap());
     /// ```
     => target_size, NonZeroU32, get
     }
@@ -254,7 +269,9 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.invert(true);
     /// ```
     => invert, bool
@@ -271,24 +288,26 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.border(true);
     /// ```
     => border, bool
-    // pub fn border(mut self, border: bool) -> Self {
-    //     self.border = border;
-    //     self
     }
 
     property! {
     /// Set which dimension should be scaled first.
     ///
-    /// See [ResizingDimension] for more information.
+    /// See [`ResizingDimension`] for more information.
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
-    /// builder.dimension(util::ResizingDimension:.Height);
+    /// use artem::options::OptionBuilder;
+    /// use artem::util::ResizingDimension;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// builder.dimension(ResizingDimension::Height);
     /// ```
     => dimension, util::ResizingDimension
     }
@@ -300,7 +319,9 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.transform_x(true);
     /// ```
     => transform_x, bool
@@ -313,7 +334,9 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.transform_y(true);
     /// ```
     => transform_y, bool
@@ -329,7 +352,9 @@ impl ConversionOptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.outline(true);
     /// ```
     => outline, bool
@@ -344,39 +369,48 @@ impl ConversionOptionBuilder {
     /// It will only be used when outlining is set to true.
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// builder.hysteresis(true);
     /// ```
     => hysteresis, bool
     }
 
     property! {
-        ///Set the target type
-        ///
-        /// This will effect the output, for example if the [ConversionTargetType] is set to html,
-        /// the output will be the content of a Html-file.
-        ///
-        /// See [ConversionTargetType] for more information. It defaults to the shell as the target.
-        ///
-        /// # Examples
-        /// ```
-        /// let mut builder = ConversionOptionBuilder::new();
-        /// builder.file_type(ConversionFileType::Html);
-        /// ```
-        => target,  ConversionTargetType
-    }
-
-    ///Build the ConversionOptions struct.
+    ///Set the target type
     ///
-    /// This returns a [ConversionOption], which can than be used for the image conversion.
-    /// If values are not explicitly specified, the default values will be used.
+    /// This will effect the output, for example if the [`TargetType`] is set to html,
+    /// the output will be the content of a Html-file.
+    ///
+    /// See [`TargetType`] for more information. It defaults to the shell as the target.
+    ///
     /// # Examples
     /// ```
-    /// let mut builder = ConversionOptionBuilder::new();
+    /// use artem::options::OptionBuilder;
+    /// use artem::options::TargetType;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// //use color, but don't color the background
+    /// builder.target(TargetType::HtmlFile(true, false));
+    /// ```
+        => target,  TargetType
+    }
+
+    ///Build the [`Option`] struct.
+    ///
+    /// This returns a [`Option`], which can than be used for the image conversion using [`convert()`].
+    /// If values are not explicitly specified, the default values will be used.
+    ///
+    /// # Examples
+    /// ```
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
     /// let options = builder.build();
     /// ```
-    pub fn build(&self) -> ConversionOption {
-        ConversionOption {
+    pub fn build(&self) -> Option {
+        Option {
             density: self.density.to_owned(),
             threads: self.threads,
             scale: self.scale,
@@ -399,7 +433,7 @@ mod test_conversion_option_builder {
     #[test]
     fn build_default() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -411,16 +445,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().build()
+            OptionBuilder::new().build()
         );
     }
 
     #[test]
     fn change_density() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: "density".to_string(), //change attribute
                 threads: 0,
                 scale: 0.0f64,
@@ -432,18 +466,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new()
-                .density("density".to_string())
-                .build()
+            OptionBuilder::new().density("density".to_string()).build()
         );
     }
 
     #[test]
     fn change_thread_count() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 314, //change attribute
                 scale: 0.0f64,
@@ -455,9 +487,9 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new()
+            OptionBuilder::new()
                 .threads(NonZeroU32::new(314).unwrap())
                 .build()
         );
@@ -466,7 +498,7 @@ mod test_conversion_option_builder {
     #[test]
     fn change_scale() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 3.14f64, //change attribute
@@ -478,16 +510,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().scale(3.14f64).build()
+            OptionBuilder::new().scale(3.14f64).build()
         );
     }
 
     #[test]
     fn change_target_size() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -499,9 +531,9 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new()
+            OptionBuilder::new()
                 .target_size(NonZeroU32::new(314).unwrap())
                 .build()
         );
@@ -510,7 +542,7 @@ mod test_conversion_option_builder {
     #[test]
     fn change_invert() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -522,16 +554,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().invert(true).build()
+            OptionBuilder::new().invert(true).build()
         );
     }
 
     #[test]
     fn change_border() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -543,16 +575,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().border(true).build()
+            OptionBuilder::new().border(true).build()
         );
     }
 
     #[test]
     fn change_dimension() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -564,9 +596,9 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new()
+            OptionBuilder::new()
                 .dimension(util::ResizingDimension::Height)
                 .build()
         );
@@ -575,7 +607,7 @@ mod test_conversion_option_builder {
     #[test]
     fn change_transform_x() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -587,16 +619,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().transform_x(true).build()
+            OptionBuilder::new().transform_x(true).build()
         );
     }
 
     #[test]
     fn change_transform_y() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -608,16 +640,16 @@ mod test_conversion_option_builder {
                 transform_y: true, //change attribute
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().transform_y(true).build()
+            OptionBuilder::new().transform_y(true).build()
         );
     }
 
     #[test]
     fn change_outline() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -629,16 +661,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: true, //change attribute
                 hysteresis: false,
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().outline(true).build()
+            OptionBuilder::new().outline(true).build()
         );
     }
 
     #[test]
     fn change_hysteresis() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -650,16 +682,16 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: true, //change attribute
-                target: ConversionTargetType::default(),
+                target: TargetType::default(),
             },
-            ConversionOptionBuilder::new().hysteresis(true).build()
+            OptionBuilder::new().hysteresis(true).build()
         );
     }
 
     #[test]
     fn change_file_type() {
         assert_eq!(
-            ConversionOption {
+            Option {
                 density: String::new(),
                 threads: 0,
                 scale: 0.0f64,
@@ -671,10 +703,10 @@ mod test_conversion_option_builder {
                 transform_y: false,
                 outline: false,
                 hysteresis: false,
-                target: ConversionTargetType::AnsiFile(false), //change attribute
+                target: TargetType::AnsiFile(false), //change attribute
             },
-            ConversionOptionBuilder::new()
-                .target(ConversionTargetType::AnsiFile(false))
+            OptionBuilder::new()
+                .target(TargetType::AnsiFile(false))
                 .build()
         );
     }

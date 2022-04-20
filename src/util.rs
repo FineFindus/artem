@@ -1,6 +1,5 @@
 use std::{env, process};
 
-use colored::{ColoredString, Colorize};
 use log::error;
 
 ///Returns if the terminal supports truecolor mode.
@@ -13,6 +12,8 @@ use log::error;
 ///
 /// # Examples
 /// ```
+/// use artem::util::supports_truecolor;
+///
 /// //only true when run in a shell that supports true color
 /// let color_support = supports_truecolor();
 /// assert!(color_support);
@@ -55,7 +56,9 @@ mod test_color_support {
 ///
 ///# Examples
 /// ```
-/// let remapped = map_range((0f64, 10f64), (0f64, 20f64), 2f64)
+/// use artem::util::map_range;
+///
+/// let remapped = map_range((0f64, 10f64), (0f64, 20f64), 2f64);
 /// assert_eq!(4f64, remapped);
 /// ```
 pub fn map_range(from_range: (f64, f64), to_range: (f64, f64), value: f64) -> f64 {
@@ -85,132 +88,6 @@ mod test_map_range {
     }
 }
 
-///Converts the given input string to an ansi colored string
-///
-/// It tries to match the ANSI-Color as closely as possible by calculating the distance between all
-/// 8 colors and the given input color from `r`, `b` and `b`, then returning the nearest.
-/// It will not be 100% accurate, since every terminal has slightly different
-/// ANSI-Colors. It used the VGA-Colors as ANSI-Color.
-///
-/// # Examples
-/// ```
-/// //convert black to ansi black color
-/// assert_eq!("input".black(), rgb_to_ansi("input", 0, 0, 0));
-/// ```
-pub fn rgb_to_ansi(input: &str, r: u8, g: u8, b: u8) -> ColoredString {
-    //get rgb values and convert them to i32, since later on the could negative when subtracting
-    let r = r as i32;
-    let g = g as i32;
-    let b = b as i32;
-
-    //vga colors as example ansi color
-    //from https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-    let vga_colors = [
-        [0, 0, 0],       //black
-        [170, 0, 0],     //red
-        [0, 170, 0],     //green
-        [170, 85, 0],    //yellow
-        [0, 0, 170],     //blue
-        [170, 0, 170],   //magenta
-        [0, 170, 170],   //cyan
-        [170, 170, 170], //white
-        [128, 128, 128], //bright black/gray
-        [255, 0, 0],     //bright red
-        [0, 255, 0],     //bright green
-        [255, 255, 0],   //bright yellow
-        [0, 0, 255],     //bright blue
-        [255, 0, 255],   //bright magenta
-        [0, 255, 255],   //bright cyan
-        [255, 255, 255], //bright white
-    ];
-
-    //find nearest color
-    let mut smallest_distance = i32::MAX;
-    let mut smallest_distance_index: u8 = 7;
-    //maybe there is a better method for this
-    for (index, vga_color) in vga_colors.iter().enumerate() {
-        let distance =
-            (r - vga_color[0]).pow(2) + (g - vga_color[1]).pow(2) + (b - vga_color[2]).pow(2);
-
-        if distance < smallest_distance {
-            smallest_distance = distance;
-            smallest_distance_index = index as u8;
-        }
-    }
-
-    //convert string to matching color
-    match smallest_distance_index {
-        0 => input.black(),
-        1 => input.red(),
-        2 => input.green(),
-        3 => input.yellow(),
-        4 => input.blue(),
-        5 => input.magenta(),
-        6 => input.cyan(),
-        7 => input.white(),
-        8 => input.bright_black(),
-        9 => input.bright_red(),
-        10 => input.bright_green(),
-        11 => input.bright_yellow(),
-        12 => input.bright_blue(),
-        13 => input.bright_magenta(),
-        14 => input.bright_cyan(),
-        15 => input.bright_white(),
-        _ => input.normal(),
-    }
-}
-
-#[cfg(test)]
-mod test_convert_rgb_ansi {
-    use super::*;
-
-    #[test]
-    fn convert_vga_normal_values() {
-        //convert black to ansi black color
-        assert_eq!("input".black(), rgb_to_ansi("input", 0, 0, 0));
-        //convert red to ansi red color
-        assert_eq!("input".red(), rgb_to_ansi("input", 170, 0, 0));
-        //convert green to ansi green color
-        assert_eq!("input".green(), rgb_to_ansi("input", 0, 170, 0));
-        //convert yellow to ansi yellow color
-        assert_eq!("input".yellow(), rgb_to_ansi("input", 170, 85, 0));
-        //convert blue to ansi blue color
-        assert_eq!("input".blue(), rgb_to_ansi("input", 0, 0, 170));
-        //convert magenta to ansi magenta color
-        assert_eq!("input".magenta(), rgb_to_ansi("input", 170, 0, 170));
-        //convert cyan to ansi cyan color
-        assert_eq!("input".cyan(), rgb_to_ansi("input", 0, 170, 170));
-        //convert white to ansi white color
-        assert_eq!("input".white(), rgb_to_ansi("input", 170, 170, 170));
-    }
-
-    #[test]
-    fn convert_vga_bright_values() {
-        //convert bright black to ansi bright black color
-        assert_eq!("input".bright_black(), rgb_to_ansi("input", 128, 128, 128));
-        //convert bright red to ansi bright red color
-        assert_eq!("input".bright_red(), rgb_to_ansi("input", 255, 0, 0));
-        //convert bright green to ansi bright green color
-        assert_eq!("input".bright_green(), rgb_to_ansi("input", 0, 255, 0));
-        //convert bright yellow to ansi bright yellow color
-        assert_eq!("input".bright_yellow(), rgb_to_ansi("input", 255, 255, 0));
-        //convert bright blue to ansi bright blue color
-        assert_eq!("input".bright_blue(), rgb_to_ansi("input", 0, 0, 255));
-        //convert bright magenta to ansi bright magenta color
-        assert_eq!("input".bright_magenta(), rgb_to_ansi("input", 255, 0, 255));
-        //convert bright cyan to ansi bright cyan color
-        assert_eq!("input".bright_cyan(), rgb_to_ansi("input", 0, 255, 255));
-        //convert bright white to ansi bright white color
-        assert_eq!("input".bright_white(), rgb_to_ansi("input", 255, 255, 255));
-    }
-
-    #[test]
-    fn rgb_blue() {
-        //convert a blue rgb tone to ansi blue
-        assert_eq!("input".blue(), rgb_to_ansi("input", 0, 0, 88));
-    }
-}
-
 ///Function for fatal errors.
 ///
 ///A fatal error is an error, from which the program can no recover, meaning the only option left ist to print
@@ -222,7 +99,10 @@ mod test_convert_rgb_ansi {
 /// A list of exit code can be found here: <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
 ///
 /// # Examples
-/// ```
+/// ```no_run
+/// use std::fs::File;
+/// use artem::util::fatal_error;
+///
 /// let f = File::open("hello.txt");
 /// let f = match f {
 ///     Ok(file) => file,
@@ -245,6 +125,8 @@ pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
 ///
 /// # Examples
 /// ```
+/// use artem::util::{ResizingDimension, calculate_dimensions};
+///
 /// assert_eq!(
 /// (100, 46, 5, 11),
 /// //image with a size of 512x512, split into 100 columns with no border
@@ -380,6 +262,8 @@ mod test_calculate_dimensions {
 ///
 /// # Examples
 /// ```
+/// use artem::util::ResizingDimension;
+///
 /// assert_eq!(ResizingDimension::Width, ResizingDimension::default());
 /// ```
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -413,6 +297,8 @@ mod test_dimensions_enum {
 ///
 /// ## Forward Iterator
 /// ```
+/// use artem::util::range;
+///
 /// let mut range = range(0, 2, false);
 /// assert_eq!(Some(0), range.next());
 /// assert_eq!(Some(1), range.next());
@@ -421,12 +307,13 @@ mod test_dimensions_enum {
 ///
 /// ## Reverse Iterator
 /// ```
+/// use artem::util::range;
+///
 /// let mut range = range(0, 2, true);
 /// assert_eq!(Some(1), range.next());
 /// assert_eq!(Some(0), range.next());
 /// assert_eq!(None, range.next());
 /// ```
-///
 pub fn range(start: u32, end: u32, rev: bool) -> impl Iterator<Item = u32> {
     let (mut r_start, step) = if rev {
         (end.saturating_sub(1), u32::max_value())

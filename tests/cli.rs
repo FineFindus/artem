@@ -78,7 +78,7 @@ pub mod density {
             .args(["-c", "M0123-."]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "MMMMMMMMM00000000000000000000000000000101111111111111111111110011000000000000000",
+            "MMMMMMMMMM0000000000000000000000000000101111111111111111111110011000000000000000",
         ));
     }
 
@@ -89,7 +89,7 @@ pub mod density {
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "####WWWWW$$$$$999$9888777777777666667666555555655555543334556665667778888899$$$9",
+                "####WWWWW$$$$$999$9888777677777666667666555545655555543334556665667778888899$$$9",
             ));
         }
     }
@@ -113,7 +113,7 @@ pub mod density {
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "W&&WMMM#*oaaaahhaahbbdqqwwwppwwmwmmmwwZmO0O0Q0Z000000CUJCC0OZmm0Zmqqqdbbbbkkaoah",
+                "W&&WMMM#**aaaahhaahbbdqqwwwppwwwwmmmwwZmO0O0Q0Z00000OCJJJC0OZmm0Zmqqqdbbbbkkaoah",
             ));
         }
     }
@@ -350,7 +350,7 @@ pub mod scale {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", f64::MAX.to_string().as_str()]);
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "NWWNNNNNXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOO000KKK00KKXXXX",
+            "WWWNNNNNXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOO000KKK00KKXXXX",
         ));
     }
 
@@ -361,7 +361,7 @@ pub mod scale {
             .args(["--ratio", "0.75"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "NWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOOOOOOxkkkxkOkkkkkkxxdxxkkOOOkOO000KKK0KKKXXXX",
+            "WWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOOOOOOxkkkxkOkkkkkkxxdxxkkOOOkOO000KKK0KKKXXXX",
         ));
     }
 }
@@ -387,7 +387,7 @@ pub mod flip_x {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--flipX");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "XXXXKKKKKK0000OOkOOOOkxxxxxkkkkkkOkkkOkkOOO0OOOOO0000OOO000KKKXXKXXXXXXNNNNNNWWW",
+            "XXXXKKKKKK0000OOkOOOOkxxxxxkkkkkkOkkkkkkOOO0OOOOO0000OOO000KKKXXKXXXXXXNNNNNNWWW",
         ));
     }
 }
@@ -478,7 +478,7 @@ pub mod hysteresis {
             .args(["--outline", "--hys"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "                   ....';''..:;;.;;'.,..,;::;o:dxc,':llcldc:;,:c::lc:;,;c;:,.'.,",
+            "                   ....';''..:;;.;;'.,..,:::;o:dxc,':llcldc:;,:c::lc:;,;c;:,.'.,",
         ));
     }
 }
@@ -655,7 +655,7 @@ pub mod invert {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--invert");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "         ...............'''....'''''.''',,',,,',,,,,,;;;;;,'''',''..............",
+            "         ...............'''....'''''.''',,,,,,',,,,,,;;;;;,'''',''..............",
         ));
     }
 }

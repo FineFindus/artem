@@ -20,7 +20,7 @@ use crate::util;
 /// since it will mostly consist of dots.
 ///
 /// # Example
-/// ```
+/// ```compile_fail, compile will fail, this is an internal example
 ///  let outlined_image = edge_detection_filter(img, 4);
 /// ```
 pub fn edge_detection_filter(
@@ -48,7 +48,7 @@ pub fn edge_detection_filter(
 /// This returns a new (blurred) image.
 ///
 /// # Examples
-/// ```
+/// ```compile_fail, compile will fail, this is an internal example
 /// let blurred = blur(image, 1.4f64, 4)
 /// ```
 fn blur(img: DynamicImage, sigma: f64, thread_count: u32) -> DynamicImage {
@@ -223,8 +223,9 @@ mod test_blur {
 ///
 /// # Panics
 /// This will panic if the given `sigma` is smaller or equal to zero.
+///
 /// # Examples
-/// ```
+/// ```compile_fail, compile will fail, this is an internal example
 /// let kernel = create_gauss_kernel(1.4f64);
 /// ```
 fn create_gauss_kernel(sigma: f64) -> [[f64; 3]; 3] {
@@ -301,7 +302,7 @@ mod test_create_gauss_kernel {
 /// This returns a new, grayscale image with only the edges in white visible.
 ///
 /// # Examples
-/// ```
+/// ```compile_fail, compile will fail, this is an internal example
 /// let outline = edge_detection(image, 4)
 /// ```
 fn apply_sobel_kernel(img: DynamicImage, thread_count: u32) -> DynamicImage {
@@ -375,11 +376,8 @@ fn apply_sobel_kernel(img: DynamicImage, thread_count: u32) -> DynamicImage {
 
                             //get the current pixel, it will always be inside, since of the previous clamping
                             let pixel = thread_img.get_pixel(pixel_pos_x, pixel_pos_y);
-                            let pixel_gray = crate::pixel::get_luminosity(
-                                pixel.0[0] as f64,
-                                pixel.0[1] as f64,
-                                pixel.0[2] as f64,
-                            );
+                            let pixel_gray =
+                                crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
                             //add rgb values
                             kernel_values_x += pixel_gray as f64 * kernel_x[k_x][k_y];
@@ -481,7 +479,7 @@ mod test_sobel {
 /// if at least one neighboring pixel is strong. Every non-strong pixel will be removed.
 ///
 /// # Examples
-/// ```
+/// ```compile_fail, compile will fail, this is an internal example
 /// let hysteresis_img = edge_tracking(img);
 /// ```
 fn edge_tracking(img: DynamicImage) -> DynamicImage {
@@ -500,11 +498,8 @@ fn edge_tracking(img: DynamicImage) -> DynamicImage {
     for y in 0..img.height() {
         for x in 0..img.width() {
             let target_pixel = img.get_pixel(x, y);
-            let grayscale_pixel = crate::pixel::get_luminosity(
-                target_pixel.0[0] as f64,
-                target_pixel.0[1] as f64,
-                target_pixel.0[2] as f64,
-            );
+            let grayscale_pixel =
+                crate::pixel::luminosity(target_pixel.0[0], target_pixel.0[1], target_pixel.0[2]);
 
             //check if pixel is at least weak or strong
             if grayscale_pixel >= upper_threshold {
@@ -526,11 +521,8 @@ fn edge_tracking(img: DynamicImage) -> DynamicImage {
 
                         //get the adjacent pixel to target pixel, it will always be inside, since of the previous clamping
                         let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
-                        let pixel_gray = crate::pixel::get_luminosity(
-                            pixel.0[0] as f64,
-                            pixel.0[1] as f64,
-                            pixel.0[2] as f64,
-                        );
+                        let pixel_gray =
+                            crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
                         if pixel_gray >= upper_threshold {
                             //adjacent pixel is strong, so target pixel should be strong as well

@@ -16,23 +16,13 @@ use std::{
 
 use log::{debug, info, trace, warn, LevelFilter};
 
-use crate::conversion_options::{ConversionOptionBuilder, ConversionTargetType};
+use artem::{
+    options::{OptionBuilder, TargetType},
+    util,
+};
 
 //import cli
 mod cli;
-//import utilities
-mod util;
-
-//condense all arguments into a single struct
-mod conversion_options;
-
-//import functions for conversion
-mod image_conversion;
-
-//pixel to string
-mod pixel;
-
-mod filter;
 
 fn main() {
     //get args from cli
@@ -57,7 +47,7 @@ fn main() {
         .init();
     trace!("Started logger with trace");
 
-    let mut options_builder = ConversionOptionBuilder::new();
+    let mut options_builder = OptionBuilder::new();
 
     //this should be save to unwrap since the input has to be non-null
     let img_path = matches.value_of("INPUT").unwrap();
@@ -239,26 +229,28 @@ fn main() {
         options_builder.target(match file_extension {
             Some("html") | Some("htm") => {
                 debug!("Target: Html-File");
-                ConversionTargetType::HtmlFile(color, background_color)
+                TargetType::HtmlFile(color, background_color)
             }
             Some("ansi") | Some("ans") => {
                 debug!("Target: Ansi-File");
-                ConversionTargetType::AnsiFile(background_color)
+                TargetType::AnsiFile(background_color)
             }
             _ => {
                 debug!("Target: File");
                 warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
-                ConversionTargetType::File
+                TargetType::File
             }
         });
     } else {
         debug!("Target: Shell");
-        options_builder.target(ConversionTargetType::Shell(color, background_color));
+        options_builder.target(TargetType::Shell(color, background_color));
     }
 
     //convert the img to ascii string
     info!("Converting the img: {img_path}");
-    let output = image_conversion::convert_img(img, options_builder.build());
+    // let output = image_conversion::convert_img(img, options_builder.build());
+    // let output = image_conversion::convert_img(img, options_builder.build());
+    let output = artem::convert(img, options_builder.build());
 
     //create and write to output file
     if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
