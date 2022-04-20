@@ -13,6 +13,7 @@ use log::error;
 /// # Examples
 /// ```
 /// use artem::util::supports_truecolor;
+/// # use std::env;
 ///
 /// # env::set_var("COLORTERM", "truecolor");
 /// //only true when run in a shell that supports true color
