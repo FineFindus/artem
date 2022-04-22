@@ -45,7 +45,7 @@ mod test_color_support {
 
     #[test]
     fn false_with_different_env() {
-        env::set_var("COLORTERM", "asdas");
+        env::set_var("COLORTERM", "false");
         assert!(!supports_truecolor());
     }
 }
@@ -157,6 +157,7 @@ pub fn calculate_dimensions(
             }
 
             //calculate tiles
+            error!("Width: {width}, C: {columns}, T: {target_size}");
             let tile_width = width / columns;
             let tile_height = (tile_width as f64 / scale).floor() as u32;
 

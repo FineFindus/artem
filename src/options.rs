@@ -93,10 +93,10 @@ mod test_option {
     fn builder_default() {
         assert_eq!(
             OptionBuilder {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -112,7 +112,7 @@ mod test_option {
 }
 
 ///A builder to create a [`Option`] struct.
-#[derive(Default, PartialEq, Debug)]
+#[derive(PartialEq, Debug)]
 pub struct OptionBuilder {
     density: String,
     threads: u32,
@@ -126,6 +126,26 @@ pub struct OptionBuilder {
     outline: bool,
     hysteresis: bool,
     target: TargetType,
+}
+
+impl Default for OptionBuilder {
+    fn default() -> Self {
+        Self {
+            //these have to be set to custom defaults for the program to work
+            density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+            threads: 1,
+            scale: 0.42f64,
+            target_size: 80,
+            invert: Default::default(),
+            border: Default::default(),
+            dimension: Default::default(),
+            transform_x: Default::default(),
+            transform_y: Default::default(),
+            outline: Default::default(),
+            hysteresis: Default::default(),
+            target: Default::default(),
+        }
+    }
 }
 
 /// Generate a builder property.
@@ -168,6 +188,10 @@ macro_rules! property {
         }
     };
 }
+
+// impl Default  {
+
+// }
 
 impl OptionBuilder {
     ///Create a new OptionBuilder.
@@ -434,10 +458,10 @@ mod test_conversion_option_builder {
     fn build_default() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -455,10 +479,10 @@ mod test_conversion_option_builder {
     fn change_density() {
         assert_eq!(
             Option {
-                density: "density".to_string(), //change attribute
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"density"#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -476,10 +500,10 @@ mod test_conversion_option_builder {
     fn change_thread_count() {
         assert_eq!(
             Option {
-                density: String::new(),
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 threads: 314, //change attribute
-                scale: 0.0f64,
-                target_size: 0,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -499,10 +523,10 @@ mod test_conversion_option_builder {
     fn change_scale() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
                 scale: 3.14f64, //change attribute
-                target_size: 0,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -520,9 +544,9 @@ mod test_conversion_option_builder {
     fn change_target_size() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
                 target_size: 314, //change attribute
                 invert: false,
                 border: false,
@@ -543,10 +567,10 @@ mod test_conversion_option_builder {
     fn change_invert() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: true, //change attribute
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -564,10 +588,10 @@ mod test_conversion_option_builder {
     fn change_border() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: true, //change attribute
                 dimension: util::ResizingDimension::Width,
@@ -585,10 +609,10 @@ mod test_conversion_option_builder {
     fn change_dimension() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Height, //change attribute
@@ -608,10 +632,10 @@ mod test_conversion_option_builder {
     fn change_transform_x() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -629,10 +653,10 @@ mod test_conversion_option_builder {
     fn change_transform_y() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -650,10 +674,10 @@ mod test_conversion_option_builder {
     fn change_outline() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -671,10 +695,10 @@ mod test_conversion_option_builder {
     fn change_hysteresis() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
@@ -692,10 +716,10 @@ mod test_conversion_option_builder {
     fn change_file_type() {
         assert_eq!(
             Option {
-                density: String::new(),
-                threads: 0,
-                scale: 0.0f64,
-                target_size: 0,
+                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                threads: 1,
+                scale: 0.42f64,
+                target_size: 80,
                 invert: false,
                 border: false,
                 dimension: util::ResizingDimension::Width,
