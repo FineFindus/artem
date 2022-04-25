@@ -13,7 +13,7 @@ It supports `.jpeg`, `.png`, `.gif`, `.webp` and many more.
 
 ### Input
 
-_source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg_
+_source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg
 ![Abraham Lincoln](/examples/abraham_lincoln.jpg)
 
 ### Output
@@ -184,6 +184,11 @@ the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tG
 
 Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indirectly helping with inspiration for the build setup.
 
+The following images are used for testing/examples:
+- [Abraham Lincoln](https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg)
+- [Radio tower](https://unsplash.com/photos/hDXk9iOi9bM)
+- [Moth](https://altphotos.com/photo/deaths-head-hawkmoth-3464/)
+
 ## Todo
 
 - [x] Better average the RGB values of multiple pixel
@@ -198,7 +203,7 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [x] Add tests
 
-- [ ] Add even more test
+- [x] Add even more test
 
 - [ ] Convert multiple files at once
 
@@ -208,9 +213,9 @@ Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indir
 
 - [x] Publish
 
-### Ideas
+### Potential Ideas
 
-- [ ] Use edge detection and directional ascii
+- [x] Use edge detection and directional ascii
 
 - [ ] Implement better resizing
 
