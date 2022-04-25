@@ -134,15 +134,13 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             let mut pixel_block: Vec<Rgba<u8>> =
                 Vec::with_capacity((tile_height * tile_width) as usize);
 
-            //check so that only pixels in the image are accessed
-            let chunk_end = if rows > (chunk + 1) * thread_tiles {
-                (chunk + 1) * thread_tiles
-            } else {
-                rows
-            };
-
             //go through the thread img chunk
-            for row in util::range(chunk * thread_tiles, chunk_end, options.transform_y) {
+            for row in util::range(
+                (chunk * thread_tiles).clamp(0, rows), //after max rows, no more pixels exist
+                // chunk_end,
+                ((chunk + 1) * thread_tiles).clamp(thread_tiles, rows),
+                options.transform_y,
+            ) {
                 if options.border {
                     //add bottom part before image
                     thread_output.push('║');
