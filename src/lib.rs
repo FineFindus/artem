@@ -26,15 +26,10 @@ mod filter;
 //functions for dealing with output targets/files
 mod target;
 
-use std::{sync::Arc, thread};
-
-use image::{DynamicImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView};
 use log::{debug, info, trace};
 
-use crate::{
-    options::{Option, TargetType},
-    pixel::correlating_char,
-};
+use crate::options::{Option, TargetType};
 
 /// Takes an image and returns it as an ascii art string.
 ///
@@ -73,15 +68,25 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
 
     if options.outline {
         //create an outline using an algorithm loosely based on the canny edge algorithm
-        input_img = filter::edge_detection_filter(input_img, options.threads, options.hysteresis);
+        input_img = filter::edge_detection_filter(input_img, options.hysteresis);
+    }
+
+    if options.transform_x {
+        info!("Flipping image horizontally");
+        input_img = input_img.fliph();
+    }
+
+    if options.transform_y {
+        info!("Flipping image vertically");
+        input_img = input_img.flipv();
     }
 
     info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
-    let img = Arc::new(input_img.thumbnail_exact(columns * tile_width, rows * tile_height));
+    let source_img = input_img.thumbnail_exact(columns * tile_width, rows * tile_height);
 
-    debug!("Resized Image Width: {}", img.width());
-    debug!("Resized Image Height: {}", img.height());
+    debug!("Resized Image Width: {}", source_img.width());
+    debug!("Resized Image Height: {}", source_img.height());
 
     //output string
     let mut output = String::new();
@@ -102,108 +107,72 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         trace!("Adding top part of border");
     }
 
-    //clamp threads
-    let thread_count = options.threads.clamp(
-        1,    //there has to be at least 1 thread to convert the img
-        rows, //there should no be more threads than rows
-    );
-    debug!("Threads: {thread_count}");
+    info!("Starting conversion to ascii");
 
-    //split the img into tile for each thread
-    let thread_tiles = (rows as f64 / thread_count as f64).ceil() as u32;
-    debug!("Thread Tile Height: {thread_tiles}");
-    //collect threads handles
-    let mut handles = Vec::with_capacity(thread_count as usize);
-    trace!("Allocated thread handles");
+    //convert source img to a target string
+    let target = source_img
+        .pixels()
+        .into_iter()
+        .step_by(tile_width as usize)
+        .filter_map(|(x, y, _)| {
+            if y % tile_height == 0 && x % tile_width == 0 {
+                //preallocate vector with the with space for all pixels in the tile
+                let mut pixels = Vec::with_capacity((tile_height * tile_width) as usize);
 
-    //split the img into chunks for each thread
-    for chunk in util::range(0, thread_count, options.transform_y) {
-        //arc clone img and density
-        let thread_img = Arc::clone(&img);
-        let thread_density = options.density.to_owned();
-
-        //create a thread for this img chunk
-        trace!("Creating thread: {chunk}");
-        let handle = thread::spawn(move || {
-            //create thread string
-            let mut thread_output = String::new();
-
-            //create a pixel block from multiple pixels
-            //preallocate vector with the correct size, since all tiles should be the same size,
-            //this vector can be reused for all tiles in a thread
-            let mut pixel_block: Vec<Rgba<u8>> =
-                Vec::with_capacity((tile_height * tile_width) as usize);
-
-            //go through the thread img chunk
-            for row in util::range(
-                (chunk * thread_tiles).clamp(0, rows), //after max rows, no more pixels exist
-                // chunk_end,
-                ((chunk + 1) * thread_tiles).clamp(thread_tiles, rows),
-                options.transform_y,
-            ) {
-                if options.border {
-                    //add bottom part before image
-                    thread_output.push('║');
+                //get all pixel of the tile
+                for p_x in 0..tile_width {
+                    for p_y in 0..tile_height {
+                        pixels.push(source_img.get_pixel(x + p_x, y + p_y))
+                    }
                 }
 
-                for col in util::range(0, columns, options.transform_x) {
-                    //get a single tile
-                    let tile_row = row * tile_height;
-                    let tile_col = col * tile_width;
+                //convert pixels to a char/string
+                let mut char = pixel::correlating_char(
+                    &pixels,
+                    options.density.as_str(),
+                    options.invert,
+                    options.target,
+                );
 
-                    //go through each pixel in the tile
-                    for y in tile_row..(tile_row + tile_height) {
-                        for x in tile_col..(tile_col + tile_width) {
-                            //add pixel to block
-                            pixel_block.push(thread_img.get_pixel(x, y));
-                        }
+                //add a break at line end
+                if x == source_img.width() - tile_width {
+                    //add outer border (right)
+                    if options.border {
+                        char.push('║');
                     }
 
-                    //get and display density char, it returns a normal and a colored string
-                    let char = correlating_char(
-                        &pixel_block,
-                        &thread_density,
-                        options.invert,
-                        options.target,
-                    );
-
-                    //clear the vec for the next iteration
-                    pixel_block.clear();
-                    //append the char for the output
-                    thread_output.push_str(char.as_str());
+                    char.push('\n');
+                } else if x == 0 {
+                    //add outer border (left)
+                    if options.border {
+                        char = format!("{}{}", "║", char);
+                    }
                 }
 
-                if options.border {
-                    //add bottom part after image
-                    thread_output.push('║');
-                }
-
-                //add new line
-                thread_output.push('\n');
+                Some(char)
+            } else {
+                //only read tiles
+                None
             }
-            trace!("Thread {chunk} finished");
-            thread_output
-        });
-        trace!("Appending handle of thread {chunk}");
-        handles.push(handle);
-    }
+        })
+        .reduce(|acc, value| acc + value.as_str());
 
-    for handle in handles {
-        //get thread result
-        let result = match handle.join() {
-            Ok(string) => string,
-            Err(_) => util::fatal_error("Error encountered when converting image", Some(1)),
-        };
-        //add output together
-        trace!("Appending output of thread");
-        output.push_str(result.as_str());
-    }
+    match target {
+        Some(value) => output.push_str(&value),
+        //this none case should never appear
+        None => util::fatal_error("Failed to convert image.", Some(70)),
+    };
 
     if options.border {
         //add bottom part of border after conversion
         output.push('╚');
         output.push_str("═".repeat((columns) as usize).as_str());
         output.push('╝');
+    } else {
+        //last char is a new line char, remove it
+        //don't use trim, since it can remove "whitespace" which include spaces
+        //these might be used to represent part of the image
+        output.remove(output.len() - 1);
     }
 
     //compare it, ignoring the enum value such as true, true
@@ -214,5 +183,6 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         output.push_str(&target::html::html_bottom());
     }
 
-    output.trim_end().to_string()
+    //return output
+    output
 }

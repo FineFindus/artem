@@ -90,14 +90,6 @@ pub fn build_cli() -> Command<'static> {
                 .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an .ansi extension, or an .html file, to convert the output to html."),
         )
         .arg(
-            Arg::new("threads")
-                .long("thread")
-                .takes_value(true)
-                .default_value("4")
-                .value_hint(ValueHint::Other)
-                .help("OutputNumber of threads used to convert the image. A larger number can lead to grater performance. Defaults to 4"),
-        )
-        .arg(
             Arg::new("invert-density")
                 .long("invert")
                 .help("Inverts the characters used for the image, so light characters will as dark ones. Can be useful if the image has a dark background."),

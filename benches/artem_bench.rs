@@ -6,8 +6,6 @@ mod benchmarks;
 criterion_main!(
     //without any options set
     benchmarks::default::benches,
-    //using different threads
-    benchmarks::threads::benches,
     //different size options
     benchmarks::size::benches,
     //using the outline algorithm

@@ -60,10 +60,10 @@ mod test_color_support {
 /// ```
 /// use artem::util::map_range;
 ///
-/// let remapped = map_range((0f64, 10f64), (0f64, 20f64), 2f64);
-/// assert_eq!(4f64, remapped);
+/// let remapped = map_range((0f32, 10f32), (0f32, 20f32), 2f32);
+/// assert_eq!(4f32, remapped);
 /// ```
-pub fn map_range(from_range: (f64, f64), to_range: (f64, f64), value: f64) -> f64 {
+pub fn map_range(from_range: (f32, f32), to_range: (f32, f32), value: f32) -> f32 {
     to_range.0 + (value - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
 
@@ -74,19 +74,19 @@ mod test_map_range {
     #[test]
     fn remap_values() {
         //remap 2 to 4
-        assert_eq!(4f64, map_range((0f64, 10f64), (0f64, 20f64), 2f64));
+        assert_eq!(4f32, map_range((0f32, 10f32), (0f32, 20f32), 2f32));
     }
 
     #[test]
     fn remap_values_above_range() {
         //remap 21 to 42, since the value will be doubled
-        assert_eq!(42f64, map_range((0f64, 10f64), (0f64, 20f64), 21f64));
+        assert_eq!(42f32, map_range((0f32, 10f32), (0f32, 20f32), 21f32));
     }
 
     #[test]
     fn remap_values_below_range() {
         //remap -1 to -2, since the value will be doubled
-        assert_eq!(-2f64, map_range((0f64, 10f64), (0f64, 20f64), -1f64));
+        assert_eq!(-2f32, map_range((0f32, 10f32), (0f32, 20f32), -1f32));
     }
 }
 
@@ -138,7 +138,7 @@ pub fn calculate_dimensions(
     target_size: u32,
     height: u32,
     width: u32,
-    scale: f64,
+    scale: f32,
     border: bool,
     dimension: ResizingDimension,
 ) -> (u32, u32, u32, u32) {
@@ -158,27 +158,31 @@ pub fn calculate_dimensions(
 
             //calculate tiles
             let tile_width = width / columns;
-            let tile_height = (tile_width as f64 / scale).floor() as u32;
+            let tile_height = (tile_width as f32 / scale).floor() as u32;
 
             let rows = height / tile_height;
 
             (columns, rows, tile_width, tile_height)
         }
+
         ResizingDimension::Height => {
-            let rows = if height > target_size {
-                target_size
+            let mut rows = if height > target_size {
+                // minus 1, since the user input line is included
+                target_size - 1
             } else {
                 height
             };
+
             //calculate tiles
             let tile_height = height / rows;
-            let tile_width = (tile_height as f64 * scale).ceil() as u32;
+            let tile_width = (tile_height as f32 * scale).ceil() as u32;
 
             let mut columns = width / tile_width;
 
             if border {
                 //remove a bit of space for the border
                 columns = columns.saturating_sub(2);
+                rows = rows.saturating_sub(2);
             }
 
             (columns, rows, tile_width, tile_height)
@@ -209,7 +213,7 @@ mod test_calculate_dimensions {
     #[test]
     fn calculate_dimensions_height() {
         assert_eq!(
-            (170, 100, 3, 5),
+            (170, 99, 3, 5),
             calculate_dimensions(100, 512, 512, 0.42, false, ResizingDimension::Height)
         );
     }
@@ -242,7 +246,7 @@ mod test_calculate_dimensions {
     fn calculate_dimensions_scale_zero() {
         assert_eq!(
             (100, 0, 5, 4294967295),
-            calculate_dimensions(100, 512, 512, 0f64, false, ResizingDimension::Width)
+            calculate_dimensions(100, 512, 512, 0f32, false, ResizingDimension::Width)
         );
     }
 
@@ -250,7 +254,7 @@ mod test_calculate_dimensions {
     fn calculate_border_smaller_columns() {
         assert_eq!(
             (98, 0, 5, 4294967295),
-            calculate_dimensions(100, 512, 512, 0f64, true, ResizingDimension::Width)
+            calculate_dimensions(100, 512, 512, 0f32, true, ResizingDimension::Width)
         );
     }
 }

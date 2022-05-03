@@ -1,5 +1,3 @@
-use std::ops::Div;
-
 use image::Rgba;
 
 use crate::{options, target, util};
@@ -30,7 +28,7 @@ pub fn correlating_char(
     invert: bool,
     target: options::TargetType,
 ) -> String {
-    let (red, blue, green) = average_color(block);
+    let (red, green, blue) = average_color(block);
 
     //calculate luminosity from avg. pixel color
     let luminosity = luminosity(red, green, blue);
@@ -38,16 +36,16 @@ pub fn correlating_char(
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
     let density_index = util::map_range(
-        (0f64, 255f64),
+        (0f32, 255f32),
         if invert {
-            (0f64, density.len() as f64)
+            (0f32, density.len() as f32)
         } else {
-            (density.len() as f64, 0f64)
+            (density.len() as f32, 0f32)
         },
         luminosity,
     )
     .floor()
-    .clamp(0f64, density.len() as f64);
+    .clamp(0f32, density.len() as f32);
 
     //get correct char from map, default to a space
     let density_char = density.chars().nth(density_index as usize).unwrap_or(' ');
@@ -311,34 +309,27 @@ mod test_pixel_density {
 ///
 /// The formula for calculating the rbg colors is based an a minutephysics video <https://www.youtube.com/watch?v=LKnqECcg6Gw>
 fn average_color(block: &[Rgba<u8>]) -> (u8, u8, u8) {
-    //color as f64 for square rooting later
-    let mut red: f64 = 0f64;
-    let mut blue: f64 = 0f64;
-    let mut green: f64 = 0f64;
-
-    //average all pixel in a block
-    for pixel in block {
-        let r = pixel.0[0] as f64;
-        let g = pixel.0[1] as f64;
-        let b = pixel.0[2] as f64;
-
-        //rgb values have to squared and rooted to get avg color
-        red += r * r;
-        blue += b * b;
-        green += g * g;
-    }
-
-    //calculate average color according to √color1² + color2², round result
-    red = red.div(block.len() as f64).sqrt().round();
-    blue = blue.div(block.len() as f64).sqrt().round();
-    green = green.div(block.len() as f64).sqrt().round();
-
-    //convert to u8, since rgb is only u8
-    (red as u8, blue as u8, green as u8)
+    let sum = block
+        .iter()
+        .map(|pixel| {
+            (
+                pixel.0[0] as f32 * pixel.0[0] as f32,
+                pixel.0[1] as f32 * pixel.0[1] as f32,
+                pixel.0[2] as f32 * pixel.0[2] as f32,
+            )
+        })
+        .fold((0f32, 0f32, 0f32), |acc, value| {
+            (acc.0 + value.0, acc.1 + value.1, acc.2 + value.2)
+        });
+    (
+        (sum.0 / block.len() as f32).sqrt() as u8,
+        (sum.1 / block.len() as f32).sqrt() as u8,
+        (sum.2 / block.len() as f32).sqrt() as u8,
+    )
 }
 
 #[cfg(test)]
-mod test_pixel_color_luminosity {
+mod test_avg_color {
     use super::*;
 
     #[test]
@@ -348,10 +339,7 @@ mod test_pixel_color_luminosity {
             Rgba::<u8>::from([0, 255, 0, 255]),
         ];
 
-        assert_eq!(
-            (180, 0, 180), //float values... https://imgs.xkcd.com/comics/e_to_the_pi_minus_pi.png
-            average_color(&pixels)
-        );
+        assert_eq!((180, 180, 0), average_color(&pixels));
     }
 
     #[test]
@@ -385,12 +373,12 @@ mod test_pixel_color_luminosity {
 /// use artem::pixel;
 ///
 /// let luminosity = luminosity(154, 85, 54);
-/// assert_eq!(97f64, luminosity);
+/// assert_eq!(97f32, luminosity);
 /// ```
 ///
 /// The formula/weighting for the colors comes from <http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/>
-pub fn luminosity(red: u8, green: u8, blue: u8) -> f64 {
-    (0.21 * red as f64) + (0.72 * green as f64) + (0.07 * blue as f64)
+pub fn luminosity(red: u8, green: u8, blue: u8) -> f32 {
+    (0.21 * red as f32) + (0.72 * green as f32) + (0.07 * blue as f32)
 }
 
 #[cfg(test)]
@@ -399,16 +387,16 @@ mod tests {
 
     #[test]
     fn luminosity_black_is_zero() {
-        assert_eq!(0f64, luminosity(0, 0, 0))
+        assert_eq!(0f32, luminosity(0, 0, 0))
     }
 
     #[test]
     fn luminosity_white_is_255() {
-        assert_eq!(254.99999999999997f64, luminosity(255, 255, 255))
+        assert_eq!(255.00002, luminosity(255, 255, 255))
     }
 
     #[test]
     fn luminosity_rust_color_is_255() {
-        assert_eq!(97.32f64, luminosity(154, 85, 54))
+        assert_eq!(97.32f32, luminosity(154, 85, 54))
     }
 }

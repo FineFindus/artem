@@ -67,7 +67,7 @@ pub mod density {
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg").arg("-c 0.6");
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "                       0000  000000000000000000000000000000000000000            ",
+            "                      00000  000000000000000000000000000000000000000            ",
         ));
     }
 
@@ -78,7 +78,7 @@ pub mod density {
             .args(["-c", "M0123-."]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "MMMMMMMMMM0000000000000000000000000000101111111111111111111110011000000000000000",
+            "MMMMMMMMM00000000000000000000000000000101111111111111111111110011000000000000000",
         ));
     }
 
@@ -89,7 +89,7 @@ pub mod density {
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "####WWWWW$$$$$999$9888777677777666667666555545655555543334556665667778888899$$$9",
+                "###WWWWWW$$$$$999998887776677776666676665555456555555433345566656677788888999$$9",
             ));
         }
     }
@@ -113,7 +113,7 @@ pub mod density {
             cmd.arg("examples/abraham_lincoln.jpg").args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "W&&WMMM#**aaaahhaahbbdqqwwwppwwwwmmmwwZmO0O0Q0Z00000OCJJJC0OZmm0Zmqqqdbbbbkkaoah",
+                "W&WMMMM#*oaaaahhhahbbdqwwwwqqwwmwmmmwwZmO0O0Q0Z000000CUJJC0OZmm0Zmqqqdbbddkkaaah",
             ));
         }
     }
@@ -205,7 +205,7 @@ pub mod size {
         cmd.arg("examples/abraham_lincoln.jpg").args(["-s", "75"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNXXXXXXXXXKKK000O00000OOOOO0OOOkkkkkOkkkkkkxxxxkkOOOkOO000KKKKKKXXXX",
+            "WWWNNNNNXXXXXXKXXKKK000OO000OOOOOO0OOOkkkkkOkkkkkkxdxxkkOOOkOO0000KKKKKXXXK",
         ));
     }
 }
@@ -350,7 +350,7 @@ pub mod scale {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--ratio", f64::MAX.to_string().as_str()]);
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOO000KKK00KKXXXX",
+            "NWWNNNNXXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOOO00KKK00KKXXXX",
         ));
     }
 
@@ -361,7 +361,7 @@ pub mod scale {
             .args(["--ratio", "0.75"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "WWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOOOOOOxkkkxkOkkkkkkxxdxxkkOOOkOO000KKK0KKKXXXX",
+            "NWWNNNNNXXXXKKKKXXKKK0000OO00OOOOOOkOOkkxkkkxkOkkkkkkxxddxkkOOOkOO000KKK00KKXXXX",
         ));
     }
 }
@@ -387,7 +387,7 @@ pub mod flip_x {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--flipX");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "XXXXKKKKKK0000OOkOOOOkxxxxxkkkkkkOkkkkkkOOO0OOOOO0000OOO000KKKXXKXXXXXXNNNNNNWWW",
+            "XXXXKKKKKK0000OOkOOOkkxxxxxkkkkkkOkkkkkkOOO0OOOOOOO00OOO000KKKXXKKXXXXXNNNNNNWWW",
         ));
     }
 }
@@ -413,7 +413,7 @@ pub mod flip_y {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--flipY");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            ".....................................................                           ",
+            "...........................................                                     ",
         ));
     }
 }
@@ -439,7 +439,7 @@ pub mod outline {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--outline");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "        ................'....'''.''..'..''''',,;;,'.',,,,;,'''','',,'''','''....",
+            "        ................'....'''.''..'..''''',,;;''.',,,,;,'''','',,'''','''....",
         ));
     }
 }
@@ -478,7 +478,7 @@ pub mod hysteresis {
             .args(["--outline", "--hys"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "                   ....';''..:;;.;;'.,..,:::;o:dxc,':llcldc:;,:c::lc:;,;c;:,.'.,",
+            "                   ....';''..:;;.;;'.,..,;::;o:ddc,':llcldc:;,:c::lc:;,;c;:,.'.,",
         ));
     }
 }
@@ -495,82 +495,8 @@ pub mod flip_x_y {
             .args(["--flipY", "--flipX"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "                           .....................................................",
+            "                                     ..........................................",
         ));
-    }
-}
-
-pub mod thread {
-    use assert_cmd::prelude::*;
-    use predicates::prelude::*;
-    use std::process::Command;
-
-    use crate::load_correct_file;
-
-    #[test]
-    fn arg_is_none() {
-        let mut cmd = Command::cargo_bin("artem").unwrap();
-
-        cmd.arg("examples/abraham_lincoln.jpg").arg("--thread");
-        cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--thread <threads>' requires a value but none was supplied",
-        ));
-    }
-
-    #[test]
-    fn arg_is_nan() {
-        let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
-        cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--thread", "string"]);
-        cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with thread input value",
-        ));
-    }
-
-    #[test]
-    fn arg_is_float() {
-        let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
-        cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--thread", "0.6"]);
-        cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with thread input value",
-        ));
-    }
-
-    #[test]
-    fn arg_is_negative() {
-        let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
-        cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--thread", "-6"]);
-        cmd.assert().failure().stderr(predicate::str::contains(
-            "error: Found argument '-6' which wasn't expected, or isn't valid in this context",
-        ));
-    }
-
-    #[test]
-    fn arg_is_larger_max() {
-        let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
-        cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--thread", u32::MAX.to_string().as_str()]);
-        //since its clamped, it should return the normal img
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::starts_with(load_correct_file()));
-    }
-
-    #[test]
-    fn arg_is_correct() {
-        let mut cmd = Command::cargo_bin("artem").unwrap();
-        cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--thread", "3"]);
-        //only check first line
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::starts_with(load_correct_file()));
     }
 }
 
@@ -597,7 +523,7 @@ pub mod output_file {
             .args(["-o", "/tmp/ascii.ans"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "Written 3617 bytes to /tmp/ascii.ans",
+            "Written 3644 bytes to /tmp/ascii.ans",
         ));
         //delete output file
         fs::remove_file("/tmp/ascii.ans").unwrap();
@@ -612,7 +538,7 @@ pub mod output_file {
             .args(["-o", "/tmp/ascii.html"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "Written 133621 bytes to /tmp/ascii.html",
+            "Written 133620 bytes to /tmp/ascii.html",
         ));
         //delete output file
         fs::remove_file("/tmp/ascii.html").unwrap();
@@ -627,7 +553,7 @@ pub mod output_file {
             .args(["-o", "/tmp/test.txt"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "Written 3617 bytes to /tmp/test.txt",
+            "Written 3644 bytes to /tmp/test.txt",
         ));
         //delete output file
         fs::remove_file("/tmp/test.txt").unwrap();
@@ -655,7 +581,7 @@ pub mod invert {
         cmd.arg("examples/abraham_lincoln.jpg").arg("--invert");
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "         ...............'''....'''''.''',,,,,,',,,,,,;;;;;,'''',''..............",
+            "        ................'''..'''''''.''',,,,,,',,,,,,;;;;;,,''',''..............",
         ));
     }
 }

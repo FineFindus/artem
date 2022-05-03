@@ -87,7 +87,7 @@ fn full_file_compare_html() {
     //load file contents to compare
     let desired_output = fs::read_to_string("assets/abraham_lincoln.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 133621 bytes to /tmp/ascii.html",
+        "Written 133620 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -131,7 +131,7 @@ fn full_file_compare_html_outline() {
     //load file contents to compare
     let desired_output = fs::read_to_string("assets/abraham_lincoln_outline.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 133621 bytes to /tmp/ascii.html",
+        "Written 133620 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -153,7 +153,7 @@ fn full_file_compare_html_background_color() {
     //load file contents to compare
     let desired_output = fs::read_to_string("assets/abraham_lincoln_background.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 173221 bytes to /tmp/ascii.html",
+        "Written 173220 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors

@@ -2,8 +2,6 @@
 pub mod default;
 //Benchmark for different size arguments
 pub mod size;
-//different amount of threads
-pub mod threads;
 //outline version without hysteresis
 pub mod outline;
 //outline version with hysteresis

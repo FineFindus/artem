@@ -106,11 +106,27 @@ fn main() {
         trace!("Using terminal height as target size");
         //change dimension to height
         options_builder.dimension(util::ResizingDimension::Height);
-        terminal_size::terminal_size().unwrap().1 .0 as u32
+
+        //read terminal size, error when STDOUT is not a tty
+        match terminal_size::terminal_size() {
+            Some(value) => value.1 .0 as u32,
+            None => util::fatal_error(
+                "Failed to read terminal size, STDOUT is not a tty",
+                Some(72),
+            ),
+        }
     } else if matches.is_present("width") {
         //use max terminal width
         trace!("Using terminal width as target size");
-        terminal_size::terminal_size().unwrap().0 .0 as u32
+
+        //read terminal size, error when STDOUT is not a tty
+        match terminal_size::terminal_size() {
+            Some(value) => value.0 .0 as u32,
+            None => util::fatal_error(
+                "Failed to read terminal size, STDOUT is not a tty",
+                Some(72),
+            ),
+        }
     } else {
         //use given input size
         trace!("Using user input size as target size");
@@ -135,27 +151,16 @@ fn main() {
     let scale = match matches
         .value_of("scale")
         .unwrap() //this should always be at least "0.43", so it should be safe to unwrap
-        .parse::<f64>()
+        .parse::<f32>()
     {
         Ok(v) => v.clamp(
-            0f64, //a negative scale is not allowed
-            1f64, //even a scale above 0.43 is not looking good
+            0f32, //a negative scale is not allowed
+            1f32, //even a scale above 0.43 is not looking good
         ),
         Err(_) => util::fatal_error("Could not work with ratio input value", Some(65)),
     };
     debug!("Scale: {scale}");
     options_builder.scale(scale);
-
-    //number rof threads used to convert the image
-    let thread_count: u32 = match matches
-        .value_of("threads")
-        .unwrap() //this should always be at least "4", so it should be safe to unwrap
-        .parse::<u32>()
-    {
-        Ok(v) => v,
-        Err(_) => util::fatal_error("Could not work with thread input value", Some(65)),
-    };
-    options_builder.threads(NonZeroU32::new(thread_count).unwrap()); //safe to unwrap, since it is clamped before
 
     let invert = matches.is_present("invert-density");
     debug!("Invert is set to: {invert}");
@@ -248,8 +253,6 @@ fn main() {
 
     //convert the img to ascii string
     info!("Converting the img: {img_path}");
-    // let output = image_conversion::convert_img(img, options_builder.build());
-    // let output = image_conversion::convert_img(img, options_builder.build());
     let output = artem::convert(img, options_builder.build());
 
     //create and write to output file

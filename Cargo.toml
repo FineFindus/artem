@@ -31,8 +31,8 @@ name = "artem_bench"
 harness = false
 
 [build-dependencies]
-clap = "3.1.10"
-clap_complete = "3.1.2"
+clap = "3.1.15"
+clap_complete = "3.1.3"
 clap_mangen = "0.1.6"
 
 [dev-dependencies]
@@ -40,13 +40,12 @@ assert_cmd = "2.0.4"
 predicates = "2.1.1"
 criterion = "0.3.5"
 
-
 [dependencies]
-image = "0.24.1"
+image = "0.24.2"
 colored = "2"
-clap = "3.1.10"
+clap = "3.1.15"
 terminal_size = "0.1.17"
-log = "0.4.16"
+log = "0.4.17"
 env_logger = "0.9.0"
 
 
@@ -66,5 +65,5 @@ assets = [
 ]
 extended-description = """\
 artem is a cli programm to convert images to ascii art. 
-By default it uses truecolor, if not support it fallsback to ansi colors. It supports multiple image formats like jpg, png, gif, webp, and many more.
+By default it uses truecolor, if not support it fallsback to ansi colors. It supports multiple image formats such as jpg, png, gif, webp, and many more.
 """

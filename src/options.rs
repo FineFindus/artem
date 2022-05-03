@@ -59,8 +59,7 @@ mod tests {
 #[derive(Debug, PartialEq)]
 pub struct Option {
     pub density: String,
-    pub threads: u32,
-    pub scale: f64,
+    pub scale: f32,
     pub target_size: u32,
     pub invert: bool,
     pub border: bool,
@@ -94,8 +93,7 @@ mod test_option {
         assert_eq!(
             OptionBuilder {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -115,8 +113,7 @@ mod test_option {
 #[derive(PartialEq, Debug)]
 pub struct OptionBuilder {
     density: String,
-    threads: u32,
-    scale: f64,
+    scale: f32,
     target_size: u32,
     invert: bool,
     border: bool,
@@ -133,8 +130,7 @@ impl Default for OptionBuilder {
         Self {
             //these have to be set to custom defaults for the program to work
             density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-            threads: 1,
-            scale: 0.42f64,
+            scale: 0.42f32,
             target_size: 80,
             invert: Default::default(),
             border: Default::default(),
@@ -232,24 +228,6 @@ impl OptionBuilder {
     }
 
     property! {
-    /// Set the number of threads used to convert the image.
-    ///
-    /// Should be at least 1 and not more then the number of tiles that will be converted.
-    /// More threads can lead to greater performance, but too many can also reduced performance,
-    /// since each thread has an creation cost.
-    ///
-    /// # Examples
-    /// ```
-    /// use artem::options::OptionBuilder;
-    /// use core::num::NonZeroU32;
-    ///
-    /// let mut builder = OptionBuilder::new();
-    /// builder.threads(NonZeroU32::new(4).unwrap());
-    /// ```
-    => threads, NonZeroU32, get
-    }
-
-    property! {
     /// Set the scale.
     ///
     /// Used to change the ratio between width and height of an character.
@@ -260,11 +238,11 @@ impl OptionBuilder {
     /// use artem::options::OptionBuilder;
     ///
     /// let mut builder = OptionBuilder::new();
-    /// builder.scale(0.42f64);
+    /// builder.scale(0.42f32);
     /// ```
-       => scale, f64
+       => scale, f32
     }
-    // pub fn scale(&'a mut self, scale: f64) -> &'a mut Self {
+    // pub fn scale(&'a mut self, scale: f32) -> &'a mut Self {
     //     self.scale = scale;
     //     self
     // }
@@ -436,7 +414,6 @@ impl OptionBuilder {
     pub fn build(&self) -> Option {
         Option {
             density: self.density.to_owned(),
-            threads: self.threads,
             scale: self.scale,
             target_size: self.target_size,
             invert: self.invert,
@@ -459,8 +436,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -480,8 +456,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"density"#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -497,35 +472,11 @@ mod test_conversion_option_builder {
     }
 
     #[test]
-    fn change_thread_count() {
-        assert_eq!(
-            Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 314, //change attribute
-                scale: 0.42f64,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: util::ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            OptionBuilder::new()
-                .threads(NonZeroU32::new(314).unwrap())
-                .build()
-        );
-    }
-
-    #[test]
     fn change_scale() {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 3.14f64, //change attribute
+                scale: 3.14f32, //change attribute
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -536,7 +487,7 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().scale(3.14f64).build()
+            OptionBuilder::new().scale(3.14f32).build()
         );
     }
 
@@ -545,8 +496,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 314, //change attribute
                 invert: false,
                 border: false,
@@ -568,8 +518,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: true, //change attribute
                 border: false,
@@ -589,8 +538,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: true, //change attribute
@@ -610,8 +558,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -633,8 +580,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -654,8 +600,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -675,8 +620,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -696,8 +640,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
@@ -717,8 +660,7 @@ mod test_conversion_option_builder {
         assert_eq!(
             Option {
                 density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                threads: 1,
-                scale: 0.42f64,
+                scale: 0.42f32,
                 target_size: 80,
                 invert: false,
                 border: false,
