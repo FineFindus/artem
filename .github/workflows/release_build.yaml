@@ -107,7 +107,7 @@ jobs:
           - stable
         target:
          #windows gnu
-         - x86_64-pc-windows-gnu
+        #  - x86_64-pc-windows-gnu
          # mscv
          - x86_64-pc-windows-msvc
     steps:
@@ -226,11 +226,11 @@ jobs:
           mkdir -p deployment/completions
           mkdir -p deployment/doc
           #copy completion files and man page
-          cp -u target/*/release/build/artem-*/out/* deployment/completions/
+          cp target/*/release/build/artem-*/out/* deployment/completions/
           #move man page to doc folder
           mv deployment/completions/artem.1 deployment/doc/
           #copy binary file
-          cp -u target/*/release/artem deployment
+          cp target/*/release/artem deployment
 
       - name: Compress release files
         shell: bash
@@ -290,7 +290,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p deployment/assets
-          cp -u target/*/release/build/artem-*/out/* deployment/assets/
+          cp -u target/release/build/artem-*/out/* deployment/assets/
 
       - name: Install cargo deb
         uses: actions-rs/cargo@v1
