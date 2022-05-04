@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [Unreleased]
+# [1.0.0] - 2022-05-04
 
 ### Added
 
@@ -17,8 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The new `--outline` flag will only produce an only of the image
 - When using the `--hysteresis` flag along the `--outline` flag the ascii art will be even more outlined, with less imperfections
 - Added more test cases and examples to the README to cover the newly added functionality
-- Major refactoring of the Code
-- Artem is now a library used by the cli
+- Major refactoring of the code
+- Artem is now a library, which is used by the command-line interface
 - Due to a refactoring of the code, the output ascii image now resembles the input image more closely 
 
 ### Changed
