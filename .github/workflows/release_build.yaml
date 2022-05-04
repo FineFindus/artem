@@ -162,7 +162,7 @@ jobs:
         shell: bash
         run: |
           cd deployment/
-          zip ../artem-v$PROJECT_VERSION-${{ matrix.target }}.zip -r *
+          7z a artem-v$PROJECT_VERSION-${{ matrix.target }}.zip ./deployment/* 
 
         #upload zip file
       - name: Upload Release Build for Windows
