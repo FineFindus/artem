@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The new iterator-based implementation opens the possibility to use [rayon](https://crates.io/crates/rayon) in the future
 - Fixed a crash which could occur when piping to a file using the maximum terminal size
 - Fixed a bug, where the `--height` argument would not actually use the correct height and being a bit too high
+
 ## [0.6.1] - 2022-03-24
 
 ### Added
