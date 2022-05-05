@@ -161,7 +161,6 @@ jobs:
       - name: Create zip file
         shell: bash
         run: |
-          cd deployment/
           7z a artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.zip deployment/* 
 
         #upload zip file
