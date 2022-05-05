@@ -25,7 +25,7 @@ dependencies = [
 
 [[package]]
 name = "artem"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "assert_cmd",
  "clap 3.1.15",

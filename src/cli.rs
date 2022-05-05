@@ -16,7 +16,7 @@ use clap::{Arg, Command, ValueHint};
 /// ```
 pub fn build_cli() -> Command<'static> {
     Command::new("artem")
-        .version("1.0.2")
+        .version("1.0.3")
         .about(
             "artem is a small cli program written in rust to easily convert images to ascii art.",
         )
