@@ -171,7 +171,7 @@ Assuming you have rust/cargo installed, you can build the project with:
 cargo build --release
 ```
 
-The `--release` flag disables debugging options, increasing preformance.
+The `--release` flag disables debugging options, increasing performance.
 
 Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed.
 
