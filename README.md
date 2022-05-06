@@ -5,7 +5,7 @@
 
 # Artem
 
-Artem is a small cli program written in rust to easily convert images
+Artem is a small cli program, written in rust, to easily convert images
 to ascii art, named after the latin word for art. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI. When the ascii image is written to a file, the image will not use colors.
 It supports `.jpeg`, `.png`, `.gif`, `.webp` and many more.
 
@@ -68,7 +68,7 @@ Using the `--outline` flag, the given input image will be filtered, to only cont
 ```bash
 artem PATH --outline
 ```
-For an even better result, it might be worthwhile trying out the `--hysteresis`/`--hys` flag, potentially with chacracters better suited for outlines, for example.
+For an even better result, it might be worthwhile trying out the `--hysteresis`/`--hys` flag, potentially with characters better suited for outlines, for example.
 ```bash
 artem PATH --outline --hysteresis --characters "|/\_.  "
 ```
