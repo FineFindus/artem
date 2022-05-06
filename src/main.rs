@@ -229,20 +229,38 @@ fn main() {
     if matches.is_present("output-file") {
         let file_path = PathBuf::from(matches.value_of("output-file").unwrap()); //save to unwrap, checked before
         debug!("Output-file: {}", file_path.to_str().unwrap());
+
+        //check file extension
         let file_extension = file_path.extension().and_then(std::ffi::OsStr::to_str);
         debug!("FileExtension: {:?}", file_extension);
+
         options_builder.target(match file_extension {
             Some("html") | Some("htm") => {
                 debug!("Target: Html-File");
                 TargetType::HtmlFile(color, background_color)
             }
+
             Some("ansi") | Some("ans") => {
                 debug!("Target: Ansi-File");
-                TargetType::AnsiFile(background_color)
+
+                //by definition ansi file must have colors, only the background color is optional
+                if matches.is_present("no-color") {
+                    warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
+                    TargetType::File
+                } else {
+                    if !util::supports_truecolor() {
+                        warn!("truecolor is disabled, output file will not use truecolor chars")
+                    }
+                    TargetType::AnsiFile(background_color)
+                }
             }
             _ => {
                 debug!("Target: File");
-                warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
+
+                if !matches.is_present("no-color") {
+                    //warn user that output is not colored
+                    warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
+                }
                 TargetType::File
             }
         });
@@ -252,7 +270,7 @@ fn main() {
     }
 
     //convert the img to ascii string
-    info!("Converting the img: {img_path}");
+    info!("Converting img: {img_path}");
     let output = artem::convert(img, options_builder.build());
 
     //create and write to output file
@@ -275,7 +293,7 @@ fn main() {
             Err(_) => util::fatal_error("Could not write to file", Some(74)),
         };
     } else {
-        //print the img to the terminal
+        //print the ascii img to the terminal
         info!("Printing output");
         println!("{output}");
     }
