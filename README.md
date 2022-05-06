@@ -168,8 +168,10 @@ man -l doc/artem.1
 Assuming you have rust/cargo installed, you can build the project with:
 
 ```bash
-cargo build
+cargo build --release
 ```
+
+The `--release` flag disables debugging options, increasing preformance.
 
 Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed.
 
