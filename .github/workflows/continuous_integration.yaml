@@ -82,10 +82,10 @@ jobs:
       matrix:
         platform: [ubuntu-latest] # test only on ubuntu, since artem itself does not use platform specific functions, it should work the same on all othe rplatforms
         rust:
+          - 1.58.1  # MSRV
           - stable
           - beta
           - nightly
-          - 1.58.1  # MSRV
       #tests should pass on all platforms
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 25

@@ -152,7 +152,7 @@ impl Default for OptionBuilder {
 ///
 /// # Examples
 ///
-/// ```
+/// ``` compile_fail, just an internal example code
 /// property!{
 /// ///Example doc
 /// ///This generates a name setter function.
@@ -160,7 +160,7 @@ impl Default for OptionBuilder {
 /// }
 /// ```
 /// ## Generated function
-/// ```
+/// ``` compile_fail, just an internal example code
 /// ///Example doc
 /// ///This generates a name setter function.
 /// pub fn name<'a>(&'a mut self, name: String) -> &'a Self {
