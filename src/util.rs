@@ -153,7 +153,7 @@ pub fn calculate_dimensions(
 
             if border {
                 //remove a bit of space for the border
-                columns = columns.saturating_sub(2);
+                columns = columns.saturating_sub(2).max(1); //should be at last 1
             }
 
             //calculate tiles
@@ -162,7 +162,9 @@ pub fn calculate_dimensions(
 
             let rows = height / tile_height;
 
-            (columns, rows, tile_width, tile_height)
+            //.max(1) is used to ensure that the values are at least 1
+            //a value of 0 could cause an error (but not crash) later on
+            (columns.max(1), rows.max(1), tile_width, tile_height)
         }
 
         ResizingDimension::Height => {
@@ -185,7 +187,9 @@ pub fn calculate_dimensions(
                 rows = rows.saturating_sub(2);
             }
 
-            (columns, rows, tile_width, tile_height)
+            //.max(1) is used to ensure that the values are at least 1
+            //a value of 0 could cause an error (but not crash) later on
+            (columns.max(1), rows.max(1), tile_width, tile_height)
         }
     }
 }
@@ -219,6 +223,22 @@ mod test_calculate_dimensions {
     }
 
     #[test]
+    fn calculate_dimensions_height_1x1_img() {
+        assert_eq!(
+            (1, 1, 1, 1),
+            calculate_dimensions(100, 1, 1, 0.42, false, ResizingDimension::Height)
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_width_1x1_img() {
+        assert_eq!(
+            (1, 1, 1, 2),
+            calculate_dimensions(100, 1, 1, 0.42, false, ResizingDimension::Width)
+        );
+    }
+
+    #[test]
     #[should_panic]
     fn calculate_dimensions_height_zero() {
         calculate_dimensions(0, 512, 512, 0.42, false, ResizingDimension::Height);
@@ -243,9 +263,15 @@ mod test_calculate_dimensions {
     }
 
     #[test]
+    #[should_panic]
+    fn calculate_dimensions_img_width_height_zero() {
+        calculate_dimensions(100, 0, 0, 0.42, false, ResizingDimension::Height);
+    }
+
+    #[test]
     fn calculate_dimensions_scale_zero() {
         assert_eq!(
-            (100, 0, 5, 4294967295),
+            (100, 1, 5, 4294967295),
             calculate_dimensions(100, 512, 512, 0f32, false, ResizingDimension::Width)
         );
     }
@@ -253,7 +279,7 @@ mod test_calculate_dimensions {
     #[test]
     fn calculate_border_smaller_columns() {
         assert_eq!(
-            (98, 0, 5, 4294967295),
+            (98, 1, 5, 4294967295),
             calculate_dimensions(100, 512, 512, 0f32, true, ResizingDimension::Width)
         );
     }

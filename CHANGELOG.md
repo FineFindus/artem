@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Added `--release` flag to example build command (Thanks to @talwat)
 - Fixed failing doc test on rust nightly
+- Fixed an error that could occur when the image was only 1x1
+- Fixed an issue where the border was not applied correctly if the image was only a single pixel wide 
 
 ## [1.0.3] - 2022-05-05
 

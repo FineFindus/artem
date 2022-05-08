@@ -134,6 +134,15 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
                     options.target,
                 );
 
+                //add border at the start
+                //this cannot be done in single if-else, since the image might only be a single pixel wide
+                if x == 0 {
+                    //add outer border (left)
+                    if options.border {
+                        char = format!("{}{}", "║", char);
+                    }
+                }
+
                 //add a break at line end
                 if x == source_img.width() - tile_width {
                     //add outer border (right)
@@ -142,11 +151,6 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
                     }
 
                     char.push('\n');
-                } else if x == 0 {
-                    //add outer border (left)
-                    if options.border {
-                        char = format!("{}{}", "║", char);
-                    }
                 }
 
                 Some(char)
@@ -160,7 +164,10 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     match target {
         Some(value) => output.push_str(&value),
         //this none case should never appear
-        None => util::fatal_error("Failed to convert image.", Some(70)),
+        None => {
+            log::error!("Image: {:?}", input_img.dimensions());
+            util::fatal_error("Failed to convert image.", Some(70));
+        }
     };
 
     if options.border {
