@@ -1,6 +1,7 @@
 [![artem crate](https://img.shields.io/crates/v/artem.svg)](https://crates.io/crates/artem)
 ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
 [![Continuous Integration](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml/badge.svg)](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml)
+![maintenance-status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
 # Artem
