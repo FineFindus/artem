@@ -89,7 +89,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     debug!("Resized Image Height: {}", source_img.height());
 
     //output string
-    let mut output = String::new();
+    let mut output = String::with_capacity((tile_width * tile_height) as usize);
     trace!("Created output string");
 
     if std::mem::discriminant(&options.target)

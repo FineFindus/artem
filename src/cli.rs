@@ -24,6 +24,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("INPUT")
                 .help("Path to the target image. Does NOT alter the original image")
                 .required(true)
+                .multiple_values(true)
                 .value_hint(ValueHint::FilePath)
         )
         .arg(

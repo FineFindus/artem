@@ -42,6 +42,36 @@ pub mod input {
             .success()
             .stdout(predicate::str::starts_with(load_correct_file()));
     }
+
+    #[test]
+    fn multiple_input_is_false() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+
+        cmd.args(["examples/abraham_lincoln.jpg", "examples/non_existing.jpg"]);
+        cmd.assert()
+            .failure()
+            .stderr(predicate::str::contains("does not exist"));
+    }
+
+    #[test]
+    fn multiple_correct_input() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+
+        cmd.args([
+            "examples/abraham_lincoln.jpg",
+            "examples/abraham_lincoln.jpg",
+        ]);
+
+        let mut ascii_img = String::new();
+        //add img twice, since it was given twice as an input
+        ascii_img.push_str(&load_correct_file());
+        ascii_img.push('\n');
+        ascii_img.push_str(&load_correct_file());
+        //check only the first line, the rest is likely to be correct as well
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::starts_with(ascii_img));
+    }
 }
 
 pub mod density {
@@ -220,7 +250,7 @@ pub mod width {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").args(["-w", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -268,7 +298,7 @@ pub mod height {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("examples/abraham_lincoln.jpg").args(["-h", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -377,7 +407,7 @@ pub mod flip_x {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--flipX", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -403,7 +433,7 @@ pub mod flip_y {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--flipY", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -429,7 +459,7 @@ pub mod outline {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--outline", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -467,7 +497,7 @@ pub mod hysteresis {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--outline", "--hysteresis", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -571,7 +601,7 @@ pub mod invert {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--invert", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -599,7 +629,7 @@ pub mod background {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--background", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -637,7 +667,7 @@ pub mod no_color {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--no-color", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 
@@ -673,7 +703,7 @@ pub mod border {
         cmd.arg("examples/abraham_lincoln.jpg")
             .args(["--border", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '123' which wasn't expected, or isn't valid in this context",
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
     }
 

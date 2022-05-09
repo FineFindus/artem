@@ -49,25 +49,21 @@ fn main() {
 
     let mut options_builder = OptionBuilder::new();
 
-    //this should be save to unwrap since the input has to be non-null
-    let img_path = matches.value_of("INPUT").unwrap();
-    //check if file exist
-    if !Path::new(img_path).exists() {
-        util::fatal_error(format!("File {img_path} does not exist").as_str(), Some(66));
-    } else if !Path::new(img_path).is_file() {
-        util::fatal_error(format!("{img_path} is not a file").as_str(), Some(66));
-    }
+    //at least one input must exist, so its safe to unwrap
+    let input = matches.values_of("INPUT").unwrap();
 
-    //try to open img
-    let img = match image::open(img_path) {
-        Ok(img) => img,
-        Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
-    };
+    let mut img_paths = Vec::with_capacity(input.len());
 
-    trace!("Checking if img dimensions are larger than 0");
-    //the image-rs lib does not state if images can have a size 0, so check here
-    if img.height() == 0 || img.width() == 0 {
-        util::fatal_error("Image dimensions can not be 0", Some(66))
+    info!("Checking inputs");
+    for value in input {
+        let path = Path::new(value);
+        //check if file exist and is a file (not a directory)
+        if !path.exists() {
+            util::fatal_error(format!("File {value} does not exist").as_str(), Some(66));
+        } else if !Path::new(path).is_file() {
+            util::fatal_error(format!("{value} is not a file").as_str(), Some(66));
+        }
+        img_paths.push(path);
     }
 
     //density char map
@@ -269,16 +265,37 @@ fn main() {
         options_builder.target(TargetType::Shell(color, background_color));
     }
 
-    //convert the img to ascii string
-    info!("Converting img: {img_path}");
-    let output = artem::convert(img, options_builder.build());
+    let mut output = String::new();
+
+    for (index, path) in img_paths.iter().enumerate() {
+        //try to open img
+        let img = match image::open(path) {
+            Ok(img) => img,
+            Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
+        };
+
+        trace!("Checking if img dimensions are larger than 0");
+        //the image-rs lib does not state if images can have a size 0, so check here
+        if img.height() == 0 || img.width() == 0 {
+            util::fatal_error("Image dimensions can not be 0", Some(66))
+        }
+
+        if index != 0 && index - 1 != img_paths.len() {
+            trace!("Adding line break between images");
+            output.push('\n');
+        }
+
+        //convert the img to ascii string
+        info!("Converting img: {}", path.display());
+        output.push_str(artem::convert(img, options_builder.build()).as_str());
+    }
 
     //create and write to output file
     if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
         info!("Writing output to output file");
         let mut file = match File::create(matches.value_of("output-file").unwrap()) {
             Ok(f) => f,
-            Err(_) => util::fatal_error("Could not create file", Some(73)),
+            Err(_) => util::fatal_error("Could not create output file", Some(73)),
         };
         trace!("Created output file");
 
@@ -290,7 +307,7 @@ fn main() {
                     matches.value_of("output-file").unwrap()
                 )
             }
-            Err(_) => util::fatal_error("Could not write to file", Some(74)),
+            Err(_) => util::fatal_error("Could not write to output file", Some(74)),
         };
     } else {
         //print the ascii img to the terminal

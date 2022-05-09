@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- It is now possible to input multiple files
 - Improved handling of `.ansi`/`.ans` files ( includes more warnings)
 - Improved documentation of output files
 ### Changed
@@ -15,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed failing doc test on rust nightly
 - Fixed an error that could occur when the image was only 1x1
 - Fixed an issue where the border was not applied correctly if the image was only a single pixel wide 
+- Adapted tests to work with multiple file inputs
 
 ## [1.0.3] - 2022-05-05
 
