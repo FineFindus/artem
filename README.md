@@ -26,8 +26,12 @@ _source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_hea
 For simply converting an image:
 
 ```bash
-artem PATH
+artem path
 ```
+The input can either be one or multiple file paths or URLs.
+
+**NOTE**: To use URLs, the `web_image` feature has to be enabled. It is enabled by default.
+
 
 For more options use:
 
@@ -119,11 +123,11 @@ The homebrew version has the added benefit of also installing the man page and t
 
 #### Binary files
 
-Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or (more recommended) [`cargo`](#all-platforms-recommended).
+Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or  [`cargo`](#all-platforms-recommended).
 
 ### Windows
 
-To install the windows version, without using `cargo` download either the gnu- or the mscv compiled `.zip` files from [release tab](https://github.com/FineFindus/artem/releases) and extract the `.exe`. It should be noted that you will have to add the `.exe` manually to the PATH variable.
+To install the windows version, without using `cargo`, download either the gnu- or the mscv compiled `.zip` files from [release tab](https://github.com/FineFindus/artem/releases) and extract the `.exe`. It should be noted that you will have to add the `.exe` manually to the PATH variable.
 
 ## Shell completions
 
@@ -174,7 +178,21 @@ cargo build --release
 
 The `--release` flag disables debugging options, increasing performance.
 
+
 Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed.
+
+### Features
+
+This disables the default features, whilst enabling all other specified features: 
+
+```bash
+cargo build --release --no-default-features --features FEATURES
+```
+For more information about the usage of features, please refer to the [cargo book](https://doc.rust-lang.org/cargo/reference/features.html#command-line-feature-options).
+
+The following features are currently available:
+
+- `web_image` Accept Image URLs as input, enabled by default
 
 ## Contributing
 
@@ -208,7 +226,7 @@ The following images are used for testing/examples:
 
 - [x] Add even more test
 
-- [ ] Convert multiple files at once
+- [x] Convert multiple files at once
 
 - [x] Automate copying of completion files from OUT_DIR to deployment/assets
 

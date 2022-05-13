@@ -165,7 +165,6 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         Some(value) => output.push_str(&value),
         //this none case should never appear
         None => {
-            log::error!("Image: {:?}", input_img.dimensions());
             util::fatal_error("Failed to convert image.", Some(70));
         }
     };

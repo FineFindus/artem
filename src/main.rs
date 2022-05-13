@@ -47,6 +47,9 @@ fn main() {
         .init();
     trace!("Started logger with trace");
 
+    //log enabled features
+    trace!("Feature web_image: {}", cfg!(feature = "web_image"));
+
     let mut options_builder = OptionBuilder::new();
 
     //at least one input must exist, so its safe to unwrap
@@ -57,13 +60,23 @@ fn main() {
     info!("Checking inputs");
     for value in input {
         let path = Path::new(value);
+
+        #[cfg(feature = "web_image")]
+        {
+            if value.starts_with("http") {
+                debug!("Input {} is a URL", value);
+                img_paths.push(value);
+                continue;
+            }
+        }
         //check if file exist and is a file (not a directory)
         if !path.exists() {
             util::fatal_error(format!("File {value} does not exist").as_str(), Some(66));
         } else if !Path::new(path).is_file() {
             util::fatal_error(format!("{value} is not a file").as_str(), Some(66));
         }
-        img_paths.push(path);
+        debug!("Input {} is a file", value);
+        img_paths.push(value);
     }
 
     //density char map
@@ -268,11 +281,8 @@ fn main() {
     let mut output = String::new();
 
     for (index, path) in img_paths.iter().enumerate() {
-        //try to open img
-        let img = match image::open(path) {
-            Ok(img) => img,
-            Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
-        };
+        //try to load img
+        let img = load_image(path);
 
         trace!("Checking if img dimensions are larger than 0");
         //the image-rs lib does not state if images can have a size 0, so check here
@@ -286,7 +296,7 @@ fn main() {
         }
 
         //convert the img to ascii string
-        info!("Converting img: {}", path.display());
+        info!("Converting img: {}", path);
         output.push_str(artem::convert(img, options_builder.build()).as_str());
     }
 
@@ -313,5 +323,50 @@ fn main() {
         //print the ascii img to the terminal
         info!("Printing output");
         println!("{output}");
+    }
+}
+
+/// Return the image from the specified path.
+///
+/// Loads the image from the specified path.
+/// If the path is a url and the web_image feature is enabled,
+/// the image will be downloaded and opened from memory.
+///
+/// # Examples
+/// ```
+/// let image = load_image("../examples/abraham_lincoln.jpg")
+/// ```
+fn load_image(path: &str) -> image::DynamicImage {
+    #[cfg(feature = "web_image")]
+    {
+        if path.starts_with("http") {
+            {
+                info!("Started to download image from: {}", path);
+                let now = std::time::Instant::now();
+                let resp = minreq::get(path).send();
+
+                //get bytes of the image
+                let bytes = match resp {
+                    Ok(value) => value.into_bytes(),
+                    Err(_) => util::fatal_error(
+                        format!("Failed to parse image bytes from {path}").as_str(),
+                        Some(66),
+                    ),
+                };
+                info!("Downloading took {:3} ms", now.elapsed().as_millis());
+
+                debug!("Opening downloaded image from memory");
+                return match image::load_from_memory(&bytes) {
+                    Ok(img) => img,
+                    Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
+                };
+            }
+        }
+    }
+
+    info!("Opening image");
+    match image::open(path) {
+        Ok(img) => img,
+        Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
     }
 }

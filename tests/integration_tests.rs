@@ -18,6 +18,22 @@ fn full_file_compare_no_args() {
 }
 
 #[test]
+#[cfg(feature = "web_image")]
+fn full_file_compare_url() {
+    let mut cmd = Command::cargo_bin("artem").unwrap();
+
+    cmd.arg(
+        "https://raw.githubusercontent.com/FineFindus/artem/master/examples/abraham_lincoln.jpg",
+    );
+
+    //load file contents to compare
+    let desired_output = fs::read_to_string("assets/abraham_lincoln.txt").unwrap(); //ignore errors
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains(desired_output));
+}
+
+#[test]
 fn full_file_compare_border() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 

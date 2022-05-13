@@ -22,7 +22,17 @@ pub fn build_cli() -> Command<'static> {
         )
         .arg(
             Arg::new("INPUT")
-                .help("Path to the target image. Does NOT alter the original image")
+                .help(
+                    if cfg!(feature = "web_image")
+                    {
+                        //special help message with url help 
+                        "Paths or URLs to the target image. If the input is an URL, the image is downloaded and then converted. The original image is NOT altered."
+                    } else {
+                        //normal help text with only paths
+                        "Paths to the target image. The original image is NOT altered."
+                    }
+
+                )
                 .required(true)
                 .multiple_values(true)
                 .value_hint(ValueHint::FilePath)
@@ -35,7 +45,7 @@ pub fn build_cli() -> Command<'static> {
                 .value_hint(ValueHint::Other)
                 //use "\" to keep this readable but still as a single line string
                 .help("Change the characters that are used to display the image.\
-                The first character should have the highest 'darkness' and the last should have the least (recommended to be the space character ' ').\
+                The first character should have the highest 'darkness' and the last should have the least (recommended to be the space character ' '). \
                 A lower detail map is recommend for smaller images."),
         )
         .arg(
@@ -46,8 +56,8 @@ pub fn build_cli() -> Command<'static> {
                 .default_value("80")
                 .value_hint(ValueHint::Other)
                 .conflicts_with_all(&["height", "width"])
-                .help("Change the size of the output image.\
-                The minimum size is 20, the maximum 230. Values outside of the range will be\
+                .help("Change the size of the output image. \
+                The minimum size is 20, the maximum 230. Values outside of the range will be \
                 ignored and changed to the nearest usable value. This argument is conflicting with --width and --height"),
         )
         .arg(
@@ -55,14 +65,14 @@ pub fn build_cli() -> Command<'static> {
                 .short('h')
                 .long("height")
                 .conflicts_with("width")
-                .help("Use the terminal maximum terminal height to display the image.\
+                .help("Use the terminal maximum terminal height to display the image. \
                 This argument is conflicting with --size and --width "),
         )
         .arg(
             Arg::new("width")
                 .short('w')
                 .long("width")
-                .help("Use the terminal maximum terminal height to display the image.\
+                .help("Use the terminal maximum terminal height to display the image. \
                 This argument is conflicting with --size and --height "),
         )
         .arg(
@@ -71,7 +81,7 @@ pub fn build_cli() -> Command<'static> {
                 .takes_value(true)
                 .default_value("0.42")
                 .value_hint(ValueHint::Other)
-                .help("Change the ratio between height and width, since Ascii chars are a bit higher than long.\
+                .help("Change the ratio between height and width, since Ascii chars are a bit higher than long. \
                 The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
         ).arg(
             Arg::new("flipX")
@@ -88,7 +98,7 @@ pub fn build_cli() -> Command<'static> {
                 .long("output")
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
-                .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an .ansi extension, or an .html file, to convert the output to html.\
+                .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an .ansi extension, or an .html file, to convert the output to html. \
                  .ansi files will consider environment variables when creating colored output, for example when COLORTERM is not set to truecolor, the resulting file will fallback to 8-bit colors."),
         )
         .arg(
