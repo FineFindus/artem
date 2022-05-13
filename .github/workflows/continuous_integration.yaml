@@ -82,7 +82,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest] # test only on ubuntu, since artem itself does not use platform specific functions, it should work the same on all othe rplatforms
         rust:
-          - 1.58.1  # MSRV
+          - 1.60.0  # MSRV
           - stable
           - beta
           - nightly
