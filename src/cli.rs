@@ -15,11 +15,10 @@ use clap::{Arg, Command, ValueHint};
 /// matches.is_present("arg");
 /// ```
 pub fn build_cli() -> Command<'static> {
-    Command::new("artem")
-        .version("1.0.3")
-        .about(
-            "artem is a small cli program written in rust to easily convert images to ascii art.",
-        )
+    Command::new(clap::crate_name!())
+        .version(clap::crate_version!())
+        .author(clap::crate_authors!("\n"))
+        .about(clap::crate_description!())
         .arg(
             Arg::new("INPUT")
                 .help(
@@ -45,8 +44,8 @@ pub fn build_cli() -> Command<'static> {
                 .value_hint(ValueHint::Other)
                 //use "\" to keep this readable but still as a single line string
                 .help("Change the characters that are used to display the image.\
-                The first character should have the highest 'darkness' and the last should have the least (recommended to be the space character ' '). \
-                A lower detail map is recommend for smaller images."),
+                The first character should have the highest 'darkness' and the last should have the least (recommended to be a space ' '). \
+                A lower detail map is recommend for smaller images. Included characters can be used with the argument 0 | 1 | 2."),
         )
         .arg(
             Arg::new("size")
@@ -58,7 +57,7 @@ pub fn build_cli() -> Command<'static> {
                 .conflicts_with_all(&["height", "width"])
                 .help("Change the size of the output image. \
                 The minimum size is 20, the maximum 230. Values outside of the range will be \
-                ignored and changed to the nearest usable value. This argument is conflicting with --width and --height"),
+                ignored and changed to the nearest usable value. This argument is conflicting with --width and --height."),
         )
         .arg(
             Arg::new("height")
@@ -66,14 +65,14 @@ pub fn build_cli() -> Command<'static> {
                 .long("height")
                 .conflicts_with("width")
                 .help("Use the terminal maximum terminal height to display the image. \
-                This argument is conflicting with --size and --width "),
+                This argument is conflicting with --size and --width."),
         )
         .arg(
             Arg::new("width")
                 .short('w')
                 .long("width")
                 .help("Use the terminal maximum terminal height to display the image. \
-                This argument is conflicting with --size and --height "),
+                This argument is conflicting with --size and --height."),
         )
         .arg(
             Arg::new("scale")
@@ -81,16 +80,16 @@ pub fn build_cli() -> Command<'static> {
                 .takes_value(true)
                 .default_value("0.42")
                 .value_hint(ValueHint::Other)
-                .help("Change the ratio between height and width, since Ascii chars are a bit higher than long. \
-                The default value is 0.43, min is 0 and max 2. It is not recommend to change this setting."),
+                .help("Change the ratio between height and width, since ASCII characters are a bit higher than long. \
+                The value has to be between 0.1 and 1.0. It is not recommend to change this setting."),
         ).arg(
             Arg::new("flipX")
                 .long("flipX")
-                .help("Flip the image along the X axis"),
+                .help("Flip the image along the X-Axis/horizontally."),
         ).arg(
             Arg::new("flipY")
                 .long("flipY")
-                .help("Flip the image along the Y axis"),
+                .help("Flip the image along the Y-Axis/vertically."),
         )
         .arg(
             Arg::new("output-file")
@@ -98,8 +97,10 @@ pub fn build_cli() -> Command<'static> {
                 .long("output")
                 .takes_value(true)
                 .value_hint(ValueHint::FilePath)
-                .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an .ansi extension, or an .html file, to convert the output to html. \
-                 .ansi files will consider environment variables when creating colored output, for example when COLORTERM is not set to truecolor, the resulting file will fallback to 8-bit colors."),
+                .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an \
+                .ansi extension, or an .html file, to convert the output to html. \
+                .ansi files will consider environment variables when creating colored output, for example when COLORTERM is not set to truecolor,\
+                the resulting file will fallback to 8-bit colors."),
         )
         .arg(
             Arg::new("invert-density")
@@ -110,12 +111,14 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("background-color")
                 .long("background")
                 .conflicts_with("no-color")
-                .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor. This argument is mutually exclusive with the no-color argument."),
+                .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor. \
+                This argument is mutually exclusive with the no-color argument."),
         )
         .arg(
             Arg::new("border")
                 .long("border")
-                .help("Adds a decorative border surrounding the ascii image. This will make the image overall a bit smaller, since it respects the user given size."),
+                .help("Adds a decorative border surrounding the ascii image. This will make the image overall a bit smaller, \
+                since it respects the user given size."),
         )
         .arg(
             Arg::new("no-color")
@@ -125,21 +128,24 @@ pub fn build_cli() -> Command<'static> {
         .arg(
             Arg::new("outline")
                 .long("outline")
-                .help("Only create an outline of the image. This uses filters, so it will take more resources/time to complete, especially on larger images. It might not produce the desired output, it is advised to use this only on images with a clear distinction between foreground and background"),
+                .help("Only create an outline of the image. This uses filters, so it will take more resources/time to complete, especially on larger images. \
+                It might not produce the desired output, it is advised to use this only on images with a clear distinction between foreground and background."),
         )
         .arg(
             Arg::new("hysteresis")
                 .long("hysteresis")
                 .alias("hys")
                 .requires("outline")
-                .help("When creating the outline use the hysteresis method, which will remove imperfection, but might not be as good looking in ascii form. This will require the --outline argument to be present as well."),
+                .help("When creating the outline use the hysteresis method, which will remove imperfection, but might not be as good looking in ascii form.\
+                 This will require the --outline argument to be present as well."),
         )
         .arg(
             Arg::new("verbosity")
                 .long("verbose")
                 .takes_value(true)
                 .possible_values(["trace", "debug", "info", "warn", "error", "off"])
-                .help("Choose the verbosity of the logging level. Warnings and errors will always be shown by default. To completely disable them, use the off argument"),
+                .help("Choose the verbosity of the logging level. Warnings and errors will always be shown by default. To completely disable them, \
+                use the off argument."),
         )
 }
 

@@ -15,7 +15,7 @@ These steps should be performed when making a new release. Do not commit marked 
 - [ ] Added the correct semantic version in the Changelog
 - [ ] Changed the changes from Unreleased to the new version in the Changelog
 - [ ] Updated the version number in Cargo.toml
-- [ ] Updated the version number in in cli.rs
+- [ ] Build version matches version in Cargo.toml
 - [ ] Example images still represents the project accurately
 - [ ] Example commands still represents the project accurately
 - [ ] Documentation has been updated to reflect the changes

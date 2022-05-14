@@ -192,7 +192,7 @@ For more information about the usage of features, please refer to the [cargo boo
 
 The following features are currently available:
 
-- `web_image` Accept Image URLs as input, enabled by default
+- `web_image` Accept Image URLs as input (enabled by default)
 
 ## Contributing
 

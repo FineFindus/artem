@@ -2,8 +2,9 @@
 name = "artem"
 version = "1.0.3"
 authors = ["Jonathan (@FineFindus)"]
+# description = "artem is a small cli program written in rust to easily convert images to ascii art"
+description = "Convert images from multiple formats (jpg, png, webp, etc...) to ASCII art"
 edition = "2021"
-description = "artem is a small cli program written in rust to easily convert images to ascii art"
 readme = "README.md"
 license-file = "LICENSE"
 homepage = "https://github.com/finefindus/artem"
@@ -31,7 +32,7 @@ name = "artem_bench"
 harness = false
 
 [build-dependencies]
-clap = "3.1.18"
+clap = { version = "3.1.18", features = ["cargo"]}
 clap_complete = "3.1.4"
 clap_mangen = "0.1.6"
 
@@ -47,6 +48,8 @@ clap = { version = "3.1.18", features = ["cargo"]}
 terminal_size = "0.1.17"
 log = "0.4.17"
 env_logger = "0.9.0"
+
+#http client for web images
 minreq = { version = "2.6.0", features = ["punycode", "https-native"], optional = true }
 
 [features]
@@ -69,6 +72,10 @@ assets = [
       ["deployment/assets/_artem", "usr/share/zsh/vendor-completions/", "644"],
 ]
 extended-description = """\
-artem is a cli programm to convert images to ascii art. 
-By default it uses truecolor, if not support it fallsback to ansi colors. It supports multiple image formats such as jpg, png, gif, webp, and many more.
+artem is a rust command-line interface to convert images from multiple formats (jpg, png, webp, gif and many more) to ASCII art, inspired by jp2a.
+
+It suppots modern features, such as truecolor by default, although ANSI-Colors can be used as a fallback when truecolor is disabled.
+It also respects enviroment variables, like NO_COLOR, to complety disable colored output. 
+
+For questions, bug reports or feedback, please visit https://github.com/finefindus/artem.
 """

@@ -478,20 +478,20 @@ pub mod scale {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--ratio", "0"]);
+            .args(["--ratio", f64::MAX.to_string().as_str()]);
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "NNNNXXXXXXKKKKKKKKKKK0OOxddddodooolllllllllooxkkkkkkkkxxxkkkkkkkOOOO0000000KKK0O",
+            "NWWNNNNXXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOOO00KKK00KKXXXX",
         ));
     }
 
     #[test]
-    fn arg_is_larger_zero() {
+    fn arg_is_zero() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("examples/abraham_lincoln.jpg")
-            .args(["--ratio", f64::MIN.to_string().as_str()]);
+            .args(["--ratio", "0"]);
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "NWWNNNNXXXXXKKKKXXKK00000O000OOOOOOkOOkkxxkxxxOkkkkkkxxdddkkOOOkOOO00KKK00KKXXXX",
+            "NNNNXXXXXXKKKKKKKKKKK0OOxddddodooolllllllllooxkkkkkkkkxxxkkkkkkkOOOO0000000KKK0O",
         ));
     }
 
