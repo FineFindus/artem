@@ -163,8 +163,8 @@ fn main() {
         .parse::<f32>()
     {
         Ok(v) => v.clamp(
-            0f32, //a negative scale is not allowed
-            1f32, //even a scale above 0.43 is not looking good
+            0.1f32, //a negative or 0 scale is not allowed
+            1f32,   //even a scale above 0.43 is not looking good
         ),
         Err(_) => util::fatal_error("Could not work with ratio input value", Some(65)),
     };
