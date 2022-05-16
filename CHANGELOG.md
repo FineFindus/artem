@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved command help texts
 - Rewrote description of the command help
 - Rewrote description of the `.deb` package
+- Renamed `--character` input text to be ___characters___ instead of ___density___
 
 ## [1.0.3] - 2022-05-05
 
