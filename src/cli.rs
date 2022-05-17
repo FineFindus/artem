@@ -37,7 +37,7 @@ pub fn build_cli() -> Command<'static> {
                 .value_hint(ValueHint::FilePath)
         )
         .arg(
-            Arg::new("density")
+            Arg::new("characters")
                 .short('c')
                 .long("characters")
                 .takes_value(true)

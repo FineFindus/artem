@@ -58,7 +58,7 @@ mod tests {
 ///Configuration for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
 pub struct Option {
-    pub density: String,
+    pub characters: String,
     pub scale: f32,
     pub target_size: u32,
     pub invert: bool,
@@ -92,7 +92,7 @@ mod test_option {
     fn builder_default() {
         assert_eq!(
             OptionBuilder {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -112,7 +112,7 @@ mod test_option {
 ///A builder to create a [`Option`] struct.
 #[derive(PartialEq, Debug)]
 pub struct OptionBuilder {
-    density: String,
+    characters: String,
     scale: f32,
     target_size: u32,
     invert: bool,
@@ -129,7 +129,7 @@ impl Default for OptionBuilder {
     fn default() -> Self {
         Self {
             //these have to be set to custom defaults for the program to work
-            density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+            characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
             scale: 0.42f32,
             target_size: 80,
             invert: Default::default(),
@@ -204,26 +204,25 @@ impl OptionBuilder {
         Option::builder()
     }
 
-    ///Set the density.
+    ///Set the characters.
     ///
-    /// The density will determine how 'visible'/light/dark a character will be perceived.
+    /// The characters will determine how 'visible'/light/dark a character will be perceived.
     ///
     /// # Errors
-    /// When the given density is empty, the density will not be changed.
+    /// When the given characters are empty, the characters will not be changed.
     ///
     /// # Examples
     /// ```
     /// use artem::options::OptionBuilder;
     ///
     /// let mut builder = OptionBuilder::new();
-    /// builder.density("Mkl. ".to_string());
+    /// builder.characters("Mkl. ".to_string());
     /// ```
     #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
-    pub fn density<'a>(&'a mut self, density: String) -> &'a Self {
-        if density.is_empty() {
-            return self;
+    pub fn characters<'a>(&'a mut self, characters: String) -> &'a Self {
+        if !characters.is_empty() {
+            self.characters = characters;
         }
-        self.density = density;
         self
     }
 
@@ -264,7 +263,7 @@ impl OptionBuilder {
     }
 
     property! {
-    ///Invert to density map/character.
+    ///Invert to density map/characters.
     ///
     /// This inverts the mapping from light to dark characters. It can be useful when
     /// the image has a dark background. It defaults to false.
@@ -413,7 +412,7 @@ impl OptionBuilder {
     /// ```
     pub fn build(&self) -> Option {
         Option {
-            density: self.density.to_owned(),
+            characters: self.characters.to_owned(),
             scale: self.scale,
             target_size: self.target_size,
             invert: self.invert,
@@ -435,7 +434,7 @@ mod test_conversion_option_builder {
     fn build_default() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -452,10 +451,10 @@ mod test_conversion_option_builder {
     }
 
     #[test]
-    fn change_density() {
+    fn change_characters() {
         assert_eq!(
             Option {
-                density: r#"density"#.to_string(),
+                characters: r#"characters"#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -467,7 +466,9 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().density("density".to_string()).build()
+            OptionBuilder::new()
+                .characters("characters".to_string())
+                .build()
         );
     }
 
@@ -475,7 +476,7 @@ mod test_conversion_option_builder {
     fn change_scale() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 3.14f32, //change attribute
                 target_size: 80,
                 invert: false,
@@ -495,7 +496,7 @@ mod test_conversion_option_builder {
     fn change_target_size() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 314, //change attribute
                 invert: false,
@@ -517,7 +518,7 @@ mod test_conversion_option_builder {
     fn change_invert() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: true, //change attribute
@@ -537,7 +538,7 @@ mod test_conversion_option_builder {
     fn change_border() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -557,7 +558,7 @@ mod test_conversion_option_builder {
     fn change_dimension() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -579,7 +580,7 @@ mod test_conversion_option_builder {
     fn change_transform_x() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -599,7 +600,7 @@ mod test_conversion_option_builder {
     fn change_transform_y() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -619,7 +620,7 @@ mod test_conversion_option_builder {
     fn change_outline() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -639,7 +640,7 @@ mod test_conversion_option_builder {
     fn change_hysteresis() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,
@@ -659,7 +660,7 @@ mod test_conversion_option_builder {
     fn change_file_type() {
         assert_eq!(
             Option {
-                density: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
                 invert: false,

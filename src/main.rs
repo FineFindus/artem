@@ -80,8 +80,8 @@ fn main() {
     }
 
     //density char map
-    let density = if matches.is_present("density") {
-        match matches.value_of("density").unwrap() {
+    let density = if matches.is_present("characters") {
+        match matches.value_of("characters").unwrap() {
             "short" | "s" | "0" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
             "flat" | "f" | "1" => r#"MWNXK0Okxdolc:;,'...   "#,
             "long" | "l" | "2" => {
@@ -89,7 +89,7 @@ fn main() {
             }
             _ => {
                 info!("Using user provided characters");
-                let chars = matches.value_of("density").unwrap();
+                let chars = matches.value_of("characters").unwrap();
                 if chars.is_empty() {
                     util::fatal_error("Characters cannot be empty", Some(64))
                 } else {
@@ -103,7 +103,7 @@ fn main() {
         r#"MWNXK0Okxdolc:;,'...   "#
     };
     debug!("Characters used: \"{density}\"");
-    options_builder.density(density.to_string());
+    options_builder.characters(density.to_string());
 
     //set the default resizing dimension to width
     options_builder.dimension(util::ResizingDimension::Width);

@@ -1,0 +1,26 @@
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+         ll                O               ;x                O       ll         
+cccccccccxxcccccccc        0cccccccccccccccoOcccccccccccccccc0cccccccxxccccccccc
+         ll       O                                                  ll         
+.........oo.......O............................       ...............oo.........
+:::::::::dd::::::::::::::::::::::::::::::::::::'     .;::::::::::::::dd:::::::::
+         ll                                                          ll         
+cccccccccxl          .Occccccccccccccccxxccccccccccccccccccccccccccccxl         
+         ll           O                ll                            ll         
+         ll           O                ll                            ll         
+         ll           O                ll                            ll         
+         ll           O                ll                            ll         
+         ll           O                ll                            ll         
+         ll           O                ll                            ll         

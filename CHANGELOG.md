@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved documentation of output files
 - Added `web_image` feature, which allows URL instead of path input. It is enabled by default
 - Authors and description will now be shown in the command help text and man page
+- New image has been added for testing purposes
 
 
 ### Changed
@@ -27,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rewrote description of the command help
 - Rewrote description of the `.deb` package
 - Renamed `--character` input text to be ___characters___ instead of ___density___
+- Argument tests have been refactored to their own files
+- Test now complete much faster (down to 5s from 104s) due to using a smaller image, since the large one was unnecessary used
 
 ## [1.0.3] - 2022-05-05
 

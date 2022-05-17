@@ -129,7 +129,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
                 //convert pixels to a char/string
                 let mut char = pixel::correlating_char(
                     &pixels,
-                    options.density.as_str(),
+                    options.characters.as_str(),
                     options.invert,
                     options.target,
                 );

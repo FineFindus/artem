@@ -8,10 +8,11 @@ use std::process::Command; // Run programs
 fn full_file_compare_no_args() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
-    cmd.arg("examples/abraham_lincoln.jpg");
+    cmd.arg("assets/images/standard_test_img.png");
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln.txt").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img.txt").unwrap(); //ignore errors
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(desired_output));
@@ -23,11 +24,12 @@ fn full_file_compare_url() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
     cmd.arg(
-        "https://raw.githubusercontent.com/FineFindus/artem/master/examples/abraham_lincoln.jpg",
+        "https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
     );
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln.txt").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img.txt").unwrap(); //ignore errors
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(desired_output));
@@ -37,10 +39,12 @@ fn full_file_compare_url() {
 fn full_file_compare_border() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
-    cmd.arg("examples/abraham_lincoln.jpg").arg("--border");
+    cmd.arg("assets/images/standard_test_img.png")
+        .arg("--border");
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln_border.txt").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img_border.txt").unwrap(); //ignore errors
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(desired_output));
@@ -51,10 +55,12 @@ fn full_file_compare_outline() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
     //this example image is not the best case for the outline, since its already grayscale, and the person is a lot darker than the background
-    cmd.arg("examples/abraham_lincoln.jpg").arg("--outline");
+    cmd.arg("assets/images/standard_test_img.png")
+        .arg("--outline");
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln_outline.txt").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img_outline.txt").unwrap(); //ignore errors
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(desired_output));
@@ -65,12 +71,14 @@ fn full_file_compare_border_outline() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
     //this example image is not the best case for the outline, since its already grayscale, and the person is a lot darker than the background
-    cmd.arg("examples/abraham_lincoln.jpg")
+    cmd.arg("assets/images/standard_test_img.png")
         .arg("--outline")
         .arg("--border");
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln_border_outline.txt").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img_border_outline.txt")
+            .unwrap(); //ignore errors
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(desired_output));
@@ -81,12 +89,13 @@ fn full_file_compare_outline_hysteresis() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
     //this example image is not the best case for the outline, since its already grayscale, and the person is a lot darker than the background
-    cmd.arg("examples/abraham_lincoln.jpg")
+    cmd.arg("assets/images/standard_test_img.png")
         .args(["--outline", "--hysteresis"]);
 
     //load file contents to compare
     let desired_output =
-        fs::read_to_string("assets/abraham_lincoln_outline_hysteresis.txt").unwrap(); //ignore errors
+        fs::read_to_string("assets/standard_test_img/standard_test_img_outline_hysteresis.txt")
+            .unwrap(); //ignore errors
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(desired_output));
@@ -97,13 +106,14 @@ fn full_file_compare_outline_hysteresis() {
 fn full_file_compare_html() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
-    cmd.arg("examples/abraham_lincoln.jpg")
+    cmd.arg("assets/images/standard_test_img.png")
         .args(["-o", "/tmp/ascii.html"]);
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln.html").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 133620 bytes to /tmp/ascii.html",
+        "Written 77361 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -119,13 +129,14 @@ fn full_file_compare_html() {
 fn full_file_compare_html_border() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
-    cmd.arg("examples/abraham_lincoln.jpg")
+    cmd.arg("assets/images/standard_test_img.png")
         .args(["-o", "/tmp/ascii.html", "--border"]);
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln_border.html").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img_border.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 128149 bytes to /tmp/ascii.html",
+        "Written 76075 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -141,13 +152,14 @@ fn full_file_compare_html_border() {
 fn full_file_compare_html_outline() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
-    cmd.arg("examples/abraham_lincoln.jpg")
+    cmd.arg("assets/images/standard_test_img.png")
         .args(["-o", "/tmp/ascii.html", "--outline"]);
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln_outline.html").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img_outline.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 133620 bytes to /tmp/ascii.html",
+        "Written 77361 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -163,13 +175,14 @@ fn full_file_compare_html_outline() {
 fn full_file_compare_html_background_color() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
-    cmd.arg("examples/abraham_lincoln.jpg")
+    cmd.arg("assets/images/standard_test_img.png")
         .args(["-o", "/tmp/ascii.html", "--background"]);
 
     //load file contents to compare
-    let desired_output = fs::read_to_string("assets/abraham_lincoln_background.html").unwrap(); //ignore errors
+    let desired_output =
+        fs::read_to_string("assets/standard_test_img/standard_test_img_background.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 173220 bytes to /tmp/ascii.html",
+        "Written 100241 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
