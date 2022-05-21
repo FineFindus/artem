@@ -2,8 +2,7 @@
 name = "artem"
 version = "1.0.3"
 authors = ["Jonathan (@FineFindus)"]
-# description = "artem is a small cli program written in rust to easily convert images to ascii art"
-description = "Convert images from multiple formats (jpg, png, webp, etc...) to ASCII art"
+description = "Convert images from multiple formats (jpg, png, webp, etc…) to ASCII art"
 edition = "2021"
 readme = "README.md"
 license-file = "LICENSE"
@@ -25,7 +24,6 @@ path = "src/main.rs"
 [lib]
 name = "artem"
 path = "src/lib.rs"
-
 
 [[bench]]
 name = "artem_bench"
