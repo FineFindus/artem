@@ -90,6 +90,14 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("flipY")
                 .long("flipY")
                 .help("Flip the image along the Y-Axis/vertically."),
+        ).arg(
+            Arg::new("centerX")
+            .long("centerX")
+            .help("Center the image along the X-Axis/horizontally in the terminal."),
+        ).arg(
+            Arg::new("centerY")
+                .long("centerY")
+                .help("Center the image along the Y-Axis/vertically in the terminal."),
         )
         .arg(
             Arg::new("output-file")

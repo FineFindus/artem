@@ -219,6 +219,15 @@ fn main() {
     options_builder.transform_y(transform_y);
     debug!("Flipping Y-Axis: {transform_y}");
 
+    //get flags for centering the image
+    let center_x = matches.is_present("centerX");
+    options_builder.center_x(center_x);
+    debug!("Centering X-Axis: {center_x}");
+
+    let center_y = matches.is_present("centerY");
+    options_builder.center_y(center_y);
+    debug!("Center Y-Axis: {center_y}");
+
     //get flag for creating an outline
     let outline = matches.is_present("outline");
     options_builder.outline(outline);

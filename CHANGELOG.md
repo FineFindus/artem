@@ -8,44 +8,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - It is now possible to input multiple files
 - Improved handling of `.ansi`/`.ans` files ( includes more warnings)
 - Improved documentation of output files
 - Added `web_image` feature, which allows URL instead of path input. It is enabled by default
 - Authors and description will now be shown in the command help text and man page
 - New image has been added for testing purposes
-
+- The `--centerX` and `--centerY` can be used to center the image in the terminal
 
 ### Changed
+
 - Added `--release` flag to example build command (Thanks to @talwat)
 - Fixed failing doc test on rust nightly
 - Fixed an error that could occur when the image was only 1x1
-- Fixed an issue where the border was not applied correctly if the image was only a single pixel wide 
+- Fixed an issue where the border was not applied correctly if the image was only a single pixel wide
 - Adapted tests to work with multiple file inputs
-- Increased minimum rust version in CI to 1.60.0 
+- Increased minimum rust version in CI to 1.60.0
 - The clap command now uses information from Cargo.toml, including version, authors, description and name
 - Improved command help texts
 - Rewrote description of the command help
 - Rewrote description of the `.deb` package
-- Renamed `--character` input text to be ___characters___ instead of ___density___
+- Renamed `--character` input text to be **_characters_** instead of **_density_**
 - Argument tests have been refactored to their own files
 - Test now complete much faster (down to 5s from 104s) due to using a smaller image, since the large one was unnecessary used
 
 ## [1.0.3] - 2022-05-05
 
 ### Changed
+
 - Fixed error in windows releases building process
 - Fixed error with brew tap
-
 
 ## [1.0.2] - 2022-05-04
 
 ### Changed
+
 - Fixed error in windows releases
 
 ## [1.0.1] - 2022-05-04
 
 ### Changed
+
 - Fixed error in release workflow
 
 ## [1.0.0] - 2022-05-04
@@ -62,12 +66,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added more test cases and examples to the README to cover the newly added functionality
 - Major refactoring of the code
 - Artem is now a library, which is used by the command-line interface
-- Due to a refactoring of the code, the output ascii image now resembles the input image more closely 
+- Due to a refactoring of the code, the output ascii image now resembles the input image more closely
 
 ### Changed
 
 - Overhauled the installation section in the README, it now contains much more detailed installations instructions
-- Switched from `f64` to `f32`, since the additional precision has literally ***no*** impact (it gets rounded/cut away), but yields worse performance
+- Switched from `f64` to `f32`, since the additional precision has literally **_no_** impact (it gets rounded/cut away), but yields worse performance
 - Refactored `average_color` to be iterator based, according to some microbenchmarks, this makes it a few nanoseconds faster
 - Refactored the `convert`, `blur`, `apply_sober` and `edge_tracking` functions to use `iterator`s instead of for loops. This removes a lot of nasty and hart to deal with bug, especially together with multi-threading
 - Removed multithreading, it was a constant source of bugs, since pixels can't be split for threads/output characters. It also rarely brought noticeable performance improvements

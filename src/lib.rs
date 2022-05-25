@@ -99,12 +99,42 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         output.push_str(&target::html::html_top());
     }
 
+    trace!("Calculating horizontal spacing");
+    let horizontal_spacing = if options.center_x {
+        util::spacing_horizontal(if options.border {
+            //two columns are missing because the border takes up two lines
+            columns + 2
+        } else {
+            columns
+        })
+    } else {
+        String::with_capacity(0)
+    };
+
+    if options.center_y
+        && std::mem::discriminant(&options.target)
+            == std::mem::discriminant(&TargetType::Shell(true, true))
+    {
+        trace!("Adding vertical top spacing");
+        output.push_str(&util::spacing_vertical(if options.border {
+            //two rows are missing because the border takes up two lines
+            rows + 2
+        } else {
+            rows
+        }));
+    }
+
     if options.border {
+        //add spacing for centering
+        if options.center_x {
+            output.push_str(&horizontal_spacing);
+        }
+
         //add top part of border before conversion
+        trace!("Adding top part of border");
         output.push('╔');
         output.push_str("═".repeat(columns as usize).as_str());
         output.push_str("╗\n");
-        trace!("Adding top part of border");
     }
 
     info!("Starting conversion to ascii");
@@ -141,6 +171,11 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
                     if options.border {
                         char = format!("{}{}", "║", char);
                     }
+
+                    //add spacing for centering the image
+                    if options.center_x {
+                        char = format!("{}{}", horizontal_spacing, char);
+                    }
                 }
 
                 //add a break at line end
@@ -170,7 +205,13 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     };
 
     if options.border {
+        //add spacing for centering
+        if options.center_x {
+            output.push_str(&horizontal_spacing);
+        }
+
         //add bottom part of border after conversion
+        trace!("Adding bottom border");
         output.push('╚');
         output.push_str("═".repeat((columns) as usize).as_str());
         output.push('╝');
@@ -187,6 +228,19 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     {
         trace!("Adding html bottom part");
         output.push_str(&target::html::html_bottom());
+    }
+
+    if options.center_y
+        && std::mem::discriminant(&options.target)
+            == std::mem::discriminant(&TargetType::Shell(true, true))
+    {
+        trace!("Adding vertical bottom spacing");
+        output.push_str(&util::spacing_vertical(if options.border {
+            //two rows are missing because the border takes up two lines
+            rows + 2
+        } else {
+            rows
+        }));
     }
 
     //return output

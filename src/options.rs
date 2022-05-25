@@ -66,6 +66,8 @@ pub struct Option {
     pub dimension: ResizingDimension,
     pub transform_x: bool,
     pub transform_y: bool,
+    pub center_x: bool,
+    pub center_y: bool,
     pub outline: bool,
     pub hysteresis: bool,
     pub target: TargetType,
@@ -100,6 +102,8 @@ mod test_option {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -120,6 +124,8 @@ pub struct OptionBuilder {
     dimension: ResizingDimension,
     transform_x: bool,
     transform_y: bool,
+    center_x: bool,
+    center_y: bool,
     outline: bool,
     hysteresis: bool,
     target: TargetType,
@@ -137,6 +143,8 @@ impl Default for OptionBuilder {
             dimension: Default::default(),
             transform_x: Default::default(),
             transform_y: Default::default(),
+            center_x: Default::default(),
+            center_y: Default::default(),
             outline: Default::default(),
             hysteresis: Default::default(),
             target: Default::default(),
@@ -344,6 +352,40 @@ impl OptionBuilder {
     }
 
     property! {
+    /// Center the image horizontally in the terminal
+    ///
+    /// It will center the image by adding spaces in front of the text.
+    /// Since the terminal might have an uneven width, and only monospace chars are allowed,
+    /// the spacing might not always be accurate.
+    ///
+    /// # Examples
+    /// ```
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// builder.center_x(true);
+    /// ```
+    => center_x, bool
+    }
+
+    property! {
+    /// Center the image vertically in the terminal
+    ///
+    /// It will center the image by adding new lines  above and below the text.
+    /// Since the terminal might have an uneven height, and only monospace chars are allowed,
+    /// the spacing might not always be accurate.
+    ///
+    /// # Examples
+    /// ```
+    /// use artem::options::OptionBuilder;
+    ///
+    /// let mut builder = OptionBuilder::new();
+    /// builder.center_y(true);
+    /// ```
+    => center_y, bool
+    }
+
+    property! {
     ///Convert the image to it's outline
     ///
     /// This will use gaussian blur and sobel operators to only it's outline,
@@ -420,6 +462,8 @@ impl OptionBuilder {
             dimension: self.dimension,
             transform_x: self.transform_x,
             transform_y: self.transform_y,
+            center_x: self.center_x,
+            center_y: self.center_y,
             outline: self.outline,
             hysteresis: self.hysteresis,
             target: self.target,
@@ -442,6 +486,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -462,6 +508,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -484,6 +532,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -504,6 +554,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -526,6 +578,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -546,6 +600,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -566,6 +622,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Height, //change attribute
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -588,6 +646,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: true, //change attribute
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
@@ -608,11 +668,57 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: true, //change attribute
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::default(),
             },
             OptionBuilder::new().transform_y(true).build()
+        );
+    }
+
+    #[test]
+    fn change_center_x() {
+        assert_eq!(
+            Option {
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                scale: 0.42f32,
+                target_size: 80,
+                invert: false,
+                border: false,
+                dimension: util::ResizingDimension::Width,
+                transform_x: false,
+                transform_y: false,
+                center_x: true, //change attribute
+                center_y: false,
+                outline: false,
+                hysteresis: false,
+                target: TargetType::default(),
+            },
+            OptionBuilder::new().center_x(true).build()
+        );
+    }
+
+    #[test]
+    fn change_center_y() {
+        assert_eq!(
+            Option {
+                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+                scale: 0.42f32,
+                target_size: 80,
+                invert: false,
+                border: false,
+                dimension: util::ResizingDimension::Width,
+                transform_x: false,
+                transform_y: false,
+                center_x: false,
+                center_y: true, //change attribute
+                outline: false,
+                hysteresis: false,
+                target: TargetType::default(),
+            },
+            OptionBuilder::new().center_y(true).build()
         );
     }
 
@@ -628,6 +734,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: true, //change attribute
                 hysteresis: false,
                 target: TargetType::default(),
@@ -648,6 +756,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: true, //change attribute
                 target: TargetType::default(),
@@ -668,6 +778,8 @@ mod test_conversion_option_builder {
                 dimension: util::ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
+                center_x: false,
+                center_y: false,
                 outline: false,
                 hysteresis: false,
                 target: TargetType::AnsiFile(false), //change attribute

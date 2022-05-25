@@ -166,3 +166,60 @@ pub mod border {
             ));
     }
 }
+
+pub mod center_x {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("assets/images/standard_test_img.png")
+            .args(["--centerX", "123"]);
+        cmd.assert().failure().stderr(predicate::str::starts_with(
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("assets/images/standard_test_img.png")
+            .arg("--centerX");
+
+        //this is more or less a placeholder test, since the terminal size can and will be different during tests
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("                 "));
+    }
+}
+
+pub mod center_y {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn arg_with_value() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("assets/images/standard_test_img.png")
+            .args(["--centerY", "123"]);
+        cmd.assert().failure().stderr(predicate::str::starts_with(
+            "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
+        ));
+    }
+
+    #[test]
+    fn arg_is_correct() {
+        let mut cmd = Command::cargo_bin("artem").unwrap();
+        cmd.arg("assets/images/standard_test_img.png")
+            .arg("--centerY");
+
+        //this is more or less a placeholder test, since the terminal size can and will be different during tests thus
+        //affecting the size. ANd the command output will be trimmed, so any spacing will be lost
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("\n"));
+    }
+}

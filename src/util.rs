@@ -320,64 +320,61 @@ mod test_dimensions_enum {
     }
 }
 
-/// Iterator from inclusive start to exclusive end.
+/// Return a spacer string, which can be used to center the ascii image in the middle of the terminal.
 ///
-/// Returns a iterator from start to end - 1. If `rev` is set to true,
-/// it will be iterating in reverse.
+/// When the terminal width is not existing, for example when the output is not a terminal, the returned string will be empty.
 ///
-/// # Examples
-///
-/// ## Forward Iterator
+/// # Example
 /// ```
-/// use artem::util::range;
-///
-/// let mut range = range(0, 2, false);
-/// assert_eq!(Some(0), range.next());
-/// assert_eq!(Some(1), range.next());
-/// assert_eq!(None, range.next());
+/// # use artem::util::spacing_horizontal;
+/// let  spacing = spacing_horizontal(10);
 /// ```
-///
-/// ## Reverse Iterator
-/// ```
-/// use artem::util::range;
-///
-/// let mut range = range(0, 2, true);
-/// assert_eq!(Some(1), range.next());
-/// assert_eq!(Some(0), range.next());
-/// assert_eq!(None, range.next());
-/// ```
-pub fn range(start: u32, end: u32, rev: bool) -> impl Iterator<Item = u32> {
-    let (mut r_start, step) = if rev {
-        (end.saturating_sub(1), u32::max_value())
-    } else {
-        (start, 1)
+pub fn spacing_horizontal(width: u32) -> String {
+    let term_width = match terminal_size::terminal_size() {
+        Some(value) => value.0 .0 as u32,
+        None => 0,
     };
-
-    std::iter::repeat_with(move || {
-        let tmp = r_start;
-        r_start = r_start.wrapping_add(step);
-        tmp
-    })
-    .take(end as usize - start as usize)
+    " ".repeat(term_width.saturating_sub(width).saturating_div(2) as usize)
 }
 
 #[cfg(test)]
-mod test_range {
+mod test_spacing_horizontal {
     use super::*;
 
-    #[test]
-    fn create_range_0_2() {
-        let mut range = range(0, 2, false);
-        assert_eq!(Some(0), range.next());
-        assert_eq!(Some(1), range.next());
-        assert_eq!(None, range.next());
-    }
+    //can not be unit tested, since the terminal can have different sizes
 
     #[test]
-    fn create_range_2_0() {
-        let mut range = range(0, 2, true);
-        assert_eq!(Some(1), range.next());
-        assert_eq!(Some(0), range.next());
-        assert_eq!(None, range.next());
+    fn empty_return_large_input() {
+        assert_eq!("", spacing_horizontal(u32::MAX))
+    }
+}
+
+/// Return a spacer string, which can be used to center the ascii image in the middle of the terminal.
+///
+/// When the terminal height is not existing, for example when the output is not a terminal, the returned string will be empty.
+///
+/// # Example
+/// ```
+/// # use artem::util::spacing_vertical;
+/// let  spacing = spacing_vertical(10);
+/// ```
+pub fn spacing_vertical(height: u32) -> String {
+    let term_height = match terminal_size::terminal_size() {
+        Some(value) => value.1 .0 as u32,
+        None => 0,
+    };
+    log::trace!("H: {term_height}, h: {height}");
+    "\n".repeat(term_height.saturating_sub(height).saturating_div(2) as usize)
+}
+
+#[cfg(test)]
+mod test_spacing_vertical {
+    use super::*;
+
+    //can not be unit tested, since the terminal can have different sizes
+
+    #[test]
+    fn empty_return_large_input() {
+        assert_eq!("", spacing_vertical(u32::MAX))
     }
 }
