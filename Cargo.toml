@@ -59,9 +59,10 @@ web_image = ["dep:minreq"]
 section = "graphics"
 priority = "optional"
 assets = [
-      #file locations are from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
+      #file locations are partailly from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
       ["target/release/artem", "usr/bin/", "755"],
       ["deployment/assets/artem.1", "usr/share/man/man1/artem.1", "644"],
+      ["README.md", "usr/share/doc/artem/README", "644"],
       ["CHANGELOG.md", "usr/share/doc/artem/CHANGELOG", "644"],
       ["LICENSE", "usr/share/doc/artem/", "644"],
       #the completion files and man page is generated and copied by the build script

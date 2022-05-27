@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Authors and description will now be shown in the command help text and man page
 - New image has been added for testing purposes
 - The `--centerX` and `--centerY` can be used to center the image in the terminal
+- `artem` is now available as an aur package (artem) as well as as a aur binary package (artem-bin)
 
 ### Changed
 

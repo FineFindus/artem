@@ -3,37 +3,35 @@
 # https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
 # https://github.com/BurntSushi/ripgrep/blob/master/.github/workflows/release.yml
 
-
 # This workflow creates all the needed binaries, uploads the binaries to github releases and updates the crate as well as the
 # homebrew tap.
 # The binaries include versions from linux x86_64 and arm, windows gnu and mscv and macos x86_64 and arm versions.
 # It also creates a .deb package using the cargo-deb crate.
 
 name: Build Release files
-on: 
-#switch for debugging
-# [push] 
+on:
+  #switch for debugging
+  # [push]
   release:
     types: [published]
 
 jobs:
-
-  release_assets:
+  release_assets_linux:
     name: Release Linux Assets
-    #create and release different linux builds for arm and x86 
-    runs-on: ${{ matrix.platform }} 
+    #create and release different linux builds for arm and x86
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [ubuntu-latest]
         rust:
           - stable
         target:
-        #compile for x86 and armv8 (64-Bit)
-         - x86_64-unknown-linux-gnu
-         - aarch64-unknown-linux-gnu
-        #compile with musl
-         - x86_64-unknown-linux-musl
-         - aarch64-unknown-linux-musl
+          #compile for x86 and armv8 (64-Bit)
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+          #compile with musl
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-musl
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -44,7 +42,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -58,9 +56,9 @@ jobs:
 
       - name: Build artem release
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
-          command: build 
+          command: build
           use-cross: true
           args: --locked --release --verbose --target=${{ matrix.target }}
 
@@ -77,8 +75,10 @@ jobs:
           mkdir -p deployment/doc
           #copy completion files and man page
           cp -u target/*/release/build/artem-*/out/* deployment/completions/
-          #move man page to doc folder
+          #move man page and CHANGELOG/README to doc folder
           mv deployment/completions/artem.1 deployment/doc/
+          mv CHANGELOG.md deployment/doc/
+          mv README.md deployment/
           #copy binary file
           cp -u target/*/release/artem deployment
 
@@ -97,19 +97,19 @@ jobs:
           prerelease: true
 
   release_assets_windows:
-  #this is only to release the windows build, since it has a .exe extensions will be uploaded as a zip file
+    #this is only to release the windows build, since it has a .exe extensions will be uploaded as a zip file
     name: Release Windows Assets
-    runs-on: ${{ matrix.platform }} 
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [windows-latest]
         rust:
           - stable
         target:
-         #windows gnu
-        #  - x86_64-pc-windows-gnu
-         # mscv
-         - x86_64-pc-windows-msvc
+          #windows gnu
+          #  - x86_64-pc-windows-gnu
+          # mscv
+          - x86_64-pc-windows-msvc
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -120,7 +120,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -134,9 +134,9 @@ jobs:
 
       - name: Build artem release
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
-          command: build 
+          command: build
           use-cross: true
           args: --locked --release --verbose --target=${{ matrix.target }}
 
@@ -151,17 +151,19 @@ jobs:
           mkdir -p deployment/completions
           mkdir -p deployment/doc
           #copy completion files and man page
-          cp -u target/*/release/build/artem-*/out/* deployment/completions/
-          #move man page to doc folder
-          mv deployment/completions/artem.1 deployment/doc/
+          cp -u target/*/release/build/test_win_ci-*/out/* deployment/completions/
+          #move man page and CHANGELOG/README to doc folder
+          mv deployment/completions/test_win_ci.1 deployment/doc/
+          mv CHANGELOG.md deployment/doc/
+          mv README.md deployment/
           #copy binary file
-          cp -u target/${{ matrix.target }}/release/artem.exe deployment
+          cp -u target/${{ matrix.target }}/release/test_win_ci.exe deployment
 
-        #create zip file from .exe release build 
+        #create zip file from .exe release build
       - name: Create zip file
         shell: bash
         run: |
-          7z a artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.zip deployment/* 
+          7z a test_win_ci-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.zip ./deployment/*
 
         #upload zip file
       - name: Upload Release Build for Windows
@@ -173,17 +175,17 @@ jobs:
 
   release_assets_macos:
     name: Release MacOS Assets
-    runs-on: ${{ matrix.platform }} 
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [macos-latest]
         rust:
           - stable
         target:
-        #compile for x86 mac os
-         - x86_64-apple-darwin
-        #compile arm version for M1 macs (BigSur+)
-         - aarch64-apple-darwin
+          #compile for x86 mac os
+          - x86_64-apple-darwin
+          #compile arm version for M1 macs (BigSur+)
+          - aarch64-apple-darwin
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
@@ -194,7 +196,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -208,9 +210,9 @@ jobs:
 
       - name: Build artem release
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
-          command: build 
+          command: build
           use-cross: true
           args: --locked --release --verbose --target=${{ matrix.target }}
 
@@ -226,8 +228,10 @@ jobs:
           mkdir -p deployment/doc
           #copy completion files and man page
           cp target/*/release/build/artem-*/out/* deployment/completions/
-          #move man page to doc folder
+          #move man page and CHANGELOG/README to doc folder
           mv deployment/completions/artem.1 deployment/doc/
+          mv CHANGELOG.md deployment/doc/
+          mv README.md deployment/
           #copy binary file
           cp target/*/release/artem deployment
 
@@ -248,7 +252,7 @@ jobs:
   release_deb:
     name: Create Debian
     #create a .deb package using cargo-deb
-    runs-on: ${{ matrix.platform }} 
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [ubuntu-latest]
@@ -264,7 +268,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -275,13 +279,13 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      
+
       #build release, so it contains the completion files
       - name: Build artem release
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
-          command: build 
+          command: build
           args: --locked --release --verbose
 
         #copy to completion files from the out directory to the deployment/assets dir
@@ -293,14 +297,14 @@ jobs:
 
       - name: Install cargo deb
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
           command: install
           args: cargo-deb
 
       - name: Run cargo deb
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
           command: deb
 
@@ -315,7 +319,7 @@ jobs:
     name: Publish to Cargo
     # update the cargo version, using cargo publish.
     # this can fail, so it should be locally checked with cargo publish --dry-run before
-    runs-on: ${{ matrix.platform }} 
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
         platform: [ubuntu-latest]
@@ -342,6 +346,59 @@ jobs:
         with:
           # this token will expire after 90 days and should be manually renewed
           # use this link to create a new one: https://github.com/settings/tokens/new?scopes=public_repo,workflow
-          token: ${{ secrets.HOMEBREW_TAP_TOKEN }} 
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           tap: finefindus/homebrew-tap
           formula: artem
+
+  publish_aur_package:
+    name: Publish AUR package
+    # publish a compiled from source and binary release to the aur
+    needs:
+      - release_assets_linux
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Extract Version Number
+        shell: bash
+        run: echo "PROJECT_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
+
+      - name: Generate PKGBUILD files
+        shell: bash
+        run: |
+          #update PKGBUILD with new values
+          cd assets/aur
+          #update PKGBUILDs
+          ./update_PKGBUILD.sh
+          #copy files to the deployment dir
+          cd ../../
+          mkdir pkgbuilds/
+          cp -u assets/aur/PKGBUILD-* pkgbuilds
+
+      - name: Publish artem to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
+        with:
+          pkgname: artem
+          pkgbuild: ./pkgbuilds/PKGBUILD-stable
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Updating to v${{ env.PROJECT_VERSION }}
+          force_push: "true"
+
+      - name: Publish artem-bin to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
+        with:
+          pkgname: artem-bin
+          pkgbuild: ./pkgbuilds/PKGBUILD-bin
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Updating to v${{ env.PROJECT_VERSION }}
+          force_push: "true"

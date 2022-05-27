@@ -5,11 +5,13 @@ These steps should be performed when making a new release. Do not commit marked 
 ## Pre-release Test Checklist
 
 ### Before Committing
+
 - [ ] Local and Remote branches are synced
 - [ ] All the tests are passing
 - [ ] Continuous Integration is passing
-- [ ] `cargo clippy` finds no errors 
-- [ ] `cargo publish --dry-run` passes 
+- [ ] `cargo clippy` finds no errors
+- [ ] `cargo publish --dry-run` passes
+- [ ] Ensure that the aur packages build correctly
 - [ ] README has been updated
 - [ ] All changes were documented in the Changelog
 - [ ] Added the correct semantic version in the Changelog
@@ -21,10 +23,13 @@ These steps should be performed when making a new release. Do not commit marked 
 - [ ] Documentation has been updated to reflect the changes
 - [ ] Manpage contains the correct help
 - [ ] Tab-completions works in a all supported shells
+
 ### After Committing
+
 - [ ] Copied the changes to a new release
 - [ ] Build artifacts have been attached to the release through continuous delivery
 - [ ] Cargo deb builds the correct package
+
 ## Post-release Test Checklist
 
 - [ ] Installation instructions work using the released artefact
