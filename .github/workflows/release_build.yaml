@@ -151,19 +151,19 @@ jobs:
           mkdir -p deployment/completions
           mkdir -p deployment/doc
           #copy completion files and man page
-          cp -u target/*/release/build/test_win_ci-*/out/* deployment/completions/
+          cp -u target/*/release/build/artem-*/out/* deployment/completions/
           #move man page and CHANGELOG/README to doc folder
-          mv deployment/completions/test_win_ci.1 deployment/doc/
+          mv deployment/completions/artem.1 deployment/doc/
           mv CHANGELOG.md deployment/doc/
           mv README.md deployment/
           #copy binary file
-          cp -u target/${{ matrix.target }}/release/test_win_ci.exe deployment
+          cp -u target/${{ matrix.target }}/release/artem.exe deployment
 
         #create zip file from .exe release build
       - name: Create zip file
         shell: bash
         run: |
-          7z a test_win_ci-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.zip ./deployment/*
+          7z a artem-v${{ env.PROJECT_VERSION }}-${{ matrix.target }}.zip ./deployment/*
 
         #upload zip file
       - name: Upload Release Build for Windows
