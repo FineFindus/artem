@@ -14,7 +14,7 @@ It supports `.jpeg`, `.png`, `.gif`, `.webp` and many more.
 
 ### Input
 
-_source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg
+\_source: https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg
 ![Abraham Lincoln](/examples/abraham_lincoln.jpg)
 
 ### Output
@@ -28,10 +28,10 @@ For simply converting an image:
 ```bash
 artem path
 ```
+
 The input can either be one or multiple file paths or URLs.
 
 **NOTE**: To use URLs, the `web_image` feature has to be enabled. It is enabled by default.
-
 
 For more options use:
 
@@ -70,13 +70,17 @@ artem PATH --output ascii.ans
 ```
 
 Using the `--outline` flag, the given input image will be filtered, to only contain an outline, which will then be converted. Please be aware, that this will take some additional time, as well as that it might not perfectly work on every image. For the best result, please use and image with a clear distinction between the background and the foreground.
+
 ```bash
 artem PATH --outline
 ```
+
 For an even better result, it might be worthwhile trying out the `--hysteresis`/`--hys` flag, potentially with characters better suited for outlines, for example.
+
 ```bash
 artem PATH --outline --hysteresis --characters "|/\_.  "
 ```
+
 ## Installation
 
 ### All platforms (recommended)
@@ -113,6 +117,8 @@ Alternatively, if `brew` is installed, you can also use `brew` to install it. Se
 
 #### Using Homebrew
 
+**Warning:** Currently the brew version is outdated and can be no longer recommend. This is due to brew providing only rust version `1.59.0`. This project relies on features from `1.60.0`.
+
 The recommended way to install `artem` on MacOS is using a Homebrew [tap](https://github.com/FineFindus/homebrew-tap):
 
 ```bash
@@ -123,7 +129,7 @@ The homebrew version has the added benefit of also installing the man page and t
 
 #### Binary files
 
-Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or  [`cargo`](#all-platforms-recommended).
+Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or [`cargo`](#all-platforms-recommended).
 
 ### Windows
 
@@ -178,16 +184,16 @@ cargo build --release
 
 The `--release` flag disables debugging options, increasing performance.
 
-
 Visit the [rust homepage](https://www.rust-lang.org/learn/get-started) for installation instructions if rust is not installed.
 
 ### Features
 
-This disables the default features, whilst enabling all other specified features: 
+This disables the default features, whilst enabling all other specified features:
 
 ```bash
 cargo build --release --no-default-features --features FEATURES
 ```
+
 For more information about the usage of features, please refer to the [cargo book](https://doc.rust-lang.org/cargo/reference/features.html#command-line-feature-options).
 
 The following features are currently available:
@@ -206,6 +212,7 @@ the [coding train video on ascii art](https://www.youtube.com/watch?v=55iwMYv8tG
 Also a big thanks to [ripgrep](https://github.com/BurntSushi/ripgrep/) for indirectly helping with inspiration for the build setup.
 
 The following images are used for testing/examples:
+
 - [Abraham Lincoln](https://upload.wikimedia.org/wikipedia/commons/4/44/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg)
 - [Radio tower](https://unsplash.com/photos/hDXk9iOi9bM)
 - [Moth](https://altphotos.com/photo/deaths-head-hawkmoth-3464/)
