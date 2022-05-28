@@ -107,6 +107,21 @@ sudo dpkg -i artem.deb
 
 The `.deb` package also contains tab completions (for bash, zsh and fish) and a man page.
 
+#### Archlinux-based Distributions
+
+`artem` is available as an AUR package. You can install it with your favorite aur-helper, for example with `yay`:
+
+```bash
+yay -S artem
+```
+
+This will build it from source.
+Alternatively, it is also available as a precompiled binary (`artem-bin`):
+
+```bash
+yay -S artem-bin
+```
+
 #### Other Distributions
 
 On other distributions use the binary file provided in the [release tab](https://github.com/FineFindus/artem/releases).
@@ -137,7 +152,7 @@ To install the windows version, without using `cargo`, download either the gnu- 
 
 ## Shell completions
 
-`artem` has shell completions and a man page available. When using the homebrew version or the `.deb` package, they are installed automatically, whilst for using the binary files with shell completions, the completion files, which be can be found in the compressed release file, have to be copied to the correct locations.
+`artem` has shell completions and a man page available. When using the homebrew version, the `.deb` package, or the aur versions, they are installed automatically, whilst for using the binary files with shell completions, the completion files, which be can be found in the compressed release file, have to be copied to the correct locations.
 Assuming the compressed file has been uncompressed, use following commands to copy the files to their correct location for unix-like systems:
 
 ### Shell Completions and Man page
