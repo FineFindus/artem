@@ -117,7 +117,7 @@ Alternatively, if `brew` is installed, you can also use `brew` to install it. Se
 
 #### Using Homebrew
 
-**Warning:** Currently the brew version is outdated and can be no longer recommend. This is due to brew providing only rust version `1.59.0`. This project relies on features from `1.60.0`.
+**Warning:** Currently the brew version is outdated and can be no longer recommend. This is due to brew providing only rust version `1.59.0`. This project relies on features from `1.60.0`. The progress can be tracked at [the homebrew repo](https://github.com/Homebrew/homebrew-core/pull/98823)
 
 The recommended way to install `artem` on MacOS is using a Homebrew [tap](https://github.com/FineFindus/homebrew-tap):
 
