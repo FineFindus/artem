@@ -349,6 +349,7 @@ jobs:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           tap: finefindus/homebrew-tap
           formula: artem
+          force: true
 
   publish_aur_package:
     name: Publish AUR package
