@@ -1,6 +1,6 @@
 [package]
 name = "artem"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Jonathan (@FineFindus)"]
 description = "Convert images from multiple formats (jpg, png, webp, etc…) to ASCII art"
 edition = "2021"
@@ -48,7 +48,7 @@ log = "0.4.17"
 env_logger = "0.9.0"
 
 #http client for web images
-minreq = { version = "2.6.0", features = ["punycode", "https-native"], optional = true }
+minreq = { version = "2.6.0", features = ["punycode", "https-bundled-probe"], optional = true }
 
 [features]
 default = ["web_image"]
