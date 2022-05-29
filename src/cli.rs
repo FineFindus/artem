@@ -71,7 +71,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("width")
                 .short('w')
                 .long("width")
-                .help("Use the terminal maximum terminal height to display the image. \
+                .help("Use the terminal maximum terminal width to display the image. \
                 This argument is conflicting with --size and --height."),
         )
         .arg(
