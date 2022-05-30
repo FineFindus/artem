@@ -33,8 +33,8 @@ pub fn build_cli() -> Command<'static> {
 
                 )
                 .required(true)
-                .multiple_values(true)
                 .value_hint(ValueHint::FilePath)
+                .multiple_values(true)
         )
         .arg(
             Arg::new("characters")

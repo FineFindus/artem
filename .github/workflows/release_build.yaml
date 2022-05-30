@@ -75,6 +75,8 @@ jobs:
           mkdir -p deployment/doc
           #copy completion files and man page
           cp -u target/*/release/build/artem-*/out/* deployment/completions/
+          # replace the input file completions, since it won't work after inputting the paths otherwise
+          sed -i "s/*::/*:/" deployment/completions/_artem
           #move man page and CHANGELOG/README to doc folder
           mv deployment/completions/artem.1 deployment/doc/
           mv CHANGELOG.md deployment/doc/
@@ -147,11 +149,13 @@ jobs:
       - name: Copy completion files and man page
         shell: bash
         run: |
-          #create a completions and doc folder
+          # create a completions and doc folder
           mkdir -p deployment/completions
           mkdir -p deployment/doc
-          #copy completion files and man page
+          # copy completion files and man page
           cp -u target/*/release/build/artem-*/out/* deployment/completions/
+          # replace the input file completions, since it won't work after inputting the paths otherwise
+          sed -i "s/*::/*:/" deployment/completions/_artem
           #move man page and CHANGELOG/README to doc folder
           mv deployment/completions/artem.1 deployment/doc/
           mv CHANGELOG.md deployment/doc/
@@ -228,6 +232,8 @@ jobs:
           mkdir -p deployment/doc
           #copy completion files and man page
           cp target/*/release/build/artem-*/out/* deployment/completions/
+          # replace the input file completions, since it won't work after inputting the paths otherwise
+          sed -i "s/*::/*:/" deployment/completions/_artem
           #move man page and CHANGELOG/README to doc folder
           mv deployment/completions/artem.1 deployment/doc/
           mv CHANGELOG.md deployment/doc/
