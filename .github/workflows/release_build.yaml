@@ -233,7 +233,7 @@ jobs:
           #copy completion files and man page
           cp target/*/release/build/artem-*/out/* deployment/completions/
           # replace the input file completions, since it won't work after inputting the paths otherwise
-          sed -i "s/*::/*:/" deployment/completions/_artem
+          sed -i "" "s/*::/*:/" deployment/completions/_artem
           #move man page and CHANGELOG/README to doc folder
           mv deployment/completions/artem.1 deployment/doc/
           mv CHANGELOG.md deployment/doc/
