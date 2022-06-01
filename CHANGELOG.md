@@ -5,19 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.5] - 2022-06-01
-
-### Added
-
-- README now states that `brew` packages is currently outdated, due to brew providing an old rust version
-- Minimum rust version downgraded to `1.59.0`, so `brew` will be able to compile the release again
-
-### Changed
-
-- Fixed error where description for `--width` and `--height` stated that both changed the height of the output
-- Fixed [#7](https://github.com/FineFindus/artem/issues/7), the zsh completion works now after the input path
-- Updated README with more usage info
-
 ## [1.1.4] - 2022-06-01
 
 ### Added
