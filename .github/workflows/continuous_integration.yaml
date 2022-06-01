@@ -78,7 +78,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        platform: [ubuntu-latest] # test only on ubuntu, testing on every platform would take too much time and fail too often due to a few flaky test
         rust:
           - 1.59.0 # MSRV
           - stable
