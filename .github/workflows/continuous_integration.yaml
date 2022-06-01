@@ -78,7 +78,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        platform: [ubuntu-latest] # test only on ubuntu, since artem itself does not use platform specific functions, it should work the same on all othe rplatforms
+        platform: [ubuntu-latest, macos-latest, windows-latest]
         rust:
           - 1.59.0 # MSRV
           - stable
