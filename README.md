@@ -59,17 +59,26 @@ artem PATH --width
 artem PATH --size 100
 ```
 
+It is also possible to center the image using:
+
+```bash
+#center the image horizontally
+artem PATH --centerX
+#center the image vertically
+artem PATH --centerY
+```
+
 To save the the image to a file, use the `--output` flag.
 
 ```bash
 artem PATH --output ascii.txt
-#if the output file is an html file, the resulting ascii art will be saved as html ascii art
+#if the output file is an html file, the resulting ascii art will be saved as html ascii art, which supports colors
 artem PATH --output ascii.html
-# or alternatively, use an .asn file for colored ascii art
+# or alternatively, use an .asn file for colored ascii text
 artem PATH --output ascii.ans
 ```
 
-Using the `--outline` flag, the given input image will be filtered, to only contain an outline, which will then be converted. Please be aware, that this will take some additional time, as well as that it might not perfectly work on every image. For the best result, please use and image with a clear distinction between the background and the foreground.
+Using the `--outline` flag, the given input image will be filtered, to only contain an outline, which will then be converted. Please be aware, that this will take some additional time, as well as that it might not perfectly work on every image. For the best result, please use an image with a clear distinction between the background and the foreground.
 
 ```bash
 artem PATH --outline

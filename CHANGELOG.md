@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fixed error where description for `--width` and `--height` stated that both changed the height of the output
+- Fixed [#7](https://github.com/FineFindus/artem/issues/7), the zsh completion works now after the input path
+- Updated README with more usage info
 
 ## [1.1.3] - 2022-05-28
 
