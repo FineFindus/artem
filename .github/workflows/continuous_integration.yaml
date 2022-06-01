@@ -7,7 +7,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   check:
     name: Check
     #format does not need to run on all platforms
@@ -23,7 +22,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -37,10 +36,9 @@ jobs:
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
           command: check
-
 
   clippy:
     name: Clippy
@@ -56,7 +54,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -82,7 +80,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest] # test only on ubuntu, since artem itself does not use platform specific functions, it should work the same on all othe rplatforms
         rust:
-          - 1.60.0  # MSRV
+          - 1.59.0 # MSRV
           - stable
           - beta
           - nightly
@@ -99,7 +97,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
-      #use caching for cargo build 
+      #use caching for cargo build
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -113,14 +111,14 @@ jobs:
 
       - name: Build artem
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
-          command: build 
+          command: build
 
       - name: Run tests
         if: contains(${{ matrix.target }}, "x86_64") #arm build can not run tests
         uses: actions-rs/cargo@v1
-        continue-on-error: false 
+        continue-on-error: false
         with:
           command: test
           args: --locked --verbose

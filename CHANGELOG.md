@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- README now states that `brew` packages is currently outdated, due to brew providing an old rust version
+- Minimum rust version downgraded to `1.59.0`, so `brew` will be able to compile the release again
+
 ### Changed
 
 - Fixed error where description for `--width` and `--height` stated that both changed the height of the output
