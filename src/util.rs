@@ -44,8 +44,14 @@ mod test_color_support {
     }
 
     #[test]
-    fn false_with_different_env() {
+    fn false_with_different_env_false() {
         env::set_var("COLORTERM", "false");
+        assert!(!supports_truecolor());
+    }
+
+    #[test]
+    fn false_with_different_env() {
+        env::set_var("COLORTERM", "kjasdlkdjaskd");
         assert!(!supports_truecolor());
     }
 }
