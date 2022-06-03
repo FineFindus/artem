@@ -1,14 +1,22 @@
 [![artem crate](https://img.shields.io/crates/v/artem.svg)](https://crates.io/crates/artem)
 ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
 [![Continuous Integration](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml/badge.svg)](https://github.com/FineFindus/artem/actions/workflows/continuous_integration.yaml)
-![maintenance-status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
+![maintenance-status](https://img.shields.io/badge/maintenance-passively--maintained-yellowgreen.svg)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+
+<!-- https://gist.github.com/taiki-e/ad73eaea17e2e0372efb76ef6b38f17b -->
 
 # Artem
 
 Artem is a small cli program, written in rust, to easily convert images
 to ascii art, named after the latin word for art. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI. When the ascii image is written to a file, the image will not use colors.
 It supports `.jpeg`, `.png`, `.gif`, `.webp` and many more.
+
+## Maintenance
+
+#### **Is this project still being maintained?**
+
+Yes. Although there is currently no active development of new features, issue and new feature request will still be worked on. If you have any issue or have an idea for a new feature, please [create an issue](https://github.com/FineFindus/artem/issues/new/choose).
 
 ## Examples
 
