@@ -31,9 +31,9 @@ name = "artem_bench"
 harness = false
 
 [build-dependencies]
-clap = { version = "3.1.18", features = ["cargo"]}
-clap_complete = "3.1.4"
-clap_mangen = "0.1.6"
+clap = { version = "3.2.2", features = ["cargo"]}
+clap_complete = "3.2.1"
+clap_mangen = "0.1.8"
 
 [dev-dependencies]
 assert_cmd = "2.0.4"
@@ -43,8 +43,8 @@ criterion = "0.3.5"
 [dependencies]
 image = "0.24.2"
 colored = "2"
-clap = { version = "3.1.18", features = ["cargo"]}
-terminal_size = "0.1.17"
+clap = { version = "3.2.2", features = ["cargo"]}
+terminal_size = "0.2.1"
 log = "0.4.17"
 env_logger = "0.9.0"
 
