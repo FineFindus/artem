@@ -66,7 +66,7 @@ mod test_push_html_top {
 /// string.push_str(&html_bottom())
 /// ```
 pub fn html_bottom() -> String {
-    "</pre></body></html>".to_string()
+    "\n</pre></body></html>".to_string()
 }
 
 #[cfg(test)]
@@ -75,7 +75,7 @@ mod test_push_html_bottom {
 
     #[test]
     fn push_bottom_html_returns_correct_string() {
-        assert_eq!("</pre></body></html>", html_bottom())
+        assert_eq!("\n</pre></body></html>", html_bottom())
     }
 }
 
