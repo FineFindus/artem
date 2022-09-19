@@ -304,7 +304,7 @@ mod test_calculate_dimensions {
 ///
 /// assert_eq!(ResizingDimension::Width, ResizingDimension::default());
 /// ```
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ResizingDimension {
     Width,
     Height,
