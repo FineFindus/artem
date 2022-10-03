@@ -9,7 +9,7 @@ readme = "README.md"
 license = "MPL-2.0"
 homepage = "https://github.com/finefindus/artem"
 repository = "https://github.com/finefindus/artem"
-catogories = ["command-line-utilities"]
+categories = ["command-line-utilities"]
 
 #build file
 build = "build.rs"
