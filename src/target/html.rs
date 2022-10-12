@@ -96,17 +96,15 @@ pub fn colored_char(red: u8, green: u8, blue: u8, char: char, background_color: 
             "<span style=\"background-color: #{:02X?}{:02X?}{:02X?}\">{}</span>",
             red, green, blue, char
         )
+    } else if char.is_whitespace() {
+        //white spaces don't have a visible foreground color,
+        //it saves space when not  having an entire useless span tag
+        String::from(char)
     } else {
-        if char.is_whitespace() {
-            //white spaces don't have a visible foreground color,
-            //it saves space when not  having an entire useless span tag
-            return String::from(char);
-        } else {
-            format!(
-                "<span style=\"color: #{:02X?}{:02X?}{:02X?}\">{}</span>",
-                red, green, blue, char
-            )
-        }
+        format!(
+            "<span style=\"color: #{:02X?}{:02X?}{:02X?}\">{}</span>",
+            red, green, blue, char
+        )
     }
 }
 
