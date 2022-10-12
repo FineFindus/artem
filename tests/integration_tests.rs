@@ -113,7 +113,7 @@ fn full_file_compare_html() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 77362 bytes to /tmp/ascii.html",
+        "Written 62674 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -136,7 +136,7 @@ fn full_file_compare_html_border() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img_border.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 76076 bytes to /tmp/ascii.html",
+        "Written 61712 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -159,7 +159,7 @@ fn full_file_compare_html_outline() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img_outline.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 77362 bytes to /tmp/ascii.html",
+        "Written 19834 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors

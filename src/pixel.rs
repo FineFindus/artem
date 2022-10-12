@@ -242,6 +242,24 @@ mod test_pixel_density {
     }
 
     #[test]
+    fn white_has_no_tag() {
+        //force color, this is not printed to the terminal anyways
+        env::set_var("COLORTERM", "truecolor");
+        env::set_var("CLICOLOR_FORCE", "1");
+
+        let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        assert_eq!(
+            " ",
+            correlating_char(
+                &pixels,
+                "#k. ",
+                false,
+                options::TargetType::HtmlFile(true, false)
+            )
+        );
+    }
+
+    #[test]
     fn target_html_colored_string() {
         //force color, this is not printed to the terminal anyways
         env::set_var("COLORTERM", "truecolor");
@@ -249,10 +267,10 @@ mod test_pixel_density {
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
-            "<span style=\"color: #0000FF\"> </span>",
+            "<span style=\"color: #0000FF\">.</span>",
             correlating_char(
                 &pixels,
-                "#k. ",
+                "#k:.",
                 false,
                 options::TargetType::HtmlFile(true, false)
             )

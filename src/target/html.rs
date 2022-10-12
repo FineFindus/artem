@@ -97,16 +97,27 @@ pub fn colored_char(red: u8, green: u8, blue: u8, char: char, background_color: 
             red, green, blue, char
         )
     } else {
-        format!(
-            "<span style=\"color: #{:02X?}{:02X?}{:02X?}\">{}</span>",
-            red, green, blue, char
-        )
+        if char.is_whitespace() {
+            //white spaces don't have a visible foreground color,
+            //it saves space when not  having an entire useless span tag
+            return String::from(char);
+        } else {
+            format!(
+                "<span style=\"color: #{:02X?}{:02X?}{:02X?}\">{}</span>",
+                red, green, blue, char
+            )
+        }
     }
 }
 
 #[cfg(test)]
 mod test_html_string {
     use super::*;
+
+    #[test]
+    fn whitespace_no_tag() {
+        assert_eq!(" ", colored_char(0, 0, 0, ' ', false))
+    }
 
     #[test]
     fn black_no_background() {

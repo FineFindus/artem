@@ -36,7 +36,7 @@ pub mod output_file {
             .args(["-o", "/tmp/ascii.html"]);
         //only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
-            "Written 77362 bytes to /tmp/ascii.html",
+            "Written 62674 bytes to /tmp/ascii.html",
         ));
         //delete output file
         fs::remove_file("/tmp/ascii.html").unwrap();
