@@ -37,7 +37,7 @@ checksum = "23ea9e81bd02e310c216d080f6223c179012256e5151c41db88d12c88a1684d2"
 
 [[package]]
 name = "artem"
-version = "1.1.6"
+version = "1.1.7"
 dependencies = [
  "assert_cmd",
  "clap",
