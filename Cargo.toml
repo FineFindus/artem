@@ -4,7 +4,7 @@ version = "1.1.6"
 authors = ["Jonathan (@FineFindus)"]
 description = "Convert images from multiple formats (jpg, png, webp, etc…) to ASCII art"
 edition = "2021"
-rust-version = "1.59.0"
+rust-version = "1.68.0"
 readme = "README.md"
 license = "MPL-2.0"
 homepage = "https://github.com/finefindus/artem"
@@ -46,7 +46,7 @@ colored = "2"
 clap = { version = "3.2.2", features = ["cargo"]}
 terminal_size = "0.2.1"
 log = "0.4.17"
-env_logger = "0.10.0"
+env_logger = "0.9.3"
 
 #http client for web images
 minreq = { version = "2.7.0", features = ["punycode", "https-bundled-probe"], optional = true }
