@@ -43,6 +43,7 @@ criterion = "0.4.0"
 [dependencies]
 image = "0.24.2"
 colored = "2"
+openssl = "0.10.48"
 clap = { version = "3.2.2", features = ["cargo"]}
 terminal_size = "0.2.1"
 log = "0.4.17"

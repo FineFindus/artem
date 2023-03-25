@@ -49,6 +49,7 @@ dependencies = [
  "image",
  "log",
  "minreq",
+ "openssl",
  "predicates 3.0.2",
  "terminal_size",
 ]
