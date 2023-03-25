@@ -304,16 +304,11 @@ mod test_calculate_dimensions {
 ///
 /// assert_eq!(ResizingDimension::Width, ResizingDimension::default());
 /// ```
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ResizingDimension {
+    #[default]
     Width,
     Height,
-}
-//Implement `Default` as Width
-impl Default for ResizingDimension {
-    fn default() -> Self {
-        ResizingDimension::Width
-    }
 }
 
 #[cfg(test)]
