@@ -198,6 +198,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
           profile: minimal
           override: true
       #use caching for cargo build
