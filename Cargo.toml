@@ -37,8 +37,8 @@ clap_mangen = "0.1.8"
 
 [dev-dependencies]
 assert_cmd = "2.0.4"
-predicates = "2.1.1"
-criterion = "0.3.5"
+predicates = "3.0.2"
+criterion = "0.4.0"
 
 [dependencies]
 image = "0.24.2"
@@ -46,10 +46,10 @@ colored = "2"
 clap = { version = "3.2.2", features = ["cargo"]}
 terminal_size = "0.2.1"
 log = "0.4.17"
-env_logger = "0.9.0"
+env_logger = "0.10.0"
 
 #http client for web images
-minreq = { version = "2.6.0", features = ["punycode", "https-bundled-probe"], optional = true }
+minreq = { version = "2.7.0", features = ["punycode", "https-bundled-probe"], optional = true }
 
 [features]
 default = ["web_image"]
