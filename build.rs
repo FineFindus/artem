@@ -50,9 +50,9 @@ where
 {
     //generate shell completions
     let path = generate_to(
-        shell, cmd,      // We need to specify what generator to use
-        "artem",  // We need to specify the bin name manually
-        &out_dir, // We need to specify where to write to
+        shell, cmd,     // We need to specify what generator to use
+        "artem", // We need to specify the bin name manually
+        out_dir, // We need to specify where to write to
     )?;
     println!("cargo:warning=completion file is generated: {:?}", &path);
     Ok(path)

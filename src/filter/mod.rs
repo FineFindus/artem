@@ -56,7 +56,7 @@ fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
     let mut destination_img = ImageBuffer::new(width, height);
 
     //use iter to iter over every pixel and create a new img
-    img.pixels().into_iter().for_each(|(x, y, _)| {
+    img.pixels().for_each(|(x, y, _)| {
         //kernel values for rgb
         let mut kernel_values_red = 0f32;
         let mut kernel_values_green = 0f32;
@@ -259,7 +259,7 @@ fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
     debug!("Creating target sobel image");
     let mut destination_img = ImageBuffer::new(width, height);
 
-    img.pixels().into_iter().for_each(|(x, y, _)| {
+    img.pixels().for_each(|(x, y, _)| {
         //kernel values for rgb
         let mut kernel_values_x = 0f32;
         let mut kernel_values_y = 0f32;
@@ -276,8 +276,8 @@ fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
                 let pixel_gray = crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
                 //add rgb values
-                kernel_values_x += pixel_gray as f32 * kernel_x[k_x][k_y];
-                kernel_values_y += pixel_gray as f32 * kernel_y[k_x][k_y];
+                kernel_values_x += pixel_gray * kernel_x[k_x][k_y];
+                kernel_values_y += pixel_gray * kernel_y[k_x][k_y];
             }
         }
 
@@ -374,7 +374,7 @@ fn edge_tracking(img: DynamicImage) -> DynamicImage {
     let lower_threshold = u8::MAX as f32 * 0.3;
     debug!("Lower threshold: {}", lower_threshold);
 
-    img.pixels().into_iter().for_each(|(x, y, pixel)| {
+    img.pixels().for_each(|(x, y, pixel)| {
         let grayscale_pixel = crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
         //check if pixel is at least weak or strong

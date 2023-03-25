@@ -142,7 +142,6 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     //convert source img to a target string
     let target = source_img
         .pixels()
-        .into_iter()
         .step_by(tile_width as usize)
         .filter_map(|(x, y, _)| {
             if y % tile_height == 0 && x % tile_width == 0 {
