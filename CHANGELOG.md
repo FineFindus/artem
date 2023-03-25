@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Changed
+### [1.1.6] - 2023-03-25
 
 - HTML Output has now a line break before the closing tags
 - Reduced produced html file size, by not coloring invisible whitespace
+- Update dependencies
 
 ## [1.1.5] - 2022-06-01
 

@@ -1,6 +1,6 @@
 [package]
 name = "artem"
-version = "1.1.5"
+version = "1.1.6"
 authors = ["Jonathan (@FineFindus)"]
 description = "Convert images from multiple formats (jpg, png, webp, etc…) to ASCII art"
 edition = "2021"
@@ -43,7 +43,6 @@ criterion = "0.4.0"
 [dependencies]
 image = "0.24.2"
 colored = "2"
-openssl = "0.10.48"
 clap = { version = "3.2.2", features = ["cargo"]}
 terminal_size = "0.2.1"
 log = "0.4.17"
