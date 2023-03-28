@@ -150,7 +150,7 @@ Alternatively, if `brew` is installed, you can also use `brew` to install it. Se
 #### Using Homebrew
 
 > **Warning**
-> It's no longer recommended to install `artem` via homebrew, as the tap is no longer maintained due to diffculty working with homebrew. IF you wihs to maintain the tap, please contact me.
+> It's no longer recommended to install `artem` via Homebrew, as the tap is no longer maintained due to difficulty working with Homebrew. If you wish to maintain the tap, please contact me.
 
 ```bash
 brew install finefindus/tap/artem
