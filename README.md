@@ -149,7 +149,8 @@ Alternatively, if `brew` is installed, you can also use `brew` to install it. Se
 
 #### Using Homebrew
 
-The recommended way to install `artem` on MacOS is using a Homebrew [tap](https://github.com/FineFindus/homebrew-tap):
+> **Warning**
+> It's no longer recommended to install `artem` via homebrew, as the tap is no longer maintained due to diffculty working with homebrew. IF you wihs to maintain the tap, please contact me.
 
 ```bash
 brew install finefindus/tap/artem
@@ -159,7 +160,7 @@ The homebrew version has the added benefit of also installing the man page and t
 
 #### Binary files
 
-Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`brew`](#using-homebrew) or [`cargo`](#all-platforms-recommended).
+Alternatively binary files (for x86_64 and Arm) are provided in the [release tab](https://github.com/FineFindus/artem/releases). This way of installing is NOT recommend over using [`cargo`](#all-platforms-recommended).
 
 ### Windows
 
