@@ -22,7 +22,7 @@ pub enum TargetType {
     Shell(bool, bool),
     /// Special Ansi/ans file that will always have colors enabled. Can also have background colors.
     AnsiFile(bool),
-    /// Shell target, Supports color and background colors.
+    /// HTML target, Supports color and background colors.
     HtmlFile(bool, bool),
     /// Every other file, does not support either colored outputs.
     File,
