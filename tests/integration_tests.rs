@@ -2,6 +2,7 @@ use assert_cmd::prelude::*; // Add methods on commands
 use predicates::prelude::*;
 use std::fs::{self};
 // Used for writing assertions
+use pretty_assertions::assert_str_eq;
 use std::process::Command; // Run programs
 
 #[test]
@@ -113,7 +114,7 @@ fn full_file_compare_html() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 62674 bytes to /tmp/ascii.html",
+        "Written 62625 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -121,7 +122,7 @@ fn full_file_compare_html() {
     //delete output file
     fs::remove_file("/tmp/ascii.html").unwrap();
 
-    assert_eq!(desired_output, file_output);
+    assert_str_eq!(desired_output, file_output);
 }
 
 #[test]
@@ -136,7 +137,7 @@ fn full_file_compare_html_border() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img_border.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 61712 bytes to /tmp/ascii.html",
+        "Written 61663 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -144,7 +145,7 @@ fn full_file_compare_html_border() {
     //delete output file
     fs::remove_file("/tmp/ascii.html").unwrap();
 
-    assert_eq!(desired_output, file_output);
+    assert_str_eq!(desired_output, file_output);
 }
 
 #[test]
@@ -159,7 +160,7 @@ fn full_file_compare_html_outline() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img_outline.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 19834 bytes to /tmp/ascii.html",
+        "Written 19785 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -167,7 +168,7 @@ fn full_file_compare_html_outline() {
     //delete output file
     fs::remove_file("/tmp/ascii.html").unwrap();
 
-    assert_eq!(desired_output, file_output);
+    assert_str_eq!(desired_output, file_output);
 }
 
 #[test]
@@ -182,7 +183,7 @@ fn full_file_compare_html_background_color() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img_background.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 100242 bytes to /tmp/ascii.html",
+        "Written 100193 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors
@@ -190,5 +191,5 @@ fn full_file_compare_html_background_color() {
     //delete output file
     fs::remove_file("/tmp/ascii.html").unwrap();
 
-    assert_eq!(desired_output, file_output);
+    assert_str_eq!(desired_output, file_output);
 }
