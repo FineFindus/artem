@@ -179,14 +179,14 @@ impl Default for OptionBuilder {
 macro_rules! property {
     ($(#[$attr:meta])* => $field:ident, $field_type:ty) => {
         $(#[$attr])*
-        pub fn $field<'a>(&'a mut self, $field: $field_type) -> &'a mut Self {
+        pub fn $field(&mut self, $field: $field_type) -> &mut Self {
             self.$field = $field;
             self
         }
     };
     ($(#[$attr:meta])* => $field:ident, $field_type:ty, $func:ident) => {
         $(#[$attr])*
-        pub fn $field<'a>(&'a mut self, $field: $field_type) -> &'a mut Self {
+        pub fn $field(&mut self, $field: $field_type) -> &mut Self {
             self.$field = $field.$func();
             self
         }

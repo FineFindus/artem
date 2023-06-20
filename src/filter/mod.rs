@@ -461,7 +461,7 @@ mod test_edge_detection {
                 image::Luma([0u8])
             }
         }));
-        let result = edge_tracking(img.clone());
+        let result = edge_tracking(img);
         //result is equal to a black image
         assert_eq!(DynamicImage::ImageLuma8(ImageBuffer::new(3, 3)), result);
     }
@@ -476,7 +476,7 @@ mod test_edge_detection {
                 image::Luma([0u8])
             }
         }));
-        let result = edge_tracking(img.clone());
+        let result = edge_tracking(img);
         //result is equal to a black image
         assert_eq!(DynamicImage::ImageLuma8(ImageBuffer::new(3, 3)), result);
     }
@@ -503,7 +503,7 @@ mod test_edge_detection {
                 image::Luma([0u8])
             }
         }));
-        let result = edge_tracking(img.clone());
+        let result = edge_tracking(img);
         //result is equal to a black image
         assert_eq!(desired_result, result);
     }
@@ -527,7 +527,7 @@ mod test_edge_detection {
                 image::Luma([0u8])
             }
         }));
-        let result = edge_tracking(img.clone());
+        let result = edge_tracking(img);
         //result is equal to a black image
         assert_eq!(desired_result, result);
     }
