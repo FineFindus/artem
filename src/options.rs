@@ -257,7 +257,7 @@ impl OptionBuilder {
     property! {
     /// Set the target_size.
     ///
-    /// This is the number of characters that the resulting ascii image will be heigh/wide.
+    /// This is the number of characters that the resulting ascii image will be high/wide.
     ///
     /// # Examples
     /// ```

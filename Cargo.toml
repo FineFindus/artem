@@ -76,7 +76,7 @@ extended-description = """\
 artem is a rust command-line interface to convert images from multiple formats (jpg, png, webp, gif and many more) to ASCII art, inspired by jp2a.
 
 It suppots modern features, such as truecolor by default, although ANSI-Colors can be used as a fallback when truecolor is disabled.
-It also respects enviroment variables, like NO_COLOR, to complety disable colored output. 
+It also respects environment variables, like NO_COLOR, to completely disable colored output. 
 
 For questions, bug reports or feedback, please visit https://github.com/finefindus/artem.
 """

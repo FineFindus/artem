@@ -3,7 +3,7 @@ use std::time::Instant;
 use image::{DynamicImage, GenericImageView, GrayImage, ImageBuffer};
 use log::{debug, info, trace};
 
-/// Filter an image using a technic similar to canny edge detection.
+/// Filter an image using a technique similar to canny edge detection.
 ///
 /// The image will first be blurred and then as grayscale converted using the sobel operators.
 /// It will not use non-maximum suppression, since this would make the lines thinner, which is something that is not actually wanted,

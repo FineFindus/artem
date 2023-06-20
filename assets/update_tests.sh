@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script can be used to easily update when the test results should change
-# That can happen even when to image ist just slightly different, for example a single char is different.
+# That can happen even when to image is just slightly different, for example a single char is different.
 
 echo "Building release"
 cargo build --release
