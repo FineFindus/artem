@@ -1,7 +1,7 @@
 ///Returns the top part of the output html file.
 ///
 /// This contains the html elements needed for a correct html file.
-/// The title will be set to `Artem Ascii Image`, whilst the will be set to `Courier` ( a monospace font)
+/// The title will be set to `Artem Ascii Image`.
 /// It will also have the pre tag for correct spacing/line breaking
 ///
 /// # Examples
@@ -20,7 +20,6 @@ pub fn html_top() -> String {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Artem Ascii Image</title>
-        <style>* {font-family: Courier;}</style>
     </head>
     
     <body>
@@ -42,7 +41,6 @@ mod test_push_html_top {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Artem Ascii Image</title>
-        <style>* {font-family: Courier;}</style>
     </head>
     
     <body>
