@@ -143,55 +143,51 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     let target = source_img
         .pixels()
         .step_by(tile_width as usize)
-        .filter_map(|(x, y, _)| {
-            if y % tile_height == 0 && x % tile_width == 0 {
-                //preallocate vector with the with space for all pixels in the tile
-                let mut pixels = Vec::with_capacity((tile_height * tile_width) as usize);
+        .filter(|(x, y, _)| y % tile_height == 0 && x % tile_width == 0)
+        .map(|(x, y, _)| {
+            //preallocate vector with the with space for all pixels in the tile
+            let mut pixels = Vec::with_capacity((tile_height * tile_width) as usize);
 
-                //get all pixel of the tile
-                for p_x in 0..tile_width {
-                    for p_y in 0..tile_height {
-                        pixels.push(source_img.get_pixel(x + p_x, y + p_y))
-                    }
+            //get all pixel of the tile
+            for p_x in 0..tile_width {
+                for p_y in 0..tile_height {
+                    pixels.push(unsafe { source_img.unsafe_get_pixel(x + p_x, y + p_y) })
                 }
-
-                //convert pixels to a char/string
-                let mut char = pixel::correlating_char(
-                    &pixels,
-                    options.characters.as_str(),
-                    options.invert,
-                    options.target,
-                );
-
-                //add border at the start
-                //this cannot be done in single if-else, since the image might only be a single pixel wide
-                if x == 0 {
-                    //add outer border (left)
-                    if options.border {
-                        char = format!("{}{}", "║", char);
-                    }
-
-                    //add spacing for centering the image
-                    if options.center_x {
-                        char = format!("{}{}", horizontal_spacing, char);
-                    }
-                }
-
-                //add a break at line end
-                if x == source_img.width() - tile_width {
-                    //add outer border (right)
-                    if options.border {
-                        char.push('║');
-                    }
-
-                    char.push('\n');
-                }
-
-                Some(char)
-            } else {
-                //only read tiles
-                None
             }
+
+            //convert pixels to a char/string
+            let mut char = pixel::correlating_char(
+                &pixels,
+                options.characters.as_str(),
+                options.invert,
+                options.target,
+            );
+
+            //add border at the start
+            //this cannot be done in single if-else, since the image might only be a single pixel wide
+            if x == 0 {
+                //add outer border (left)
+                if options.border {
+                    char = format!("{}{}", "║", char);
+                }
+
+                //add spacing for centering the image
+                if options.center_x {
+                    char = format!("{}{}", horizontal_spacing, char);
+                }
+            }
+
+            //add a break at line end
+            if x == source_img.width() - tile_width {
+                //add outer border (right)
+                if options.border {
+                    char.push('║');
+                }
+
+                char.push('\n');
+            }
+
+            char
         })
         .reduce(|acc, value| acc + value.as_str());
 
