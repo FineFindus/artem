@@ -189,15 +189,9 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
 
             char
         })
-        .reduce(|acc, value| acc + value.as_str());
+        .collect::<String>();
 
-    match target {
-        Some(value) => output.push_str(&value),
-        //this none case should never appear
-        None => {
-            util::fatal_error("Failed to convert image.", Some(70));
-        }
-    };
+    output.push_str(&target);
 
     if options.border {
         //add spacing for centering
@@ -208,7 +202,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         //add bottom part of border after conversion
         trace!("Adding bottom border");
         output.push('╚');
-        output.push_str("═".repeat((columns) as usize).as_str());
+        output.push_str("═".repeat(columns as usize).as_str());
         output.push('╝');
     } else {
         //last char is a new line char, remove it
