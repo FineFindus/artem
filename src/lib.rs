@@ -92,9 +92,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     let mut output = String::with_capacity((tile_width * tile_height) as usize);
     trace!("Created output string");
 
-    if std::mem::discriminant(&options.target)
-        == std::mem::discriminant(&TargetType::HtmlFile(true, true))
-    {
+    if matches!(&options.target, &TargetType::HtmlFile(true, true)) {
         trace!("Adding html top part");
         output.push_str(&target::html::html_top());
     }
@@ -111,10 +109,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         String::with_capacity(0)
     };
 
-    if options.center_y
-        && std::mem::discriminant(&options.target)
-            == std::mem::discriminant(&TargetType::Shell(true, true))
-    {
+    if options.center_y && matches!(&options.target, &TargetType::Shell(true, true)) {
         trace!("Adding vertical top spacing");
         output.push_str(&util::spacing_vertical(if options.border {
             //two rows are missing because the border takes up two lines
@@ -212,17 +207,12 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     }
 
     //compare it, ignoring the enum value such as true, true
-    if std::mem::discriminant(&options.target)
-        == std::mem::discriminant(&TargetType::HtmlFile(true, true))
-    {
+    if matches!(&options.target, &TargetType::HtmlFile(true, true)) {
         trace!("Adding html bottom part");
         output.push_str(&target::html::html_bottom());
     }
 
-    if options.center_y
-        && std::mem::discriminant(&options.target)
-            == std::mem::discriminant(&TargetType::Shell(true, true))
-    {
+    if options.center_y && matches!(&options.target, &TargetType::Shell(true, true)) {
         trace!("Adding vertical bottom spacing");
         output.push_str(&util::spacing_vertical(if options.border {
             //two rows are missing because the border takes up two lines
