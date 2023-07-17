@@ -140,7 +140,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         .step_by(tile_width as usize)
         .filter(|(x, y, _)| y % tile_height == 0 && x % tile_width == 0)
         .map(|(x, y, _)| {
-            //preallocate vector with the with space for all pixels in the tile
+            //pre-allocate vector with the with space for all pixels in the tile
             let mut pixels = Vec::with_capacity((tile_height * tile_width) as usize);
 
             //get all pixel of the tile
@@ -151,9 +151,9 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             }
 
             //convert pixels to a char/string
-            let mut char = pixel::correlating_char(
+            let mut ascii_char = pixel::correlating_char(
                 &pixels,
-                options.characters.as_str(),
+                &options.characters,
                 options.invert,
                 options.target,
             );
@@ -163,12 +163,12 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             if x == 0 {
                 //add outer border (left)
                 if options.border {
-                    char = format!("{}{}", "║", char);
+                    ascii_char.insert_str(0, "║");
                 }
 
                 //add spacing for centering the image
                 if options.center_x {
-                    char = format!("{}{}", horizontal_spacing, char);
+                    ascii_char.insert_str(0, &horizontal_spacing);
                 }
             }
 
@@ -176,13 +176,13 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             if x == source_img.width() - tile_width {
                 //add outer border (right)
                 if options.border {
-                    char.push('║');
+                    ascii_char.push('║');
                 }
 
-                char.push('\n');
+                ascii_char.push('\n');
             }
 
-            char
+            ascii_char
         })
         .collect::<String>();
 
