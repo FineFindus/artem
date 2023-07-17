@@ -114,7 +114,7 @@ mod test_map_range {
 /// let f = File::open("hello.txt");
 /// let f = match f {
 ///     Ok(file) => file,
-///     Err(error) => fatal_error(error.to_string().as_str(), Some(66)),
+///     Err(error) => fatal_error(&error.to_string(), Some(66)),
 /// };
 /// ```
 pub fn fatal_error(message: &str, code: Option<i32>) -> ! {

@@ -128,7 +128,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         //add top part of border before conversion
         trace!("Adding top part of border");
         output.push('╔');
-        output.push_str("═".repeat(columns as usize).as_str());
+        output.push_str(&"═".repeat(columns as usize));
         output.push_str("╗\n");
     }
 
@@ -197,7 +197,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         //add bottom part of border after conversion
         trace!("Adding bottom border");
         output.push('╚');
-        output.push_str("═".repeat(columns as usize).as_str());
+        output.push_str(&"═".repeat(columns as usize));
         output.push('╝');
     } else {
         //last char is a new line char, remove it

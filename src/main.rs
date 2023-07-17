@@ -71,9 +71,9 @@ fn main() {
         }
         //check if file exist and is a file (not a directory)
         if !path.exists() {
-            util::fatal_error(format!("File {value} does not exist").as_str(), Some(66));
+            util::fatal_error(&format!("File {value} does not exist"), Some(66));
         } else if !Path::new(path).is_file() {
-            util::fatal_error(format!("{value} is not a file").as_str(), Some(66));
+            util::fatal_error(&format!("{value} is not a file"), Some(66));
         }
         debug!("Input {} is a file", value);
         img_paths.push(value);
@@ -306,7 +306,7 @@ fn main() {
 
         //convert the img to ascii string
         info!("Converting img: {}", path);
-        output.push_str(artem::convert(img, options_builder.build()).as_str());
+        output.push_str(&artem::convert(img, options_builder.build()));
     }
 
     //create and write to output file
@@ -358,7 +358,7 @@ fn load_image(path: &str) -> image::DynamicImage {
                 let bytes = match resp {
                     Ok(value) => value.into_bytes(),
                     Err(_) => util::fatal_error(
-                        format!("Failed to parse image bytes from {path}").as_str(),
+                        &format!("Failed to parse image bytes from {path}"),
                         Some(66),
                     ),
                 };
@@ -367,7 +367,7 @@ fn load_image(path: &str) -> image::DynamicImage {
                 debug!("Opening downloaded image from memory");
                 return match image::load_from_memory(&bytes) {
                     Ok(img) => img,
-                    Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
+                    Err(err) => util::fatal_error(&err.to_string(), Some(66)),
                 };
             }
         }
@@ -376,6 +376,6 @@ fn load_image(path: &str) -> image::DynamicImage {
     info!("Opening image");
     match image::open(path) {
         Ok(img) => img,
-        Err(err) => util::fatal_error(err.to_string().as_str(), Some(66)),
+        Err(err) => util::fatal_error(&err.to_string(), Some(66)),
     }
 }

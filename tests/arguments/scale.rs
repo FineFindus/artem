@@ -41,7 +41,7 @@ pub mod scale {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png")
-            .args(["--ratio", f64::MAX.to_string().as_str()]);
+            .args(["--ratio", &f64::MAX.to_string()]);
         cmd.assert().success().stdout(predicate::str::starts_with(
             "::::::::::OOOOOOOOkkkkkkkkkxddddddddoooooooo;.................        ::::::::::",
         ));

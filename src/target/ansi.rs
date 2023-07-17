@@ -21,7 +21,7 @@ pub fn colored_char(red: u8, green: u8, blue: u8, char: char, background_color: 
         }
     } else {
         //otherwise use basic (8 color) ansi color
-        rgb_to_ansi(char.to_string().as_str(), red, green, blue).to_string()
+        rgb_to_ansi(&char.to_string(), red, green, blue).to_string()
     }
 }
 
