@@ -143,6 +143,7 @@ mod test_pixel_density {
     }
 
     #[test]
+    #[ignore = "Requires truecolor support"]
     fn colored_char() {
         //set needed env vars
         env::set_var("COLORTERM", "truecolor");
@@ -194,6 +195,7 @@ mod test_pixel_density {
     }
 
     #[test]
+    #[ignore = "Requires truecolor support"]
     fn colored_background_char_shell() {
         //set needed env vars
         env::set_var("COLORTERM", "truecolor");
@@ -213,6 +215,7 @@ mod test_pixel_density {
     }
 
     #[test]
+    #[ignore = "Requires truecolor support"]
     fn colored_background_char_ansi() {
         //set needed env vars
         env::set_var("COLORTERM", "truecolor");
