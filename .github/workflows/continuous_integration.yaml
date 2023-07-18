@@ -83,7 +83,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest] # test only on ubuntu, testing on every platform would take too much time and fail too often due to a few flaky test
         rust:
-          - 1.68.0 # MSRV
+          - 1.70.0 # MSRV
           - stable
           - beta
           - nightly
