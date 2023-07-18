@@ -4,6 +4,10 @@ use crate::{options, target, util};
 
 /// Convert a pixel block to a char (as a String) from the given density string.
 ///
+/// # Panics
+///
+/// Panics if either the given pixel block or the density is empty.
+///
 /// # Examples
 ///
 /// ```compile_fail, compile will fail, this is an internal example
@@ -28,36 +32,43 @@ pub fn correlating_char(
     invert: bool,
     target: options::TargetType,
 ) -> String {
+    assert!(!block.is_empty());
+    assert!(!density.is_empty());
+
     let (red, green, blue) = average_color(block);
 
     //calculate luminosity from avg. pixel color
     let luminosity = luminosity(red, green, blue);
+
+    //use chars length to support unicode chars
+    let length = density.chars().count();
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
     let density_index = util::map_range(
         (0f32, 255f32),
         if invert {
-            (0f32, density.len() as f32)
+            (0f32, length as f32)
         } else {
-            (density.len() as f32, 0f32)
+            (length as f32, 0f32)
         },
         luminosity,
     )
     .floor()
-    .clamp(0f32, density.len() as f32);
+    .clamp(0f32, length as f32 - 1.0);
 
-    //get correct char from map, default to a space
-    let density_char = density.chars().nth(density_index as usize).unwrap_or(' ');
+    //get correct char from map
+    assert!((density_index as usize) < length);
+    let density_char = density
+        .chars()
+        .nth(density_index as usize)
+        .expect("Failed to get char");
 
     //return the correctly formatted/colored string depending on the target
     match target {
         //if no color, use default case
-        options::TargetType::Shell(true, background_color) => {
-            target::ansi::colored_char(red, green, blue, density_char, background_color)
-        }
-        options::TargetType::AnsiFile(background_color) => {
-            //ansi file is always colored
+        options::TargetType::Shell(true, background_color)
+        | options::TargetType::AnsiFile(background_color) => {
             target::ansi::colored_char(red, green, blue, density_char, background_color)
         }
         options::TargetType::HtmlFile(color, background_color) => {
@@ -77,20 +88,6 @@ mod test_pixel_density {
     use std::env;
 
     use super::*;
-
-    #[test]
-    fn empty_returns_last_char() {
-        let pixels: Vec<Rgba<u8>> = Vec::new();
-        assert_eq!(
-            " ",
-            correlating_char(
-                &pixels,
-                "# ",
-                false,
-                options::TargetType::Shell(false, false)
-            )
-        );
-    }
 
     #[test]
     fn invert_returns_first_instead_of_last_char() {
