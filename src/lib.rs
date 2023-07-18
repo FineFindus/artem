@@ -133,6 +133,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     }
 
     info!("Starting conversion to ascii");
+    let width = source_img.width();
 
     //convert source img to a target string
     let target = source_img
@@ -173,7 +174,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             }
 
             //add a break at line end
-            if x == source_img.width() - tile_width {
+            if x == width - tile_width {
                 //add outer border (right)
                 if options.border {
                     ascii_char.push('║');
