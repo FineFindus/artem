@@ -49,6 +49,7 @@ dependencies = [
  "image",
  "log",
  "minreq",
+ "once_cell",
  "predicates 3.0.2",
  "pretty_assertions",
  "terminal_size",

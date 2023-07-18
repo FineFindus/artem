@@ -1,6 +1,7 @@
 use std::{env, process};
 
 use log::error;
+use once_cell::sync::Lazy;
 
 ///Returns if the terminal supports truecolor mode.
 ///
@@ -12,20 +13,17 @@ use log::error;
 ///
 /// # Examples
 /// ```
-/// use artem::util::supports_truecolor;
+/// use artem::util::SUPPORTS_TRUECOLOR;
 /// # use std::env;
 ///
 /// # env::set_var("COLORTERM", "truecolor");
 /// //only true when run in a shell that supports true color
-/// let color_support = supports_truecolor();
+/// let color_support = *SUPPORTS_TRUECOLOR;
 /// assert!(color_support);
 /// ```
-pub fn supports_truecolor() -> bool {
-    match env::var("COLORTERM") {
-        Ok(value) => value.contains("truecolor") || value.contains("24bit"),
-        Err(_) => false, //not found, true colors are not supported
-    }
-}
+pub static SUPPORTS_TRUECOLOR: Lazy<bool> = Lazy::new(|| {
+    env::var("COLORTERM").is_ok_and(|value| value.contains("truecolor") || value.contains("24bit"))
+});
 
 #[cfg(test)]
 mod test_color_support {
@@ -46,13 +44,13 @@ mod test_color_support {
     #[test]
     fn false_with_different_env_false() {
         env::set_var("COLORTERM", "false");
-        assert!(!supports_truecolor());
+        assert!(!*SUPPORTS_TRUECOLOR);
     }
 
     #[test]
     fn false_with_different_env() {
         env::set_var("COLORTERM", "kjasdlkdjaskd");
-        assert!(!supports_truecolor());
+        assert!(!*SUPPORTS_TRUECOLOR);
     }
 }
 

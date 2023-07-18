@@ -192,7 +192,7 @@ fn main() {
 
         //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
         info!("Using colored ascii");
-        let truecolor = util::supports_truecolor();
+        let truecolor = *util::SUPPORTS_TRUECOLOR;
         if !truecolor {
             if background_color {
                 warn!("Background flag will be ignored, since truecolor is not supported.")
@@ -266,7 +266,7 @@ fn main() {
                     warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
                     TargetType::File
                 } else {
-                    if !util::supports_truecolor() {
+                    if !*util::SUPPORTS_TRUECOLOR {
                         warn!("truecolor is disabled, output file will not use truecolor chars")
                     }
                     TargetType::AnsiFile(background_color)
