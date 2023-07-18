@@ -163,7 +163,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             if x == 0 {
                 //add outer border (left)
                 if options.border {
-                    ascii_char.insert_str(0, "║");
+                    ascii_char.insert(0, '║');
                 }
 
                 //add spacing for centering the image
