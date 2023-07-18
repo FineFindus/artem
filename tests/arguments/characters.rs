@@ -44,7 +44,7 @@ pub mod characters {
                 .args(["-c", arg]);
             //only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
-                "aaaaaaaaaa6666666654444444432222222200000000b++++++++---------........aaaaaaaaaa",
+                "aaaaaaaaaa6666666665555555542222222211111111b:::::::+=========,,,,,,,,aaaaaaaaaa",
             ));
         }
     }
