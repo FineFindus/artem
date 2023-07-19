@@ -324,29 +324,28 @@ fn main() {
 /// ```
 fn load_image(path: &str) -> image::DynamicImage {
     #[cfg(feature = "web_image")]
-    {
-        if path.starts_with("http") {
-            {
-                info!("Started to download image from: {}", path);
-                let now = std::time::Instant::now();
-                let resp = minreq::get(path).send();
-
-                //get bytes of the image
-                let Ok(bytes) = resp.map(|resp| resp.into_bytes()) else {
+    if path.starts_with("http") {
+        info!("Started to download image from: {}", path);
+        let now = std::time::Instant::now();
+        let Ok(resp) = ureq::get(path).call() else {
                     util::fatal_error(
-                        &format!("Failed to parse image bytes from {path}"),
+                        &format!("Failed to load image bytes from {}", path),
                         Some(66),
                     );
                 };
-                info!("Downloading took {:3} ms", now.elapsed().as_millis());
 
-                debug!("Opening downloaded image from memory");
-                return match image::load_from_memory(&bytes) {
-                    Ok(img) => img,
-                    Err(err) => util::fatal_error(&err.to_string(), Some(66)),
-                };
-            }
-        }
+        //get bytes of the images
+        let mut bytes: Vec<u8> = Vec::new();
+        resp.into_reader()
+            .read_to_end(&mut bytes)
+            .expect("Failed to read bytes");
+        info!("Downloading took {:3} ms", now.elapsed().as_millis());
+
+        debug!("Opening downloaded image from memory");
+        return match image::load_from_memory(&bytes) {
+            Ok(img) => img,
+            Err(err) => util::fatal_error(&err.to_string(), Some(66)),
+        };
     }
 
     info!("Opening image");
