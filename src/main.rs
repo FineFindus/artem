@@ -287,7 +287,7 @@ fn main() {
 
     //remove last linebreak, we cannot use `.trim_end()` here
     //as it may end up remove whitespace that is part of the image
-    if output.chars().last() == Some('\n') {
+    if output.ends_with('\n') {
         output.remove(output.len() - 1);
     }
 
