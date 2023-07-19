@@ -112,7 +112,7 @@ pub mod url_input {
 
         cmd.arg("https://example.com/no.png");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "[ERROR] The image format could not be determined",
+            "[ERROR] Failed to load image bytes from https://example.com/no.png",
         ));
     }
 
@@ -139,7 +139,7 @@ pub mod url_input {
             "https://example.com/no.png",
         ]);
         cmd.assert().failure().stderr(predicate::str::contains(
-            "[ERROR] The image format could not be determined",
+            "[ERROR] Failed to load image bytes from https://example.com/no-image.jpg",
         ));
     }
 
