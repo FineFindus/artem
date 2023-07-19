@@ -183,7 +183,7 @@ fn full_file_compare_html_background_color() {
     let desired_output =
         fs::read_to_string("assets/standard_test_img/standard_test_img_background.html").unwrap(); //ignore errors
     cmd.assert().success().stdout(predicate::str::contains(
-        "Written 100193 bytes to /tmp/ascii.html",
+        "Written 100194 bytes to /tmp/ascii.html",
     ));
 
     let file_output = fs::read_to_string("/tmp/ascii.html").unwrap(); //ignore errors

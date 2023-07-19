@@ -59,8 +59,6 @@ fn main() {
 
     info!("Checking inputs");
     for value in input {
-        let path = Path::new(value);
-
         #[cfg(feature = "web_image")]
         {
             if value.starts_with("http") {
@@ -69,6 +67,8 @@ fn main() {
                 continue;
             }
         }
+
+        let path = Path::new(value);
         //check if file exist and is a file (not a directory)
         if !path.exists() {
             util::fatal_error(&format!("File {value} does not exist"), Some(66));
@@ -80,29 +80,23 @@ fn main() {
     }
 
     //density char map
-    let density = if matches.is_present("characters") {
-        match matches.value_of("characters").unwrap() {
-            "short" | "s" | "0" => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
-            "flat" | "f" | "1" => r#"MWNXK0Okxdolc:;,'...   "#,
-            "long" | "l" | "2" => {
-                r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
-            }
-            _ => {
-                info!("Using user provided characters");
-                let chars = matches.value_of("characters").unwrap();
-                if chars.is_empty() {
-                    util::fatal_error("Characters cannot be empty", Some(64))
-                } else {
-                    chars
-                }
-            }
+    let density = match matches.value_of("characters") {
+        Some("short") | Some("s") | Some("0") => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
+        Some("flat") | Some("f") | Some("1") => r#"MWNXK0Okxdolc:;,'...   "#,
+        Some("long") | Some("l") | Some("2") => {
+            r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
         }
-    } else {
-        //density map from jp2a
-        info!("Using default characters");
-        r#"MWNXK0Okxdolc:;,'...   "#
+        Some(chars) if !chars.is_empty() => {
+            info!("Using user provided characters");
+            chars
+        }
+        _ => {
+            //density map from jp2a
+            info!("Using default characters");
+            r#"MWNXK0Okxdolc:;,'...   "#
+        }
     };
-    debug!("Characters used: \"{density}\"");
+    debug!("Characters used: '{density}'");
     options_builder.characters(density.to_string());
 
     //set the default resizing dimension to width
@@ -117,36 +111,34 @@ fn main() {
         options_builder.dimension(util::ResizingDimension::Height);
 
         //read terminal size, error when STDOUT is not a tty
-        match terminal_size::terminal_size() {
-            Some(value) => value.1 .0 as u32,
-            None => util::fatal_error(
+        let Some(height) = terminal_size::terminal_size().map(|size| size.1.0 as u32) else {
+            util::fatal_error(
                 "Failed to read terminal size, STDOUT is not a tty",
                 Some(72),
-            ),
-        }
+            );
+        };
+        height
     } else if matches.is_present("width") {
         //use max terminal width
         trace!("Using terminal width as target size");
 
         //read terminal size, error when STDOUT is not a tty
-        match terminal_size::terminal_size() {
-            Some(value) => value.0 .0 as u32,
-            None => util::fatal_error(
+        let Some(width) = terminal_size::terminal_size().map(|size| size.0.0 as u32) else {
+            util::fatal_error(
                 "Failed to read terminal size, STDOUT is not a tty",
                 Some(72),
-            ),
-        }
+            );
+        };
+        width
     } else {
         //use given input size
         trace!("Using user input size as target size");
-        match matches
+        let Some(size) = matches
             .value_of("size")
-            .unwrap() //this should always be at least "80", so it should be safe to unwrap
-            .parse::<u32>()
-        {
-            Ok(v) => v,
-            Err(_) => util::fatal_error("Could not work with size input value", Some(65)),
-        }
+            .and_then(|size| size.parse::<u32>().ok()) else {
+                util::fatal_error("Could not work with size input value", Some(65));
+            };
+        size
     }
     .clamp(
         20,  //min should be 20 to ensure a somewhat visible picture
@@ -157,16 +149,16 @@ fn main() {
     options_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
 
     //best ratio between height and width is 0.43
-    let scale = match matches
+    let Some(scale) = matches
         .value_of("scale")
-        .unwrap() //this should always be at least "0.43", so it should be safe to unwrap
-        .parse::<f32>()
-    {
-        Ok(v) => v.clamp(
-            0.1f32, //a negative or 0 scale is not allowed
-            1f32,   //even a scale above 0.43 is not looking good
-        ),
-        Err(_) => util::fatal_error("Could not work with ratio input value", Some(65)),
+        .and_then(|scale| scale.parse::<f32>().ok())
+        .map(|scale| {
+            scale.clamp(
+                0.1f32, //a negative or 0 scale is not allowed
+                1f32,   //even a scale above 0.43 is not looking good
+            )
+        }) else {
+        util::fatal_error("Could not work with ratio input value", Some(65));
     };
     debug!("Scale: {scale}");
     options_builder.scale(scale);
@@ -192,8 +184,7 @@ fn main() {
 
         //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
         info!("Using colored ascii");
-        let truecolor = *util::SUPPORTS_TRUECOLOR;
-        if !truecolor {
+        if !*util::SUPPORTS_TRUECOLOR {
             if background_color {
                 warn!("Background flag will be ignored, since truecolor is not supported.")
             }
@@ -244,8 +235,8 @@ fn main() {
     }
 
     //get output file extension for specific output, default to plain text
-    if matches.is_present("output-file") {
-        let file_path = PathBuf::from(matches.value_of("output-file").unwrap()); //save to unwrap, checked before
+    if let Some(output_file) = matches.value_of("output-file") {
+        let file_path = PathBuf::from(output_file); //save to unwrap, checked before
         debug!("Output-file: {}", file_path.to_str().unwrap());
 
         //check file extension
@@ -287,51 +278,37 @@ fn main() {
         options_builder.target(TargetType::Shell(color, background_color));
     }
 
-    let mut output = String::new();
+    let mut output = img_paths
+        .iter()
+        .map(|path| load_image(path))
+        .filter(|img| img.height() != 0 || img.width() != 0)
+        .map(|img| artem::convert(img, options_builder.build()))
+        .collect::<String>();
 
-    for (index, path) in img_paths.iter().enumerate() {
-        //try to load img
-        let img = load_image(path);
-
-        trace!("Checking if img dimensions are larger than 0");
-        //the image-rs lib does not state if images can have a size 0, so check here
-        if img.height() == 0 || img.width() == 0 {
-            util::fatal_error("Image dimensions can not be 0", Some(66))
-        }
-
-        if index != 0 && index - 1 != img_paths.len() {
-            trace!("Adding line break between images");
-            output.push('\n');
-        }
-
-        //convert the img to ascii string
-        info!("Converting img: {}", path);
-        output.push_str(&artem::convert(img, options_builder.build()));
+    //remove last linebreak, we cannot use `.trim_end()` here
+    //as it may end up remove whitespace that is part of the image
+    if output.chars().last() == Some('\n') {
+        output.remove(output.len() - 1);
     }
 
     //create and write to output file
-    if matches.is_present("output-file") && matches.value_of("output-file").is_some() {
+    if let Some(output_file) = matches.value_of("output-file") {
         info!("Writing output to output file");
-        let mut file = match File::create(matches.value_of("output-file").unwrap()) {
-            Ok(f) => f,
-            Err(_) => util::fatal_error("Could not create output file", Some(73)),
-        };
-        trace!("Created output file");
 
-        match file.write(output.as_bytes()) {
-            Ok(result) => {
-                info!("Written ascii chars to output file");
-                println!(
-                    "Written {result} bytes to {}",
-                    matches.value_of("output-file").unwrap()
-                )
-            }
-            Err(_) => util::fatal_error("Could not write to output file", Some(74)),
+        let Ok(mut file) = File::create(output_file) else {
+            util::fatal_error("Could not create output file", Some(73));
         };
+
+        trace!("Created output file");
+        let Ok(bytes_count) = file.write(output.as_bytes()) else {
+                util::fatal_error("Could not write to output file", Some(74));
+        };
+        info!("Written ascii chars to output file");
+        println!("Written {} bytes to {}", bytes_count, output_file)
     } else {
         //print the ascii img to the terminal
         info!("Printing output");
-        println!("{output}");
+        println!("{}", output);
     }
 }
 

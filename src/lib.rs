@@ -200,11 +200,6 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         output.push('╚');
         output.push_str(&"═".repeat(columns as usize));
         output.push('╝');
-    } else {
-        //last char is a new line char, remove it
-        //don't use trim, since it can remove "whitespace" which include spaces
-        //these might be used to represent part of the image
-        output.remove(output.len() - 1);
     }
 
     //compare it, ignoring the enum value such as true, true

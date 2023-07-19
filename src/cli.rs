@@ -45,7 +45,7 @@ pub fn build_cli() -> Command<'static> {
                 //use "\" to keep this readable but still as a single line string
                 .help("Change the characters that are used to display the image.\
                 The first character should have the highest 'darkness' and the last should have the least (recommended to be a space ' '). \
-                A lower detail map is recommend for smaller images. Included characters can be used with the argument 0 | 1 | 2."),
+                A lower detail map is recommend for smaller images. Included characters can be used with the argument 0 | 1 | 2. If no characters are passed in, the default set will be used."),
         )
         .arg(
             Arg::new("size")

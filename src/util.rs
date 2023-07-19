@@ -331,10 +331,9 @@ mod test_dimensions_enum {
 /// let  spacing = spacing_horizontal(10);
 /// ```
 pub fn spacing_horizontal(width: u32) -> String {
-    let term_width = match terminal_size::terminal_size() {
-        Some(value) => value.0 .0 as u32,
-        None => 0,
-    };
+    let term_width = terminal_size::terminal_size()
+        .map(|dimensions| dimensions.0 .0 as u32)
+        .unwrap_or_default();
     " ".repeat(term_width.saturating_sub(width).saturating_div(2) as usize)
 }
 
@@ -360,10 +359,9 @@ mod test_spacing_horizontal {
 /// let  spacing = spacing_vertical(10);
 /// ```
 pub fn spacing_vertical(height: u32) -> String {
-    let term_height = match terminal_size::terminal_size() {
-        Some(value) => value.1 .0 as u32,
-        None => 0,
-    };
+    let term_height = terminal_size::terminal_size()
+        .map(|dimensions| dimensions.1 .0 as u32)
+        .unwrap_or_default();
     log::trace!("H: {term_height}, h: {height}");
     "\n".repeat(term_height.saturating_sub(height).saturating_div(2) as usize)
 }
