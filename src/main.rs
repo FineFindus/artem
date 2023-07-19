@@ -332,12 +332,11 @@ fn load_image(path: &str) -> image::DynamicImage {
                 let resp = minreq::get(path).send();
 
                 //get bytes of the image
-                let bytes = match resp {
-                    Ok(value) => value.into_bytes(),
-                    Err(_) => util::fatal_error(
+                let Ok(bytes) = resp.map(|resp| resp.into_bytes()) else {
+                    util::fatal_error(
                         &format!("Failed to parse image bytes from {path}"),
                         Some(66),
-                    ),
+                    );
                 };
                 info!("Downloading took {:3} ms", now.elapsed().as_millis());
 
