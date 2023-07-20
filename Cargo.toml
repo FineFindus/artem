@@ -7,9 +7,10 @@ edition = "2021"
 rust-version = "1.70.0"
 readme = "README.md"
 license = "MPL-2.0"
-homepage = "https://github.com/finefindus/artem"
-repository = "https://github.com/finefindus/artem"
-categories = ["command-line-utilities"]
+homepage = "https://github.com/FineFindus/artem"
+repository = "https://github.com/FineFindus/artem"
+keywords = ["text", "ascii", "ascii-art", "terminal"]
+categories = ["command-line-utilities", "multimedia::images"]
 
 #build file
 build = "build.rs"
@@ -78,5 +79,5 @@ artem is a rust command-line interface to convert images from multiple formats (
 It suppots modern features, such as truecolor by default, although ANSI-Colors can be used as a fallback when truecolor is disabled.
 It also respects environment variables, like NO_COLOR, to completely disable colored output. 
 
-For questions, bug reports or feedback, please visit https://github.com/finefindus/artem.
+For questions, bug reports or feedback, please visit https://github.com/FineFindus/artem.
 """
