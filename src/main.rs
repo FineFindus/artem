@@ -53,7 +53,7 @@ fn main() {
     //log enabled features
     trace!("Feature web_image: {}", cfg!(feature = "web_image"));
 
-    let mut options_builder = ConfigBuilder::new();
+    let mut config_builder = ConfigBuilder::new();
 
     //at least one input must exist, so its safe to unwrap
     let input = matches.get_many::<String>("INPUT").unwrap();
@@ -101,10 +101,10 @@ fn main() {
         }
     };
     debug!("Characters used: '{density}'");
-    options_builder.characters(density.to_string());
+    config_builder.characters(density.to_string());
 
     //set the default resizing dimension to width
-    options_builder.dimension(util::ResizingDimension::Width);
+    config_builder.dimension(util::ResizingDimension::Width);
 
     //get target size from args
     //only one arg should be present
@@ -112,7 +112,7 @@ fn main() {
         //use max terminal height
         trace!("Using terminal height as target size");
         //change dimension to height
-        options_builder.dimension(util::ResizingDimension::Height);
+        config_builder.dimension(util::ResizingDimension::Height);
 
         //read terminal size, error when STDOUT is not a tty
         let Some(height) = terminal_size::terminal_size().map(|size| size.1.0 as u32) else {
@@ -149,7 +149,7 @@ fn main() {
     );
 
     debug!("Target Size: {target_size}");
-    options_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
+    config_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
 
     //best ratio between height and width is 0.43
     let Some(scale) = matches
@@ -163,11 +163,11 @@ fn main() {
         util::fatal_error("Could not work with ratio input value", Some(65));
     };
     debug!("Scale: {scale}");
-    options_builder.scale(scale);
+    config_builder.scale(scale);
 
     let invert = matches.get_flag("invert-density");
     debug!("Invert is set to: {invert}");
-    options_builder.invert(invert);
+    config_builder.invert(invert);
 
     let background_color = matches.get_flag("background-color");
     debug!("BackgroundColor is set to: {background_color}");
@@ -199,37 +199,37 @@ fn main() {
 
     //get flag for border around image
     let border = matches.get_flag("border");
-    options_builder.border(border);
+    config_builder.border(border);
     info!("Using border: {border}");
 
     //get flags for flipping along x axis
     let transform_x = matches.get_flag("flipX");
-    options_builder.transform_x(transform_x);
+    config_builder.transform_x(transform_x);
     debug!("Flipping X-Axis: {transform_x}");
 
     //get flags for flipping along y axis
     let transform_y = matches.get_flag("flipY");
-    options_builder.transform_y(transform_y);
+    config_builder.transform_y(transform_y);
     debug!("Flipping Y-Axis: {transform_y}");
 
     //get flags for centering the image
     let center_x = matches.get_flag("centerX");
-    options_builder.center_x(center_x);
+    config_builder.center_x(center_x);
     debug!("Centering X-Axis: {center_x}");
 
     let center_y = matches.get_flag("centerY");
-    options_builder.center_y(center_y);
+    config_builder.center_y(center_y);
     debug!("Center Y-Axis: {center_y}");
 
     //get flag for creating an outline
     let outline = matches.get_flag("outline");
-    options_builder.outline(outline);
+    config_builder.outline(outline);
     debug!("Outline: {outline}");
 
     //if outline is set, also check for hysteresis
     if outline {
         let hysteresis = matches.get_flag("hysteresis");
-        options_builder.hysteresis(hysteresis);
+        config_builder.hysteresis(hysteresis);
         debug!("Hysteresis: {hysteresis}");
         if hysteresis {
             warn!("Using hysteresis might result in an worse looking ascii image than only using --outline")
@@ -244,7 +244,7 @@ fn main() {
         let file_extension = output_file.extension().and_then(std::ffi::OsStr::to_str);
         debug!("FileExtension: {:?}", file_extension);
 
-        options_builder.target(match file_extension {
+        config_builder.target(match file_extension {
             Some("html") | Some("htm") => {
                 debug!("Target: Html-File");
                 TargetType::HtmlFile(color, background_color)
@@ -276,14 +276,14 @@ fn main() {
         });
     } else {
         debug!("Target: Shell");
-        options_builder.target(TargetType::Shell(color, background_color));
+        config_builder.target(TargetType::Shell(color, background_color));
     }
 
     let mut output = img_paths
         .iter()
         .map(|path| load_image(path))
         .filter(|img| img.height() != 0 || img.width() != 0)
-        .map(|img| artem::convert(img, options_builder.build()))
+        .map(|img| artem::convert(img, config_builder.build()))
         .collect::<String>();
 
     //remove last linebreak, we cannot use `.trim_end()` here
