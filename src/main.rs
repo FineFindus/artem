@@ -14,12 +14,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{debug, info, trace, warn, LevelFilter};
+use log::{debug, info, trace, warn};
 
 use artem::{
     options::{OptionBuilder, TargetType},
     util,
 };
+
+use crate::cli::Verbosity;
 
 //import cli
 mod cli;
@@ -29,21 +31,16 @@ fn main() {
     let matches = cli::build_cli().get_matches();
 
     //get log level from args
-    let log_level = match matches.value_of("verbosity") {
-        Some("trace") => LevelFilter::Trace,
-        Some("debug") => LevelFilter::Debug,
-        Some("info") => LevelFilter::Info,
-        Some("warn") => LevelFilter::Warn,
-        Some("error") => LevelFilter::Error,
-        Some("off") => LevelFilter::Off, //explicit off, this will not even show errors when the file was not found
-        _ => LevelFilter::Warn,          //always show warnings and errors
-    };
-
     //enable logging
     env_logger::builder()
         .format_target(false)
         .format_timestamp(None)
-        .filter_level(log_level)
+        .filter_level(
+            (*matches
+                .get_one::<Verbosity>("verbosity")
+                .unwrap_or(&Verbosity::Warn))
+            .into(),
+        )
         .init();
     trace!("Started logger with trace");
 
@@ -53,7 +50,7 @@ fn main() {
     let mut options_builder = OptionBuilder::new();
 
     //at least one input must exist, so its safe to unwrap
-    let input = matches.values_of("INPUT").unwrap();
+    let input = matches.get_many::<String>("INPUT").unwrap();
 
     let mut img_paths = Vec::with_capacity(input.len());
 
@@ -80,7 +77,10 @@ fn main() {
     }
 
     //density char map
-    let density = match matches.value_of("characters") {
+    let density = match matches
+        .get_one::<String>("characters")
+        .map(|res| res.as_str())
+    {
         Some("short") | Some("s") | Some("0") => r#"Ñ@#W$9876543210?!abc;:+=-,._ "#,
         Some("flat") | Some("f") | Some("1") => r#"MWNXK0Okxdolc:;,'...   "#,
         Some("long") | Some("l") | Some("2") => {
@@ -104,7 +104,7 @@ fn main() {
 
     //get target size from args
     //only one arg should be present
-    let target_size = if matches.is_present("height") {
+    let target_size = if matches.get_flag("height") {
         //use max terminal height
         trace!("Using terminal height as target size");
         //change dimension to height
@@ -118,7 +118,7 @@ fn main() {
             );
         };
         height
-    } else if matches.is_present("width") {
+    } else if matches.get_flag("width") {
         //use max terminal width
         trace!("Using terminal width as target size");
 
@@ -134,11 +134,10 @@ fn main() {
         //use given input size
         trace!("Using user input size as target size");
         let Some(size) = matches
-            .value_of("size")
-            .and_then(|size| size.parse::<u32>().ok()) else {
+            .get_one::<u32>("size") else {
                 util::fatal_error("Could not work with size input value", Some(65));
             };
-        size
+        *size
     }
     .clamp(
         20,  //min should be 20 to ensure a somewhat visible picture
@@ -150,8 +149,7 @@ fn main() {
 
     //best ratio between height and width is 0.43
     let Some(scale) = matches
-        .value_of("scale")
-        .and_then(|scale| scale.parse::<f32>().ok())
+        .get_one::<f32>("scale")
         .map(|scale| {
             scale.clamp(
                 0.1f32, //a negative or 0 scale is not allowed
@@ -163,21 +161,21 @@ fn main() {
     debug!("Scale: {scale}");
     options_builder.scale(scale);
 
-    let invert = matches.is_present("invert-density");
+    let invert = matches.get_flag("invert-density");
     debug!("Invert is set to: {invert}");
     options_builder.invert(invert);
 
-    let background_color = matches.is_present("background-color");
+    let background_color = matches.get_flag("background-color");
     debug!("BackgroundColor is set to: {background_color}");
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
-    let color = if matches.is_present("no-color") {
+    let color = if matches.get_flag("no-color") {
         //print the "normal" non-colored conversion
         info!("Using non-colored ascii");
         false
     } else {
-        if matches.is_present("outline") {
+        if matches.get_flag("outline") {
             warn!("Using outline, result will only be in grayscale");
             //still set colors  to true, since grayscale has different gray tones
         }
@@ -196,37 +194,37 @@ fn main() {
     };
 
     //get flag for border around image
-    let border = matches.is_present("border");
+    let border = matches.get_flag("border");
     options_builder.border(border);
     info!("Using border: {border}");
 
     //get flags for flipping along x axis
-    let transform_x = matches.is_present("flipX");
+    let transform_x = matches.get_flag("flipX");
     options_builder.transform_x(transform_x);
     debug!("Flipping X-Axis: {transform_x}");
 
     //get flags for flipping along y axis
-    let transform_y = matches.is_present("flipY");
+    let transform_y = matches.get_flag("flipY");
     options_builder.transform_y(transform_y);
     debug!("Flipping Y-Axis: {transform_y}");
 
     //get flags for centering the image
-    let center_x = matches.is_present("centerX");
+    let center_x = matches.get_flag("centerX");
     options_builder.center_x(center_x);
     debug!("Centering X-Axis: {center_x}");
 
-    let center_y = matches.is_present("centerY");
+    let center_y = matches.get_flag("centerY");
     options_builder.center_y(center_y);
     debug!("Center Y-Axis: {center_y}");
 
     //get flag for creating an outline
-    let outline = matches.is_present("outline");
+    let outline = matches.get_flag("outline");
     options_builder.outline(outline);
     debug!("Outline: {outline}");
 
     //if outline is set, also check for hysteresis
     if outline {
-        let hysteresis = matches.is_present("hysteresis");
+        let hysteresis = matches.get_flag("hysteresis");
         options_builder.hysteresis(hysteresis);
         debug!("Hysteresis: {hysteresis}");
         if hysteresis {
@@ -235,12 +233,11 @@ fn main() {
     }
 
     //get output file extension for specific output, default to plain text
-    if let Some(output_file) = matches.value_of("output-file") {
-        let file_path = PathBuf::from(output_file); //save to unwrap, checked before
-        debug!("Output-file: {}", file_path.to_str().unwrap());
+    if let Some(output_file) = matches.get_one::<PathBuf>("output-file") {
+        debug!("Output-file: {}", output_file.to_str().unwrap());
 
         //check file extension
-        let file_extension = file_path.extension().and_then(std::ffi::OsStr::to_str);
+        let file_extension = output_file.extension().and_then(std::ffi::OsStr::to_str);
         debug!("FileExtension: {:?}", file_extension);
 
         options_builder.target(match file_extension {
@@ -253,7 +250,7 @@ fn main() {
                 debug!("Target: Ansi-File");
 
                 //by definition ansi file must have colors, only the background color is optional
-                if matches.is_present("no-color") {
+                if matches.get_flag("no-color") {
                     warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
                     TargetType::File
                 } else {
@@ -266,7 +263,7 @@ fn main() {
             _ => {
                 debug!("Target: File");
 
-                if !matches.is_present("no-color") {
+                if !matches.get_flag("no-color") {
                     //warn user that output is not colored
                     warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
                 }
@@ -292,7 +289,7 @@ fn main() {
     }
 
     //create and write to output file
-    if let Some(output_file) = matches.value_of("output-file") {
+    if let Some(output_file) = matches.get_one::<PathBuf>("output-file") {
         info!("Writing output to output file");
 
         let Ok(mut file) = File::create(output_file) else {
@@ -304,7 +301,7 @@ fn main() {
                 util::fatal_error("Could not write to output file", Some(74));
         };
         info!("Written ascii chars to output file");
-        println!("Written {} bytes to {}", bytes_count, output_file)
+        println!("Written {} bytes to {}", bytes_count, output_file.display())
     } else {
         //print the ascii img to the terminal
         info!("Printing output");

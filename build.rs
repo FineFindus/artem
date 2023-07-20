@@ -4,7 +4,6 @@ use clap_complete::{
     Generator,
 };
 use std::ffi::OsString;
-use std::path::PathBuf;
 use std::{env, path};
 
 use std::io::Error;

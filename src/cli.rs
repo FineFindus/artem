@@ -1,4 +1,6 @@
-use clap::{Arg, Command, ValueHint};
+use std::path::PathBuf;
+
+use clap::{builder::PossibleValue, value_parser, Arg, ArgAction, Command, ValueEnum, ValueHint};
 
 /// Get arguments from the command line.
 ///
@@ -14,7 +16,7 @@ use clap::{Arg, Command, ValueHint};
 /// //for example check if an arg is present
 /// matches.is_present("arg");
 /// ```
-pub fn build_cli() -> Command<'static> {
+pub fn build_cli() -> Command {
     Command::new(clap::crate_name!())
         .version(clap::crate_version!())
         .author(clap::crate_authors!("\n"))
@@ -34,13 +36,17 @@ pub fn build_cli() -> Command<'static> {
                 )
                 .required(true)
                 .value_hint(ValueHint::FilePath)
-                .multiple_values(true)
+                //because of web images accept strings, which allows for URLs and files
+                .value_parser(value_parser!(String))
+                .action(ArgAction::Append)
+                .num_args(..)
         )
         .arg(
             Arg::new("characters")
                 .short('c')
                 .long("characters")
-                .takes_value(true)
+                .value_parser(value_parser!(String))
+                .action(ArgAction::Append)
                 .value_hint(ValueHint::Other)
                 //use "\" to keep this readable but still as a single line string
                 .help("Change the characters that are used to display the image.\
@@ -51,7 +57,7 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("size")
                 .short('s')
                 .long("size")
-                .takes_value(true)
+                .value_parser(value_parser!(u32))
                 .default_value("80")
                 .value_hint(ValueHint::Other)
                 .conflicts_with_all(&["height", "width"])
@@ -61,9 +67,9 @@ pub fn build_cli() -> Command<'static> {
         )
         .arg(
             Arg::new("height")
-                .short('h')
                 .long("height")
                 .conflicts_with("width")
+                .action(ArgAction::SetTrue)
                 .help("Use the terminal maximum terminal height to display the image. \
                 This argument is conflicting with --size and --width."),
         )
@@ -71,13 +77,14 @@ pub fn build_cli() -> Command<'static> {
             Arg::new("width")
                 .short('w')
                 .long("width")
+                .action(ArgAction::SetTrue)
                 .help("Use the terminal maximum terminal width to display the image. \
                 This argument is conflicting with --size and --height."),
         )
         .arg(
             Arg::new("scale")
                 .long("ratio")
-                .takes_value(true)
+                .value_parser(value_parser!(f32))
                 .default_value("0.42")
                 .value_hint(ValueHint::Other)
                 .help("Change the ratio between height and width, since ASCII characters are a bit higher than long. \
@@ -85,25 +92,29 @@ pub fn build_cli() -> Command<'static> {
         ).arg(
             Arg::new("flipX")
                 .long("flipX")
+                .action(ArgAction::SetTrue)
                 .help("Flip the image along the X-Axis/horizontally."),
         ).arg(
             Arg::new("flipY")
                 .long("flipY")
+                .action(ArgAction::SetTrue)
                 .help("Flip the image along the Y-Axis/vertically."),
         ).arg(
             Arg::new("centerX")
-            .long("centerX")
-            .help("Center the image along the X-Axis/horizontally in the terminal."),
+                .long("centerX")
+                .action(ArgAction::SetTrue)
+                .help("Center the image along the X-Axis/horizontally in the terminal."),
         ).arg(
             Arg::new("centerY")
                 .long("centerY")
+                .action(ArgAction::SetTrue)
                 .help("Center the image along the Y-Axis/vertically in the terminal."),
         )
         .arg(
             Arg::new("output-file")
                 .short('o')
                 .long("output")
-                .takes_value(true)
+                .value_parser(value_parser!(PathBuf))
                 .value_hint(ValueHint::FilePath)
                 .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an \
                 .ansi extension, or an .html file, to convert the output to html. \
@@ -113,29 +124,34 @@ pub fn build_cli() -> Command<'static> {
         .arg(
             Arg::new("invert-density")
                 .long("invert")
+                .action(ArgAction::SetTrue)
                 .help("Inverts the characters used for the image, so light characters will as dark ones. Can be useful if the image has a dark background."),
         )
         .arg(
             Arg::new("background-color")
                 .long("background")
                 .conflicts_with("no-color")
+                .action(ArgAction::SetTrue)
                 .help("Sets the background of the ascii as the color. This will be ignored if the terminal does not support truecolor. \
                 This argument is mutually exclusive with the no-color argument."),
         )
         .arg(
             Arg::new("border")
                 .long("border")
+                .action(ArgAction::SetTrue)
                 .help("Adds a decorative border surrounding the ascii image. This will make the image overall a bit smaller, \
                 since it respects the user given size."),
         )
         .arg(
             Arg::new("no-color")
                 .long("no-color")
+                .action(ArgAction::SetTrue)
                 .help("Do not use color when printing the image to the terminal."),
         )
         .arg(
             Arg::new("outline")
                 .long("outline")
+                .action(ArgAction::SetTrue)
                 .help("Only create an outline of the image. This uses filters, so it will take more resources/time to complete, especially on larger images. \
                 It might not produce the desired output, it is advised to use this only on images with a clear distinction between foreground and background."),
         )
@@ -144,17 +160,99 @@ pub fn build_cli() -> Command<'static> {
                 .long("hysteresis")
                 .alias("hys")
                 .requires("outline")
+                .action(ArgAction::SetTrue)
                 .help("When creating the outline use the hysteresis method, which will remove imperfection, but might not be as good looking in ascii form.\
                  This will require the --outline argument to be present as well."),
         )
         .arg(
             Arg::new("verbosity")
                 .long("verbose")
-                .takes_value(true)
-                .possible_values(["trace", "debug", "info", "warn", "error", "off"])
+                .value_parser(value_parser!(Verbosity))
+                .default_value("warn")
                 .help("Choose the verbosity of the logging level. Warnings and errors will always be shown by default. To completely disable them, \
                 use the off argument."),
         )
+}
+/// Verbosity enum for different logging levels.
+///
+/// This enum is used for accepting the `--verbose` argument with different logging levels.
+///
+/// This is basically a copy of the `log::LevelFilter`, with the
+/// additional implemented `clap::ValueEnum`, which allows clap to parse values as this enum.
+#[derive(Clone, Copy, Debug, Default)]
+pub enum Verbosity {
+    /// Corresponds to the `Off` log level.
+    Off,
+    /// Corresponds to the `Error` log level.
+    Error,
+    /// Corresponds to the `Warn` log level.
+    #[default]
+    Warn,
+    /// Corresponds to the `Info` log level.
+    Info,
+    /// Corresponds to the `Debug` log level.
+    Debug,
+    /// Corresponds to the `Trace` log level.
+    Trace,
+}
+
+impl ValueEnum for Verbosity {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[
+            Verbosity::Off,
+            Verbosity::Error,
+            Verbosity::Warn,
+            Verbosity::Info,
+            Verbosity::Debug,
+            Verbosity::Trace,
+        ]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
+        Some(match self {
+            Verbosity::Off => PossibleValue::new("off").help("Do not show logs"),
+            Verbosity::Error => PossibleValue::new("error").help("Only show errors"),
+            Verbosity::Warn => PossibleValue::new("warn").help("Show errors and warnings"),
+            Verbosity::Info => PossibleValue::new("info").help("Show info logs"),
+            Verbosity::Debug => PossibleValue::new("debug").help("Show debug logs"),
+            Verbosity::Trace => PossibleValue::new("trace").help("Show trace logs"),
+        })
+    }
+}
+
+impl std::fmt::Display for Verbosity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.to_possible_value()
+            .expect("no values are skipped")
+            .get_name()
+            .fmt(f)
+    }
+}
+
+impl std::str::FromStr for Verbosity {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        for variant in Self::value_variants() {
+            if variant.to_possible_value().unwrap().matches(s, false) {
+                return Ok(*variant);
+            }
+        }
+        Err(format!("invalid variant: {s}"))
+    }
+}
+
+impl From<Verbosity> for log::LevelFilter {
+    fn from(value: Verbosity) -> Self {
+        match value {
+            Verbosity::Off => log::LevelFilter::Off,
+            Verbosity::Error => log::LevelFilter::Error,
+            Verbosity::Warn => log::LevelFilter::Warn,
+            Verbosity::Info => log::LevelFilter::Info,
+            Verbosity::Debug => log::LevelFilter::Debug,
+            Verbosity::Trace => log::LevelFilter::Trace,
+        }
+    }
 }
 
 #[cfg(test)]
