@@ -12,6 +12,8 @@ Artem is a small cli program, written in rust, to easily convert images
 to ascii art, named after the latin word for art. By default it tries to use truecolor, if the terminal does not support truecolor, it falls back to 16 Color ANSI. When the ascii image is written to a file, the image will not use colors.
 It supports `.jpeg`, `.png`, `.gif`, `.webp` and many more.
 
+If you want to use this project as a library, please refer to the [docs](https://docs.rs/artem/latest/artem/).
+
 ## Maintenance
 
 #### **Is this project still being maintained?**

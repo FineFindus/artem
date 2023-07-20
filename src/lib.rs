@@ -29,11 +29,12 @@ mod target;
 use image::{DynamicImage, GenericImageView};
 use log::{debug, info, trace};
 
+pub use crate::options::OptionBuilder;
 use crate::options::{Option, TargetType};
 
 /// Takes an image and returns it as an ascii art string.
 ///
-/// The result can be changed using th `options` argument
+/// The result can be changed using the [`crate::options::Option`] argument
 /// # Examples
 /// ```no_run
 /// use artem::options::OptionBuilder;
@@ -41,7 +42,6 @@ use crate::options::{Option, TargetType};
 /// let img = image::open("examples/abraham_lincoln.jpg").unwrap();
 /// let converted_image = artem::convert(img, OptionBuilder::new().build());
 /// ```
-///It uses the [`Option`] to set specific options on how to convert the image.
 pub fn convert(image: DynamicImage, options: Option) -> String {
     debug!("Using inverted color: {}", options.invert);
     //get img dimensions
