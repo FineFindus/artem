@@ -87,6 +87,26 @@ impl Option {
     }
 }
 
+impl Default for Option {
+    fn default() -> Self {
+        Self {
+            characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
+            scale: 0.42f32,
+            target_size: 80,
+            invert: Default::default(),
+            border: Default::default(),
+            dimension: Default::default(),
+            transform_x: Default::default(),
+            transform_y: Default::default(),
+            center_x: Default::default(),
+            center_y: Default::default(),
+            outline: Default::default(),
+            hysteresis: Default::default(),
+            target: Default::default(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test_option {
     use super::*;
