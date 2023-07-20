@@ -442,7 +442,7 @@ impl OptionBuilder {
 
     ///Build the [`Option`] struct.
     ///
-    /// This returns a [`Option`], which can than be used for the image conversion using [`convert()`].
+    /// This returns a [`Option`], which can than be used for the image conversion using [`artem::convert()`].
     /// If values are not explicitly specified, the default values will be used.
     ///
     /// # Examples

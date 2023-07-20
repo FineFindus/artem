@@ -57,12 +57,10 @@ fn main() {
     info!("Checking inputs");
     for value in input {
         #[cfg(feature = "web_image")]
-        {
-            if value.starts_with("http") {
-                debug!("Input {} is a URL", value);
-                img_paths.push(value);
-                continue;
-            }
+        if value.starts_with("http") {
+            debug!("Input {} is a URL", value);
+            img_paths.push(value);
+            continue;
         }
 
         let path = Path::new(value);
