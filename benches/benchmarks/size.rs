@@ -15,7 +15,7 @@ fn size_10_benchmark(c: &mut Criterion) {
     //it should still take long enough to see relevant changes in performance
     group.sample_size(10);
 
-    let mut options = artem::options::OptionBuilder::new();
+    let mut options = artem::config::ConfigBuilder::new();
     //set target size for all benches
     options.target_size(NonZeroU32::new(10).unwrap());
 
@@ -60,7 +60,7 @@ fn size_100_benchmark(c: &mut Criterion) {
     //it should still take long enough to see relevant changes in performance
     group.sample_size(10);
 
-    let mut options = artem::options::OptionBuilder::new();
+    let mut options = artem::config::ConfigBuilder::new();
     //set target size for all benches
     options.target_size(NonZeroU32::new(100).unwrap());
 
@@ -105,7 +105,7 @@ fn size_500_benchmark(c: &mut Criterion) {
     //it should still take long enough to see relevant changes in performance
     group.sample_size(10);
 
-    let mut options = artem::options::OptionBuilder::new();
+    let mut options = artem::config::ConfigBuilder::new();
     //set target size for all benches
     options.target_size(NonZeroU32::new(500).unwrap());
 

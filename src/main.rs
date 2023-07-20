@@ -4,12 +4,13 @@
 //!
 //! # Usage
 //! To use it, load an image using the [image crate](https://crates.io/crates/image) and pass it to
-//! artem. Addiontially the `convert` function takes an [`artem::options::Option`], which can be used to configure
-//! the resulting output. Whilst [`artem::options::Option`] implements [`Default`], it is
-//! recommended to do the configuration through [`artem::options::OptionBuilder`] instead.
+//! artem. Addiontially the [`crate::convert`] function takes an [`crate::config::Config`], which can be used to configure
+//! the resulting output. Whilst [`crate::config::Config`] implements [`Default`], it is
+//! recommended to do the configuration through [`crate::config::ConfigBuilder`] instead.
 //! ```
-//! let image = image::open(path)?;
-//! let ascii_art = artem::convert(image, artem::options::OptionBuilder::new().build());
+//! # let path = "./assets/images/standard_test_img.png";
+//! let image = image::open(path).expect("Failed to open image");
+//! let ascii_art = artem::convert(image, artem::config::ConfigBuilder::new().build());
 //! ```
 
 use std::{
@@ -22,7 +23,7 @@ use std::{
 use log::{debug, info, trace, warn};
 
 use artem::{
-    options::{OptionBuilder, TargetType},
+    config::{ConfigBuilder, TargetType},
     util,
 };
 
@@ -52,7 +53,7 @@ fn main() {
     //log enabled features
     trace!("Feature web_image: {}", cfg!(feature = "web_image"));
 
-    let mut options_builder = OptionBuilder::new();
+    let mut options_builder = ConfigBuilder::new();
 
     //at least one input must exist, so its safe to unwrap
     let input = matches.get_many::<String>("INPUT").unwrap();

@@ -11,7 +11,7 @@ use crate::util::{self, ResizingDimension};
 ///
 /// # Examples
 ///```
-/// use artem::options::TargetType;
+/// use artem::config::TargetType;
 ///
 /// assert_eq!(TargetType::Shell(true, false), TargetType::default());
 ///
@@ -36,7 +36,7 @@ impl Default for TargetType {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::TargetType;
+    /// use artem::config::TargetType;
     ///
     /// assert_eq!(TargetType::Shell(true, false), TargetType::default());
     /// ```
@@ -55,9 +55,9 @@ mod tests {
     }
 }
 
-///Configuration for the conversion of the image to the ascii image.
+///Config for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
-pub struct Option {
+pub struct Config {
     pub characters: String,
     pub scale: f32,
     pub target_size: u32,
@@ -73,21 +73,21 @@ pub struct Option {
     pub target: TargetType,
 }
 
-impl Option {
-    /// Create [`OptionBuilder`] with default properties.
+impl Config {
+    /// Create [`ConfigBuilder`] with default properties.
     ///
     /// # Examples
     /// ```
-    /// use artem::options::Option;
+    /// use artem::config::Config;
     ///
-    /// let default = Option::builder();
+    /// let default = Config::builder();
     /// ```
-    pub fn builder() -> OptionBuilder {
-        OptionBuilder::default()
+    pub fn builder() -> ConfigBuilder {
+        ConfigBuilder::default()
     }
 }
 
-impl Default for Option {
+impl Default for Config {
     fn default() -> Self {
         Self {
             characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
@@ -113,7 +113,7 @@ mod test_option {
     #[test]
     fn builder_default() {
         assert_eq!(
-            OptionBuilder {
+            ConfigBuilder {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -128,14 +128,14 @@ mod test_option {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            Option::builder()
+            Config::builder()
         );
     }
 }
 
-///A builder to create a [`Option`] struct.
+///A builder to create a [`Config`] struct.
 #[derive(PartialEq, Debug)]
-pub struct OptionBuilder {
+pub struct ConfigBuilder {
     characters: String,
     scale: f32,
     target_size: u32,
@@ -151,7 +151,7 @@ pub struct OptionBuilder {
     target: TargetType,
 }
 
-impl Default for OptionBuilder {
+impl Default for ConfigBuilder {
     fn default() -> Self {
         Self {
             //these have to be set to custom defaults for the program to work
@@ -213,23 +213,19 @@ macro_rules! property {
     };
 }
 
-// impl Default  {
-
-// }
-
-impl OptionBuilder {
-    ///Create a new OptionBuilder.
+impl ConfigBuilder {
+    ///Create a new ConfigBuilder.
     ///
     /// If an option is not specified, the rust default value will be used, unless specified otherwise.
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// ```
-    pub fn new() -> OptionBuilder {
-        Option::builder()
+    pub fn new() -> ConfigBuilder {
+        Config::builder()
     }
 
     ///Set the characters.
@@ -241,9 +237,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.characters("Mkl. ".to_string());
     /// ```
     #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
@@ -262,9 +258,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.scale(0.42f32);
     /// ```
        => scale, f32
@@ -281,10 +277,10 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     /// use core::num::NonZeroU32;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.target_size(NonZeroU32::new(80).unwrap());
     /// ```
     => target_size, NonZeroU32, get
@@ -298,9 +294,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.invert(true);
     /// ```
     => invert, bool
@@ -317,9 +313,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.border(true);
     /// ```
     => border, bool
@@ -332,10 +328,10 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     /// use artem::util::ResizingDimension;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.dimension(ResizingDimension::Height);
     /// ```
     => dimension, util::ResizingDimension
@@ -348,9 +344,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.transform_x(true);
     /// ```
     => transform_x, bool
@@ -363,9 +359,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.transform_y(true);
     /// ```
     => transform_y, bool
@@ -380,9 +376,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.center_x(true);
     /// ```
     => center_x, bool
@@ -397,9 +393,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.center_y(true);
     /// ```
     => center_y, bool
@@ -415,9 +411,9 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.outline(true);
     /// ```
     => outline, bool
@@ -432,9 +428,9 @@ impl OptionBuilder {
     /// It will only be used when outlining is set to true.
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// builder.hysteresis(true);
     /// ```
     => hysteresis, bool
@@ -450,30 +446,30 @@ impl OptionBuilder {
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
-    /// use artem::options::TargetType;
+    /// use artem::config::ConfigBuilder;
+    /// use artem::config::TargetType;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// //use color, but don't color the background
     /// builder.target(TargetType::HtmlFile(true, false));
     /// ```
         => target,  TargetType
     }
 
-    ///Build the [`Option`] struct.
+    ///Build the [`Config`] struct.
     ///
-    /// This returns a [`Option`], which can than be used for the image conversion using [`super::convert()`].
+    /// This returns a [`Config`], which can than be used for the image conversion using [`super::convert()`].
     /// If values are not explicitly specified, the default values will be used.
     ///
     /// # Examples
     /// ```
-    /// use artem::options::OptionBuilder;
+    /// use artem::config::ConfigBuilder;
     ///
-    /// let mut builder = OptionBuilder::new();
+    /// let mut builder = ConfigBuilder::new();
     /// let options = builder.build();
     /// ```
-    pub fn build(&self) -> Option {
-        Option {
+    pub fn build(&self) -> Config {
+        Config {
             characters: self.characters.to_owned(),
             scale: self.scale,
             target_size: self.target_size,
@@ -492,12 +488,12 @@ impl OptionBuilder {
 }
 
 #[cfg(test)]
-mod test_conversion_option_builder {
+mod test_conversion_configuration_builder {
     use super::*;
     #[test]
     fn build_default() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -512,14 +508,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().build()
+            ConfigBuilder::new().build()
         );
     }
 
     #[test]
     fn change_characters() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"characters"#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -534,7 +530,7 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new()
+            ConfigBuilder::new()
                 .characters("characters".to_string())
                 .build()
         );
@@ -543,7 +539,7 @@ mod test_conversion_option_builder {
     #[test]
     fn change_scale() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 3.14f32, //change attribute
                 target_size: 80,
@@ -558,14 +554,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().scale(3.14f32).build()
+            ConfigBuilder::new().scale(3.14f32).build()
         );
     }
 
     #[test]
     fn change_target_size() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 314, //change attribute
@@ -580,7 +576,7 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new()
+            ConfigBuilder::new()
                 .target_size(NonZeroU32::new(314).unwrap())
                 .build()
         );
@@ -589,7 +585,7 @@ mod test_conversion_option_builder {
     #[test]
     fn change_invert() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -604,14 +600,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().invert(true).build()
+            ConfigBuilder::new().invert(true).build()
         );
     }
 
     #[test]
     fn change_border() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -626,14 +622,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().border(true).build()
+            ConfigBuilder::new().border(true).build()
         );
     }
 
     #[test]
     fn change_dimension() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -648,7 +644,7 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new()
+            ConfigBuilder::new()
                 .dimension(util::ResizingDimension::Height)
                 .build()
         );
@@ -657,7 +653,7 @@ mod test_conversion_option_builder {
     #[test]
     fn change_transform_x() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -672,14 +668,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().transform_x(true).build()
+            ConfigBuilder::new().transform_x(true).build()
         );
     }
 
     #[test]
     fn change_transform_y() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -694,14 +690,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().transform_y(true).build()
+            ConfigBuilder::new().transform_y(true).build()
         );
     }
 
     #[test]
     fn change_center_x() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -716,14 +712,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().center_x(true).build()
+            ConfigBuilder::new().center_x(true).build()
         );
     }
 
     #[test]
     fn change_center_y() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -738,14 +734,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().center_y(true).build()
+            ConfigBuilder::new().center_y(true).build()
         );
     }
 
     #[test]
     fn change_outline() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -760,14 +756,14 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::default(),
             },
-            OptionBuilder::new().outline(true).build()
+            ConfigBuilder::new().outline(true).build()
         );
     }
 
     #[test]
     fn change_hysteresis() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -782,14 +778,14 @@ mod test_conversion_option_builder {
                 hysteresis: true, //change attribute
                 target: TargetType::default(),
             },
-            OptionBuilder::new().hysteresis(true).build()
+            ConfigBuilder::new().hysteresis(true).build()
         );
     }
 
     #[test]
     fn change_file_type() {
         assert_eq!(
-            Option {
+            Config {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
@@ -804,7 +800,7 @@ mod test_conversion_option_builder {
                 hysteresis: false,
                 target: TargetType::AnsiFile(false), //change attribute
             },
-            OptionBuilder::new()
+            ConfigBuilder::new()
                 .target(TargetType::AnsiFile(false))
                 .build()
         );

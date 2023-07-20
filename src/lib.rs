@@ -1,22 +1,23 @@
 //! # artem
-//! artem is a small cli program written in rust to easily convert images to ascii art.
-//! It uses the image-rs library to read images from different image formats, such as png, jpeg, etc.
+//! `artem` is a program to convert images to ascii art.
+//! While it's primary usages is through the command line, it also provides a rust crate.
 //!
-//! This file contains a library, which is used under the hood. This enabled benchmarking
-//! using criterion.rs, since it requires an lib to operate.
-//!
-//! It is not supported to use this library without the command-line interface.
-//!
-//! # Example usage of cli
-//! ```bash
-//! artem examples/abraham_lincoln.jpg
+//! # Usage
+//! To use it, load an image using the [image crate](https://crates.io/crates/image) and pass it to
+//! artem. Addiontially the [`crate::convert`] function takes an [`crate::config::Config`], which can be used to configure
+//! the resulting output. Whilst [`crate::config::Config`] implements [`Default`], it is
+//! recommended to do the configuration through [`crate::config::ConfigBuilder`] instead.
+//! ```
+//! # let path = "./assets/images/standard_test_img.png";
+//! let image = image::open(path).expect("Failed to open image");
+//! let ascii_art = artem::convert(image, artem::config::ConfigBuilder::new().build());
 //! ```
 
 //import utilities, such as dimensions, value remapping, etc
 pub mod util;
 
 //condense all arguments into a single struct
-pub mod options;
+pub mod config;
 
 //functions for working with pixels
 mod pixel;
@@ -29,21 +30,21 @@ mod target;
 use image::{DynamicImage, GenericImageView};
 use log::{debug, info, trace};
 
-pub use crate::options::OptionBuilder;
-use crate::options::{Option, TargetType};
+pub use crate::config::ConfigBuilder;
+use crate::config::{Config, TargetType};
 
 /// Takes an image and returns it as an ascii art string.
 ///
-/// The result can be changed using the [`crate::options::Option`] argument
+/// The result can be changed using the [`crate::config::Config`] argument
 /// # Examples
 /// ```no_run
-/// use artem::options::OptionBuilder;
+/// use artem::config::ConfigBuilder;
 ///
 /// let img = image::open("examples/abraham_lincoln.jpg").unwrap();
-/// let converted_image = artem::convert(img, OptionBuilder::new().build());
+/// let converted_image = artem::convert(img, ConfigBuilder::new().build());
 /// ```
-pub fn convert(image: DynamicImage, options: Option) -> String {
-    debug!("Using inverted color: {}", options.invert);
+pub fn convert(image: DynamicImage, config: Config) -> String {
+    debug!("Using inverted color: {}", config.invert);
     //get img dimensions
     let input_width = image.width();
     let input_height = image.height();
@@ -52,12 +53,12 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
 
     //calculate the needed dimensions
     let (columns, rows, tile_width, tile_height) = util::calculate_dimensions(
-        options.target_size,
+        config.target_size,
         input_height,
         input_width,
-        options.scale,
-        options.border,
-        options.dimension,
+        config.scale,
+        config.border,
+        config.dimension,
     );
     debug!("Columns: {columns}");
     debug!("Rows: {rows}");
@@ -66,17 +67,17 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
 
     let mut input_img = image;
 
-    if options.outline {
+    if config.outline {
         //create an outline using an algorithm loosely based on the canny edge algorithm
-        input_img = filter::edge_detection_filter(input_img, options.hysteresis);
+        input_img = filter::edge_detection_filter(input_img, config.hysteresis);
     }
 
-    if options.transform_x {
+    if config.transform_x {
         info!("Flipping image horizontally");
         input_img = input_img.fliph();
     }
 
-    if options.transform_y {
+    if config.transform_y {
         info!("Flipping image vertically");
         input_img = input_img.flipv();
     }
@@ -92,14 +93,14 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     let mut output = String::with_capacity((tile_width * tile_height) as usize);
     trace!("Created output string");
 
-    if matches!(&options.target, &TargetType::HtmlFile(true, true)) {
+    if matches!(&config.target, &TargetType::HtmlFile(true, true)) {
         trace!("Adding html top part");
         output.push_str(&target::html::html_top());
     }
 
     trace!("Calculating horizontal spacing");
-    let horizontal_spacing = if options.center_x {
-        util::spacing_horizontal(if options.border {
+    let horizontal_spacing = if config.center_x {
+        util::spacing_horizontal(if config.border {
             //two columns are missing because the border takes up two lines
             columns + 2
         } else {
@@ -109,9 +110,9 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         String::with_capacity(0)
     };
 
-    if options.center_y && matches!(&options.target, &TargetType::Shell(true, true)) {
+    if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
         trace!("Adding vertical top spacing");
-        output.push_str(&util::spacing_vertical(if options.border {
+        output.push_str(&util::spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
             rows + 2
         } else {
@@ -119,9 +120,9 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
         }));
     }
 
-    if options.border {
+    if config.border {
         //add spacing for centering
-        if options.center_x {
+        if config.center_x {
             output.push_str(&horizontal_spacing);
         }
 
@@ -152,23 +153,19 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             }
 
             //convert pixels to a char/string
-            let mut ascii_char = pixel::correlating_char(
-                &pixels,
-                &options.characters,
-                options.invert,
-                options.target,
-            );
+            let mut ascii_char =
+                pixel::correlating_char(&pixels, &config.characters, config.invert, config.target);
 
             //add border at the start
             //this cannot be done in single if-else, since the image might only be a single pixel wide
             if x == 0 {
                 //add outer border (left)
-                if options.border {
+                if config.border {
                     ascii_char.insert(0, '║');
                 }
 
                 //add spacing for centering the image
-                if options.center_x {
+                if config.center_x {
                     ascii_char.insert_str(0, &horizontal_spacing);
                 }
             }
@@ -176,7 +173,7 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
             //add a break at line end
             if x == width - tile_width {
                 //add outer border (right)
-                if options.border {
+                if config.border {
                     ascii_char.push('║');
                 }
 
@@ -189,9 +186,9 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
 
     output.push_str(&target);
 
-    if options.border {
+    if config.border {
         //add spacing for centering
-        if options.center_x {
+        if config.center_x {
             output.push_str(&horizontal_spacing);
         }
 
@@ -203,14 +200,14 @@ pub fn convert(image: DynamicImage, options: Option) -> String {
     }
 
     //compare it, ignoring the enum value such as true, true
-    if matches!(&options.target, &TargetType::HtmlFile(true, true)) {
+    if matches!(&config.target, &TargetType::HtmlFile(true, true)) {
         trace!("Adding html bottom part");
         output.push_str(&target::html::html_bottom());
     }
 
-    if options.center_y && matches!(&options.target, &TargetType::Shell(true, true)) {
+    if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
         trace!("Adding vertical bottom spacing");
-        output.push_str(&util::spacing_vertical(if options.border {
+        output.push_str(&util::spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
             rows + 2
         } else {

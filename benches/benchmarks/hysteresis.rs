@@ -9,7 +9,7 @@ fn hysteresis_benchmark(c: &mut Criterion) {
     //it should still take long enough to see relevant changes in performance
     group.sample_size(10);
 
-    let mut options = artem::options::OptionBuilder::new();
+    let mut options = artem::config::ConfigBuilder::new();
     //need to have outline enabled
     options.outline(true);
     //enable hysteresis

@@ -1,6 +1,6 @@
 use image::Rgba;
 
-use crate::{options, target, util};
+use crate::{config, target, util};
 
 /// Convert a pixel block to a char (as a String) from the given density string.
 ///
@@ -12,7 +12,7 @@ use crate::{options, target, util};
 ///
 /// ```compile_fail, compile will fail, this is an internal example
 /// use image::Rgba;
-/// use artem::options::TargetType;
+/// use artem::config::TargetType;
 ///
 /// //example pixels, use them from the directly if possible
 /// let pixels = vec![
@@ -30,7 +30,7 @@ pub fn correlating_char(
     block: &[Rgba<u8>],
     density: &str,
     invert: bool,
-    target: options::TargetType,
+    target: config::TargetType,
 ) -> String {
     assert!(!block.is_empty());
     assert!(!density.is_empty());
@@ -67,11 +67,11 @@ pub fn correlating_char(
     //return the correctly formatted/colored string depending on the target
     match target {
         //if no color, use default case
-        options::TargetType::Shell(true, background_color)
-        | options::TargetType::AnsiFile(background_color) => {
+        config::TargetType::Shell(true, background_color)
+        | config::TargetType::AnsiFile(background_color) => {
             target::ansi::colored_char(red, green, blue, density_char, background_color)
         }
-        options::TargetType::HtmlFile(color, background_color) => {
+        config::TargetType::HtmlFile(color, background_color) => {
             if color {
                 target::html::colored_char(red, green, blue, density_char, background_color)
             } else {
@@ -98,12 +98,7 @@ mod test_pixel_density {
         ];
         assert_eq!(
             " ",
-            correlating_char(
-                &pixels,
-                "# ",
-                true,
-                options::TargetType::Shell(false, false)
-            )
+            correlating_char(&pixels, "# ", true, config::TargetType::Shell(false, false))
         );
     }
 
@@ -119,7 +114,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::Shell(false, false)
+                config::TargetType::Shell(false, false)
             )
         );
     }
@@ -137,7 +132,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::Shell(false, false)
+                config::TargetType::Shell(false, false)
             )
         );
     }
@@ -157,7 +152,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::Shell(true, false)
+                config::TargetType::Shell(true, false)
             )
         );
     }
@@ -176,7 +171,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::Shell(true, false)
+                config::TargetType::Shell(true, false)
             )
         );
     }
@@ -190,7 +185,7 @@ mod test_pixel_density {
         let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
         assert_eq!(
             "\u{1b}[35m.\u{1b}[0m",
-            correlating_char(&pixels, "#k. ", false, options::TargetType::AnsiFile(false))
+            correlating_char(&pixels, "#k. ", false, config::TargetType::AnsiFile(false))
         );
     }
 
@@ -209,7 +204,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::Shell(true, true)
+                config::TargetType::Shell(true, true)
             )
         );
     }
@@ -224,7 +219,7 @@ mod test_pixel_density {
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
             "\u{1b}[48;2;0;0;255m \u{1b}[0m",
-            correlating_char(&pixels, "#k. ", false, options::TargetType::AnsiFile(true))
+            correlating_char(&pixels, "#k. ", false, config::TargetType::AnsiFile(true))
         );
     }
 
@@ -237,7 +232,7 @@ mod test_pixel_density {
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         assert_eq!(
             " ",
-            correlating_char(&pixels, "#k. ", false, options::TargetType::File)
+            correlating_char(&pixels, "#k. ", false, config::TargetType::File)
         );
     }
 
@@ -254,7 +249,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::HtmlFile(true, false)
+                config::TargetType::HtmlFile(true, false)
             )
         );
     }
@@ -272,7 +267,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k:.",
                 false,
-                options::TargetType::HtmlFile(true, false)
+                config::TargetType::HtmlFile(true, false)
             )
         );
     }
@@ -290,7 +285,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::HtmlFile(true, true)
+                config::TargetType::HtmlFile(true, true)
             )
         );
     }
@@ -308,7 +303,7 @@ mod test_pixel_density {
                 &pixels,
                 "#k. ",
                 false,
-                options::TargetType::HtmlFile(false, false)
+                config::TargetType::HtmlFile(false, false)
             )
         );
     }

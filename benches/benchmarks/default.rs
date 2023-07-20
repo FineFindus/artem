@@ -9,7 +9,7 @@ use criterion::{criterion_group, Criterion};
 fn default_options_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("default options");
 
-    let options = artem::options::OptionBuilder::new();
+    let options = artem::config::ConfigBuilder::new();
 
     //use lower sample size for faster benchmarking
     //it should still take long enough to see relevant changes in performance
