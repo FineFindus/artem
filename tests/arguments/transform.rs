@@ -109,7 +109,7 @@ pub mod hysteresis {
         cmd.assert()
             .failure()
             .stderr(predicate::str::starts_with(
-                "error: The following required arguments were not provided:",
+                "error: the following required arguments were not provided:",
             ))
             .stderr(predicate::str::contains("--outline"));
     }

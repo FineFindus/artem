@@ -9,7 +9,7 @@ pub mod size {
 
         cmd.arg("assets/images/standard_test_img.png").arg("-s");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--size <size>' requires a value but none was supplied",
+            "error: a value is required for '--size <size>' but none was supplied",
         ));
     }
 
@@ -20,7 +20,7 @@ pub mod size {
         cmd.arg("assets/images/standard_test_img.png")
             .arg("-s string");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with size input value",
+            "error: invalid value ' string' for '--size <size>': invalid digit found in string",
         ));
     }
 
@@ -30,7 +30,7 @@ pub mod size {
         //should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png").arg("-s 0.6");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with size input value",
+            "error: invalid value ' 0.6' for '--size <size>': invalid digit found in string",
         ));
     }
 
@@ -40,7 +40,7 @@ pub mod size {
         //should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png").arg("-s -6");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with size input value",
+            "error: invalid value ' -6' for '--size <size>': invalid digit found in string",
         ));
     }
 
@@ -51,7 +51,7 @@ pub mod size {
         cmd.arg("assets/images/standard_test_img.png")
             .arg(format!("-s {}", u32::MAX));
         cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with size input value",
+            "error: invalid value ' 4294967295' for '--size <size>': invalid digit found in string",
         ));
     }
 
@@ -63,7 +63,7 @@ pub mod size {
             .args(["-s", "75"])
             .arg("-w");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--size <size>' cannot be used with '--width'",
+            "error: the argument '--size <size>' cannot be used with '--width'",
         ));
     }
 
@@ -73,9 +73,9 @@ pub mod size {
         //should panic when trying using both args
         cmd.arg("assets/images/standard_test_img.png")
             .args(["-s", "75"])
-            .arg("-h");
+            .arg("--height");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--size <size>' cannot be used with '--height'",
+            "error: the argument '--size <size>' cannot be used with '--height'",
         ));
     }
 
@@ -114,7 +114,7 @@ pub mod width {
             .args(["-s", "75"]);
         //should panic when trying using both args
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--width' cannot be used with '--size <size>'",
+            "error: the argument '--width' cannot be used with '--size <size>'",
         ));
     }
 
@@ -124,9 +124,9 @@ pub mod width {
         //should panic when trying using both args
         cmd.arg("assets/images/standard_test_img.png")
             .arg("-w")
-            .arg("-h");
+            .arg("--height");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--width' cannot be used with '--height'",
+            "error: the argument '--width' cannot be used with '--height'",
         ));
     }
 
@@ -152,7 +152,7 @@ pub mod height {
     fn arg_with_value() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
-            .args(["-h", "123"]);
+            .args(["--height", "123"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
             "[ERROR] File 123 does not exist\n[ERROR] Artem exited with code: 66\n",
         ));
@@ -162,11 +162,11 @@ pub mod height {
     fn arg_conflict_size() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
-            .arg("-h")
+            .arg("--height")
             .args(["-s", "75"]);
         //should panic when trying using both args
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--height' cannot be used with '--size <size>'",
+            "error: the argument '--height' cannot be used with '--size <size>'",
         ));
     }
 
@@ -175,10 +175,10 @@ pub mod height {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         //should panic when trying using both args
         cmd.arg("assets/images/standard_test_img.png")
-            .arg("-h")
+            .arg("--height")
             .arg("-w");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--height' cannot be used with '--width'",
+            "error: the argument '--height' cannot be used with '--width'",
         ));
     }
 

@@ -11,7 +11,7 @@ pub mod characters {
 
         cmd.arg("assets/images/standard_test_img.png").arg("-c");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--characters <characters>' requires a value but none was supplied",
+            "error: a value is required for '--characters <characters>' but none was supplied",
         ));
     }
 

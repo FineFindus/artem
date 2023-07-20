@@ -48,7 +48,7 @@ pub mod no_color {
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--no-color", "--background"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: The argument '--no-color' cannot be used with '--background'",
+            "error: the argument '--no-color' cannot be used with '--background'",
         ));
     }
 
@@ -87,7 +87,7 @@ pub mod background_color {
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--background", "--no-color"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: The argument '--background' cannot be used with '--no-color'",
+            "error: the argument '--background' cannot be used with '--no-color'",
         ));
     }
 

@@ -8,7 +8,7 @@ pub mod output_file {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png").arg("-o");
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: The argument '--output <output-file>' requires a value but none was supplied",
+            "error: a value is required for '--output <output-file>' but none was supplied",
         ));
     }
 
@@ -69,7 +69,7 @@ pub mod verbosity {
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--verbose");
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: The argument '--verbose <verbosity>' requires a value but none was supplied",
+            "error: a value is required for '--verbose <verbosity>' but none was supplied",
         ));
     }
 

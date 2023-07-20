@@ -10,7 +10,7 @@ pub mod scale {
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--ratio");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "The argument '--ratio <scale>' requires a value but none was supplied",
+            "error: a value is required for '--ratio <scale>' but none was supplied",
         ));
     }
 
@@ -21,7 +21,7 @@ pub mod scale {
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", "string"]);
         cmd.assert().failure().stderr(predicate::str::contains(
-            "Could not work with ratio input value",
+            "error: invalid value 'string' for '--ratio <scale>': invalid float literal",
         ));
     }
 
@@ -32,7 +32,7 @@ pub mod scale {
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", "-6"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
-            "error: Found argument '-6' which wasn't expected, or isn't valid in this context",
+            "error: unexpected argument '-6' found",
         ));
     }
 
