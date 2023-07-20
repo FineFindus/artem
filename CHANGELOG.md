@@ -137,7 +137,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Overhauled the installation section in the README, it now contains much more detailed installations instructions
 - Switched from `f64` to `f32`, since the additional precision has literally **_no_** impact (it gets rounded/cut away), but yields worse performance
 - Refactored `average_color` to be iterator based, according to some microbenchmarks, this makes it a few nanoseconds faster
-- Refactored the `convert`, `blur`, `apply_sober` and `edge_tracking` functions to use `iterator`s instead of for loops. This removes a lot of nasty and hart to deal with bug, especially together with multi-threading
+- Refactored the `convert`, `blur`, `apply_sober` and `edge_tracking` functions to use `iterator`s instead of for loops. This removes a lot of nasty and hard to deal with bug, especially together with multi-threading
 - Removed multithreading, it was a constant source of bugs, since pixels can't be split for threads/output characters. It also rarely brought noticeable performance improvements
 - The new iterator-based implementation opens the possibility to use [rayon](https://crates.io/crates/rayon) in the future
 - Fixed a crash which could occur when piping to a file using the maximum terminal size

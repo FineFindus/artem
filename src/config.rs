@@ -7,7 +7,7 @@ use crate::util::{self, ResizingDimension};
 /// This changes of exactly the image is converted and if it supports color.
 /// The first boolean determines if the output should be colored, the second if the color is the background color.
 ///
-/// An target might support none, one or both colors.
+/// An target might support neither, one or both colors.
 ///
 /// # Examples
 ///```

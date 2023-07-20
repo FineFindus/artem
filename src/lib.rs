@@ -215,6 +215,5 @@ pub fn convert(image: DynamicImage, config: Config) -> String {
         }));
     }
 
-    //return output
     output
 }
