@@ -1,4 +1,4 @@
-use std::{env, process};
+use std::env;
 
 use once_cell::sync::Lazy;
 
@@ -53,32 +53,4 @@ mod test_color_support {
         env::set_var("COLORTERM", "kjasdlkdjaskd");
         assert!(!*SUPPORTS_TRUECOLOR);
     }
-}
-
-///Function for fatal errors.
-///
-///A fatal error is an error, from which the program can no recover, meaning the only option left is to print
-/// an error message letting the user know what went wrong. For example if a non-existing file was passed in,
-/// this program can not work correctly and should print an error message and exit.
-///
-/// This function will print the passed in error message as well as a exit message, then it will exit the program with the exit code.
-/// If non is specified, it will use exit code 1 by default.
-/// A list of exit code can be found here: <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
-///
-/// # Examples
-/// ```no_run
-/// use std::fs::File;
-/// use artem::util::fatal_error;
-///
-/// let f = File::open("hello.txt");
-/// let f = match f {
-///     Ok(file) => file,
-///     Err(error) => fatal_error(&error.to_string(), Some(66)),
-/// };
-/// ```
-pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
-    //This function never returns, since it always exit the program
-    log::error!("{}", message);
-    log::error!("Artem exited with code: {}", code.unwrap_or(1));
-    process::exit(code.unwrap_or(1));
 }

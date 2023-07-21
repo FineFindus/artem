@@ -70,9 +70,9 @@ fn main() {
         let path = Path::new(value);
         //check if file exist and is a file (not a directory)
         if !path.exists() {
-            util::fatal_error(&format!("File {value} does not exist"), Some(66));
+            fatal_error(&format!("File {value} does not exist"), Some(66));
         } else if !Path::new(path).is_file() {
-            util::fatal_error(&format!("{value} is not a file"), Some(66));
+            fatal_error(&format!("{value} is not a file"), Some(66));
         }
         log::debug!("Input {} is a file", value);
         img_paths.push(value);
@@ -114,7 +114,7 @@ fn main() {
 
         //read terminal size, error when STDOUT is not a tty
         let Some(height) = terminal_size::terminal_size().map(|size| size.1.0 as u32) else {
-            util::fatal_error(
+            fatal_error(
                 "Failed to read terminal size, STDOUT is not a tty",
                 Some(72),
             );
@@ -126,7 +126,7 @@ fn main() {
 
         //read terminal size, error when STDOUT is not a tty
         let Some(width) = terminal_size::terminal_size().map(|size| size.0.0 as u32) else {
-            util::fatal_error(
+            fatal_error(
                 "Failed to read terminal size, STDOUT is not a tty",
                 Some(72),
             );
@@ -137,7 +137,7 @@ fn main() {
         log::trace!("Using user input size as target size");
         let Some(size) = matches
             .get_one::<u32>("size") else {
-                util::fatal_error("Could not work with size input value", Some(65));
+                fatal_error("Could not work with size input value", Some(65));
             };
         *size
     }
@@ -158,7 +158,7 @@ fn main() {
                 1f32,   //even a scale above 0.43 is not looking good
             )
         }) else {
-        util::fatal_error("Could not work with ratio input value", Some(65));
+        fatal_error("Could not work with ratio input value", Some(65));
     };
     log::debug!("Scale: {scale}");
     config_builder.scale(scale);
@@ -296,12 +296,12 @@ fn main() {
         log::info!("Writing output to output file");
 
         let Ok(mut file) = File::create(output_file) else {
-            util::fatal_error("Could not create output file", Some(73));
+            fatal_error("Could not create output file", Some(73));
         };
 
         log::trace!("Created output file");
         let Ok(bytes_count) = file.write(output.as_bytes()) else {
-                util::fatal_error("Could not write to output file", Some(74));
+                fatal_error("Could not write to output file", Some(74));
         };
         log::info!("Written ascii chars to output file");
         println!("Written {} bytes to {}", bytes_count, output_file.display())
@@ -328,7 +328,7 @@ fn load_image(path: &str) -> image::DynamicImage {
         log::info!("Started to download image from: {}", path);
         let now = std::time::Instant::now();
         let Ok(resp) = ureq::get(path).call() else {
-                    util::fatal_error(
+                    fatal_error(
                         &format!("Failed to load image bytes from {}", path),
                         Some(66),
                     );
@@ -344,13 +344,40 @@ fn load_image(path: &str) -> image::DynamicImage {
         log::debug!("Opening downloaded image from memory");
         return match image::load_from_memory(&bytes) {
             Ok(img) => img,
-            Err(err) => util::fatal_error(&err.to_string(), Some(66)),
+            Err(err) => fatal_error(&err.to_string(), Some(66)),
         };
     }
 
     log::info!("Opening image");
     match image::open(path) {
         Ok(img) => img,
-        Err(err) => util::fatal_error(&err.to_string(), Some(66)),
+        Err(err) => fatal_error(&err.to_string(), Some(66)),
     }
+}
+
+///Function for fatal errors.
+///
+///A fatal error is an error, from which the program can no recover, meaning the only option left is to print
+/// an error message letting the user know what went wrong. For example if a non-existing file was passed in,
+/// this program can not work correctly and should print an error message and exit.
+///
+/// This function will print the passed in error message as well as a exit message, then it will exit the program with the exit code.
+/// If non is specified, it will use exit code 1 by default.
+/// A list of exit code can be found here: <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
+///
+/// # Examples
+/// ```no_run
+/// use std::fs::File;
+///
+/// let f = File::open("hello.txt");
+/// let f = match f {
+///     Ok(file) => file,
+///     Err(error) => fatal_error(&error.to_string(), Some(66)),
+/// };
+/// ```
+pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
+    //This function never returns, since it always exit the program
+    log::error!("{}", message);
+    log::error!("Artem exited with code: {}", code.unwrap_or(1));
+    std::process::exit(code.unwrap_or(1));
 }
