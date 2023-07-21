@@ -28,7 +28,6 @@ mod filter;
 mod target;
 
 use image::{DynamicImage, GenericImageView};
-use log::{debug, info, trace};
 
 pub use crate::config::ConfigBuilder;
 use crate::config::{Config, TargetType};
@@ -44,12 +43,12 @@ use crate::config::{Config, TargetType};
 /// let converted_image = artem::convert(img, &ConfigBuilder::new().build());
 /// ```
 pub fn convert(image: DynamicImage, config: &Config) -> String {
-    debug!("Using inverted color: {}", config.invert);
+    log::debug!("Using inverted color: {}", config.invert);
     //get img dimensions
     let input_width = image.width();
     let input_height = image.height();
-    debug!("Input Image Width: {input_width}");
-    debug!("Input Image Height: {input_height}");
+    log::debug!("Input Image Width: {input_width}");
+    log::debug!("Input Image Height: {input_height}");
 
     //calculate the needed dimensions
     let (columns, rows, tile_width, tile_height) = util::calculate_dimensions(
@@ -60,10 +59,10 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
         config.border,
         config.dimension,
     );
-    debug!("Columns: {columns}");
-    debug!("Rows: {rows}");
-    debug!("Tile Width: {tile_width}");
-    debug!("Tile Height: {tile_height}");
+    log::debug!("Columns: {columns}");
+    log::debug!("Rows: {rows}");
+    log::debug!("Tile Width: {tile_width}");
+    log::debug!("Tile Height: {tile_height}");
 
     let mut input_img = image;
 
@@ -73,32 +72,32 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
     }
 
     if config.transform_x {
-        info!("Flipping image horizontally");
+        log::info!("Flipping image horizontally");
         input_img = input_img.fliph();
     }
 
     if config.transform_y {
-        info!("Flipping image vertically");
+        log::info!("Flipping image vertically");
         input_img = input_img.flipv();
     }
 
-    info!("Resizing image to fit new dimensions");
+    log::info!("Resizing image to fit new dimensions");
     //use the thumbnail method, since its way faster, it may result in artifacts, but the ascii art will be pixelate anyway
     let source_img = input_img.thumbnail_exact(columns * tile_width, rows * tile_height);
 
-    debug!("Resized Image Width: {}", source_img.width());
-    debug!("Resized Image Height: {}", source_img.height());
+    log::debug!("Resized Image Width: {}", source_img.width());
+    log::debug!("Resized Image Height: {}", source_img.height());
 
     //output string
     let mut output = String::with_capacity((tile_width * tile_height) as usize);
-    trace!("Created output string");
+    log::trace!("Created output string");
 
     if matches!(&config.target, &TargetType::HtmlFile(true, true)) {
-        trace!("Adding html top part");
+        log::trace!("Adding html top part");
         output.push_str(&target::html::html_top());
     }
 
-    trace!("Calculating horizontal spacing");
+    log::trace!("Calculating horizontal spacing");
     let horizontal_spacing = if config.center_x {
         util::spacing_horizontal(if config.border {
             //two columns are missing because the border takes up two lines
@@ -111,7 +110,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
     };
 
     if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
-        trace!("Adding vertical top spacing");
+        log::trace!("Adding vertical top spacing");
         output.push_str(&util::spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
             rows + 2
@@ -127,13 +126,13 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
         }
 
         //add top part of border before conversion
-        trace!("Adding top part of border");
+        log::trace!("Adding top part of border");
         output.push('╔');
         output.push_str(&"═".repeat(columns as usize));
         output.push_str("╗\n");
     }
 
-    info!("Starting conversion to ascii");
+    log::info!("Starting conversion to ascii");
     let width = source_img.width();
 
     //convert source img to a target string
@@ -193,7 +192,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
         }
 
         //add bottom part of border after conversion
-        trace!("Adding bottom border");
+        log::trace!("Adding bottom border");
         output.push('╚');
         output.push_str(&"═".repeat(columns as usize));
         output.push('╝');
@@ -201,12 +200,12 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
 
     //compare it, ignoring the enum value such as true, true
     if matches!(&config.target, &TargetType::HtmlFile(true, true)) {
-        trace!("Adding html bottom part");
+        log::trace!("Adding html bottom part");
         output.push_str(&target::html::html_bottom());
     }
 
     if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
-        trace!("Adding vertical bottom spacing");
+        log::trace!("Adding vertical bottom spacing");
         output.push_str(&util::spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
             rows + 2

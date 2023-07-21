@@ -20,8 +20,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{debug, info, trace, warn};
-
 use artem::{
     config::{ConfigBuilder, TargetType},
     util,
@@ -48,10 +46,10 @@ fn main() {
             .into(),
         )
         .init();
-    trace!("Started logger with trace");
+    log::trace!("Started logger with trace");
 
     //log enabled features
-    trace!("Feature web_image: {}", cfg!(feature = "web_image"));
+    log::trace!("Feature web_image: {}", cfg!(feature = "web_image"));
 
     let mut config_builder = ConfigBuilder::new();
 
@@ -60,11 +58,11 @@ fn main() {
 
     let mut img_paths = Vec::with_capacity(input.len());
 
-    info!("Checking inputs");
+    log::info!("Checking inputs");
     for value in input {
         #[cfg(feature = "web_image")]
         if value.starts_with("http") {
-            debug!("Input {} is a URL", value);
+            log::debug!("Input {} is a URL", value);
             img_paths.push(value);
             continue;
         }
@@ -76,7 +74,7 @@ fn main() {
         } else if !Path::new(path).is_file() {
             util::fatal_error(&format!("{value} is not a file"), Some(66));
         }
-        debug!("Input {} is a file", value);
+        log::debug!("Input {} is a file", value);
         img_paths.push(value);
     }
 
@@ -91,16 +89,16 @@ fn main() {
             r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
         }
         Some(chars) if !chars.is_empty() => {
-            info!("Using user provided characters");
+            log::info!("Using user provided characters");
             chars
         }
         _ => {
             //density map from jp2a
-            info!("Using default characters");
+            log::info!("Using default characters");
             r#"MWNXK0Okxdolc:;,'...   "#
         }
     };
-    debug!("Characters used: '{density}'");
+    log::debug!("Characters used: '{density}'");
     config_builder.characters(density.to_string());
 
     //set the default resizing dimension to width
@@ -110,7 +108,7 @@ fn main() {
     //only one arg should be present
     let target_size = if matches.get_flag("height") {
         //use max terminal height
-        trace!("Using terminal height as target size");
+        log::trace!("Using terminal height as target size");
         //change dimension to height
         config_builder.dimension(util::ResizingDimension::Height);
 
@@ -124,7 +122,7 @@ fn main() {
         height
     } else if matches.get_flag("width") {
         //use max terminal width
-        trace!("Using terminal width as target size");
+        log::trace!("Using terminal width as target size");
 
         //read terminal size, error when STDOUT is not a tty
         let Some(width) = terminal_size::terminal_size().map(|size| size.0.0 as u32) else {
@@ -136,7 +134,7 @@ fn main() {
         width
     } else {
         //use given input size
-        trace!("Using user input size as target size");
+        log::trace!("Using user input size as target size");
         let Some(size) = matches
             .get_one::<u32>("size") else {
                 util::fatal_error("Could not work with size input value", Some(65));
@@ -148,7 +146,7 @@ fn main() {
         230, //img above 230 might not be displayed properly
     );
 
-    debug!("Target Size: {target_size}");
+    log::debug!("Target Size: {target_size}");
     config_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
 
     //best ratio between height and width is 0.43
@@ -162,37 +160,37 @@ fn main() {
         }) else {
         util::fatal_error("Could not work with ratio input value", Some(65));
     };
-    debug!("Scale: {scale}");
+    log::debug!("Scale: {scale}");
     config_builder.scale(scale);
 
     let invert = matches.get_flag("invert-density");
-    debug!("Invert is set to: {invert}");
+    log::debug!("Invert is set to: {invert}");
     config_builder.invert(invert);
 
     let background_color = matches.get_flag("background-color");
-    debug!("BackgroundColor is set to: {background_color}");
+    log::debug!("BackgroundColor is set to: {background_color}");
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
     let color = if matches.get_flag("no-color") {
         //print the "normal" non-colored conversion
-        info!("Using non-colored ascii");
+        log::info!("Using non-colored ascii");
         false
     } else {
         if matches.get_flag("outline") {
-            warn!("Using outline, result will only be in grayscale");
+            log::warn!("Using outline, result will only be in grayscale");
             //still set colors  to true, since grayscale has different gray tones
         }
 
         //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
-        info!("Using colored ascii");
+        log::info!("Using colored ascii");
         if !*util::SUPPORTS_TRUECOLOR {
             if background_color {
-                warn!("Background flag will be ignored, since truecolor is not supported.")
+                log::warn!("Background flag will be ignored, since truecolor is not supported.")
             }
-            warn!("Truecolor is not supported. Using ansi color.")
+            log::warn!("Truecolor is not supported. Using ansi color.")
         } else {
-            info!("Using truecolor ascii")
+            log::info!("Using truecolor ascii")
         }
         true
     };
@@ -200,82 +198,82 @@ fn main() {
     //get flag for border around image
     let border = matches.get_flag("border");
     config_builder.border(border);
-    info!("Using border: {border}");
+    log::info!("Using border: {border}");
 
     //get flags for flipping along x axis
     let transform_x = matches.get_flag("flipX");
     config_builder.transform_x(transform_x);
-    debug!("Flipping X-Axis: {transform_x}");
+    log::debug!("Flipping X-Axis: {transform_x}");
 
     //get flags for flipping along y axis
     let transform_y = matches.get_flag("flipY");
     config_builder.transform_y(transform_y);
-    debug!("Flipping Y-Axis: {transform_y}");
+    log::debug!("Flipping Y-Axis: {transform_y}");
 
     //get flags for centering the image
     let center_x = matches.get_flag("centerX");
     config_builder.center_x(center_x);
-    debug!("Centering X-Axis: {center_x}");
+    log::debug!("Centering X-Axis: {center_x}");
 
     let center_y = matches.get_flag("centerY");
     config_builder.center_y(center_y);
-    debug!("Center Y-Axis: {center_y}");
+    log::debug!("Center Y-Axis: {center_y}");
 
     //get flag for creating an outline
     let outline = matches.get_flag("outline");
     config_builder.outline(outline);
-    debug!("Outline: {outline}");
+    log::debug!("Outline: {outline}");
 
     //if outline is set, also check for hysteresis
     if outline {
         let hysteresis = matches.get_flag("hysteresis");
         config_builder.hysteresis(hysteresis);
-        debug!("Hysteresis: {hysteresis}");
+        log::debug!("Hysteresis: {hysteresis}");
         if hysteresis {
-            warn!("Using hysteresis might result in an worse looking ascii image than only using --outline")
+            log::warn!("Using hysteresis might result in an worse looking ascii image than only using --outline")
         }
     }
 
     //get output file extension for specific output, default to plain text
     if let Some(output_file) = matches.get_one::<PathBuf>("output-file") {
-        debug!("Output-file: {}", output_file.to_str().unwrap());
+        log::debug!("Output-file: {}", output_file.to_str().unwrap());
 
         //check file extension
         let file_extension = output_file.extension().and_then(std::ffi::OsStr::to_str);
-        debug!("FileExtension: {:?}", file_extension);
+        log::debug!("FileExtension: {:?}", file_extension);
 
         config_builder.target(match file_extension {
             Some("html") | Some("htm") => {
-                debug!("Target: Html-File");
+                log::debug!("Target: Html-File");
                 TargetType::HtmlFile(color, background_color)
             }
 
             Some("ansi") | Some("ans") => {
-                debug!("Target: Ansi-File");
+                log::debug!("Target: Ansi-File");
 
                 //by definition ansi file must have colors, only the background color is optional
                 if matches.get_flag("no-color") {
-                    warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
+                    log::warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
                     TargetType::File
                 } else {
                     if !*util::SUPPORTS_TRUECOLOR {
-                        warn!("truecolor is disabled, output file will not use truecolor chars")
+                        log::warn!("truecolor is disabled, output file will not use truecolor chars")
                     }
                     TargetType::AnsiFile(background_color)
                 }
             }
             _ => {
-                debug!("Target: File");
+                log::debug!("Target: File");
 
                 if !matches.get_flag("no-color") {
                     //warn user that output is not colored
-                    warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
+                    log::warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
                 }
                 TargetType::File
             }
         });
     } else {
-        debug!("Target: Shell");
+        log::debug!("Target: Shell");
         config_builder.target(TargetType::Shell(color, background_color));
     }
 
@@ -295,21 +293,21 @@ fn main() {
 
     //create and write to output file
     if let Some(output_file) = matches.get_one::<PathBuf>("output-file") {
-        info!("Writing output to output file");
+        log::info!("Writing output to output file");
 
         let Ok(mut file) = File::create(output_file) else {
             util::fatal_error("Could not create output file", Some(73));
         };
 
-        trace!("Created output file");
+        log::trace!("Created output file");
         let Ok(bytes_count) = file.write(output.as_bytes()) else {
                 util::fatal_error("Could not write to output file", Some(74));
         };
-        info!("Written ascii chars to output file");
+        log::info!("Written ascii chars to output file");
         println!("Written {} bytes to {}", bytes_count, output_file.display())
     } else {
         //print the ascii img to the terminal
-        info!("Printing output");
+        log::info!("Printing output");
         println!("{}", output);
     }
 }
@@ -327,7 +325,7 @@ fn main() {
 fn load_image(path: &str) -> image::DynamicImage {
     #[cfg(feature = "web_image")]
     if path.starts_with("http") {
-        info!("Started to download image from: {}", path);
+        log::info!("Started to download image from: {}", path);
         let now = std::time::Instant::now();
         let Ok(resp) = ureq::get(path).call() else {
                     util::fatal_error(
@@ -341,16 +339,16 @@ fn load_image(path: &str) -> image::DynamicImage {
         resp.into_reader()
             .read_to_end(&mut bytes)
             .expect("Failed to read bytes");
-        info!("Downloading took {:3} ms", now.elapsed().as_millis());
+        log::info!("Downloading took {:3} ms", now.elapsed().as_millis());
 
-        debug!("Opening downloaded image from memory");
+        log::debug!("Opening downloaded image from memory");
         return match image::load_from_memory(&bytes) {
             Ok(img) => img,
             Err(err) => util::fatal_error(&err.to_string(), Some(66)),
         };
     }
 
-    info!("Opening image");
+    log::info!("Opening image");
     match image::open(path) {
         Ok(img) => img,
         Err(err) => util::fatal_error(&err.to_string(), Some(66)),

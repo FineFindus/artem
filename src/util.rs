@@ -1,6 +1,5 @@
 use std::{env, process};
 
-use log::error;
 use once_cell::sync::Lazy;
 
 ///Returns if the terminal supports truecolor mode.
@@ -119,8 +118,8 @@ mod test_map_range {
 /// ```
 pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
     //This function never returns, since it always exit the program
-    error!("{}", message);
-    error!("Artem exited with code: {}", code.unwrap_or(1));
+    log::error!("{}", message);
+    log::error!("Artem exited with code: {}", code.unwrap_or(1));
     process::exit(code.unwrap_or(1));
 }
 

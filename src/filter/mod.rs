@@ -1,7 +1,6 @@
 use std::time::Instant;
 
 use image::{DynamicImage, GenericImageView, GrayImage, ImageBuffer};
-use log::{debug, info, trace};
 
 /// Filter an image using a technique similar to canny edge detection.
 ///
@@ -39,12 +38,12 @@ pub fn edge_detection_filter(img: DynamicImage, hysteresis: bool) -> DynamicImag
 /// let blurred = blur(image, 1.4f32, 4)
 /// ```
 fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
-    info!("Blurring image");
+    log::info!("Blurring image");
     //measure timing for this step
-    trace!("Started time tracking for blurring");
+    log::trace!("Started time tracking for blurring");
     let now = Instant::now();
 
-    debug!("Creating gauss kernel");
+    log::debug!("Creating gauss kernel");
     let kernel = create_gauss_kernel(sigma);
 
     let offset = (kernel.len() / 2) as u32;
@@ -52,7 +51,7 @@ fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
     let (width, height) = img.dimensions();
 
     //create empty target img
-    debug!("Creating target blur image");
+    log::debug!("Creating target blur image");
     let mut destination_img = ImageBuffer::new(width, height);
 
     //use iter to iter over every pixel and create a new img
@@ -94,7 +93,7 @@ fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
         );
     });
 
-    info!(
+    log::info!(
         "Successfully blurred image in {:3} ms",
         now.elapsed().as_millis()
     );
@@ -231,9 +230,9 @@ mod test_create_gauss_kernel {
 /// let outline = edge_detection(image, 4)
 /// ```
 fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
-    info!("Creating outline image");
+    log::info!("Creating outline image");
     //create stop watch
-    trace!("Started time tracking for sobel");
+    log::trace!("Started time tracking for sobel");
     let now = Instant::now();
     //sobel kernels
     let kernel_x = &[
@@ -249,14 +248,14 @@ fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
     ];
 
     let kernel_length = kernel_x.len();
-    trace!("Length: {}", kernel_length);
+    log::trace!("Length: {}", kernel_length);
 
     let offset = (kernel_length / 2) as u32;
 
     let (width, height) = img.dimensions();
 
     //create empty target img
-    debug!("Creating target sobel image");
+    log::debug!("Creating target sobel image");
     let mut destination_img = ImageBuffer::new(width, height);
 
     img.pixels().for_each(|(x, y, _)| {
@@ -296,7 +295,7 @@ fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
         );
     });
 
-    info!(
+    log::info!(
         "Successfully outlined image in {:3} ms",
         now.elapsed().as_millis()
     );
@@ -363,16 +362,16 @@ mod test_sobel {
 /// ```
 fn edge_tracking(img: DynamicImage) -> DynamicImage {
     //start tracking to for this step
-    trace!("Started time tracking for hysteresis");
+    log::trace!("Started time tracking for hysteresis");
     let now = Instant::now();
 
-    debug!("Creating target hysteresis image");
+    log::debug!("Creating target hysteresis image");
     let mut destination_img: GrayImage = ImageBuffer::new(img.width(), img.height());
 
     let upper_threshold = u8::MAX as f32 * 0.5;
-    debug!("Upper threshold: {}", upper_threshold);
+    log::debug!("Upper threshold: {}", upper_threshold);
     let lower_threshold = u8::MAX as f32 * 0.3;
-    debug!("Lower threshold: {}", lower_threshold);
+    log::debug!("Lower threshold: {}", lower_threshold);
 
     img.pixels().for_each(|(x, y, pixel)| {
         let grayscale_pixel = crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
@@ -419,7 +418,7 @@ fn edge_tracking(img: DynamicImage) -> DynamicImage {
         }
     });
 
-    info!(
+    log::info!(
         "Successfully applied hysteresis to target image in {:3} ms",
         now.elapsed().as_millis()
     );
