@@ -84,12 +84,12 @@ fn main() {
             r#"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "#
         }
         Some(chars) if !chars.is_empty() => {
-            log::info!("Using user provided characters");
+            log::debug!("Using user provided characters");
             chars
         }
         _ => {
             //density map from jp2a
-            log::info!("Using default characters");
+            log::debug!("Using default characters");
             r#"MWNXK0Okxdolc:;,'...   "#
         }
     };

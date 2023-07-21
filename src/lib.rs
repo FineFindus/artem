@@ -246,7 +246,7 @@ fn spacing_vertical(height: u32) -> String {
 ///
 /// # Examples
 /// ```
-/// use artem::util::SUPPORTS_TRUECOLOR;
+/// use artem::SUPPORTS_TRUECOLOR;
 /// # use std::env;
 ///
 /// # env::set_var("COLORTERM", "truecolor");
