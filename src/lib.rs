@@ -10,7 +10,7 @@
 //! ```
 //! # let path = "./assets/images/standard_test_img.png";
 //! let image = image::open(path).expect("Failed to open image");
-//! let ascii_art = artem::convert(image, artem::config::ConfigBuilder::new().build());
+//! let ascii_art = artem::convert(image, &artem::config::ConfigBuilder::new().build());
 //! ```
 
 //import utilities, such as dimensions, value remapping, etc
@@ -41,9 +41,9 @@ use crate::config::{Config, TargetType};
 /// use artem::config::ConfigBuilder;
 ///
 /// let img = image::open("examples/abraham_lincoln.jpg").unwrap();
-/// let converted_image = artem::convert(img, ConfigBuilder::new().build());
+/// let converted_image = artem::convert(img, &ConfigBuilder::new().build());
 /// ```
-pub fn convert(image: DynamicImage, config: Config) -> String {
+pub fn convert(image: DynamicImage, config: &Config) -> String {
     debug!("Using inverted color: {}", config.invert);
     //get img dimensions
     let input_width = image.width();

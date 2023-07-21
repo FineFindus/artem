@@ -10,7 +10,7 @@
 //! ```
 //! # let path = "./assets/images/standard_test_img.png";
 //! let image = image::open(path).expect("Failed to open image");
-//! let ascii_art = artem::convert(image, artem::config::ConfigBuilder::new().build());
+//! let ascii_art = artem::convert(image, &artem::config::ConfigBuilder::new().build());
 //! ```
 
 use std::{
@@ -279,11 +279,12 @@ fn main() {
         config_builder.target(TargetType::Shell(color, background_color));
     }
 
+    let config = config_builder.build();
     let mut output = img_paths
         .iter()
         .map(|path| load_image(path))
         .filter(|img| img.height() != 0 || img.width() != 0)
-        .map(|img| artem::convert(img, config_builder.build()))
+        .map(|img| artem::convert(img, &config))
         .collect::<String>();
 
     //remove last linebreak, we cannot use `.trim_end()` here

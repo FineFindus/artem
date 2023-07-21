@@ -20,7 +20,7 @@ fn hysteresis_benchmark(c: &mut Criterion) {
     group.bench_function("low resolution", |b| {
         b.iter_batched(
             util::load_low_res_image,
-            |data| artem::convert(data, options.build()),
+            |data| artem::convert(data, &options.build()),
             criterion::BatchSize::LargeInput,
         );
     });
@@ -28,7 +28,7 @@ fn hysteresis_benchmark(c: &mut Criterion) {
     group.bench_function("normal resolution", |b| {
         b.iter_batched(
             util::load_normal_res_image,
-            |data| artem::convert(data, options.build()),
+            |data| artem::convert(data, &options.build()),
             criterion::BatchSize::LargeInput,
         );
     });
@@ -36,7 +36,7 @@ fn hysteresis_benchmark(c: &mut Criterion) {
     group.bench_function("high resolution", |b| {
         b.iter_batched(
             util::load_high_res_image,
-            |data| artem::convert(data, options.build()),
+            |data| artem::convert(data, &options.build()),
             criterion::BatchSize::LargeInput,
         );
     });
