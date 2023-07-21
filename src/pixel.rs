@@ -1,6 +1,6 @@
 use image::Rgba;
 
-use crate::{config, target, util};
+use crate::{config, target};
 
 /// Convert a pixel block to a char (as a String) from the given density string.
 ///
@@ -45,7 +45,7 @@ pub fn correlating_char(
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
-    let density_index = util::map_range(
+    let density_index = map_range(
         (0f32, 255f32),
         if invert {
             (0f32, length as f32)
@@ -306,6 +306,38 @@ mod test_pixel_density {
                 config::TargetType::HtmlFile(false, false)
             )
         );
+    }
+}
+
+///Remap a value from one range to another.
+///
+/// If the value is outside of the specified range, it will still be
+/// converted as if it was in the range. This means it could be much larger or smaller than expected.
+/// This can be fixed by using the `clamp` function after the remapping.
+fn map_range(from_range: (f32, f32), to_range: (f32, f32), value: f32) -> f32 {
+    to_range.0 + (value - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
+}
+
+#[cfg(test)]
+mod test_map_range {
+    use super::*;
+
+    #[test]
+    fn remap_values() {
+        //remap 2 to 4
+        assert_eq!(4f32, map_range((0f32, 10f32), (0f32, 20f32), 2f32));
+    }
+
+    #[test]
+    fn remap_values_above_range() {
+        //remap 21 to 42, since the value will be doubled
+        assert_eq!(42f32, map_range((0f32, 10f32), (0f32, 20f32), 21f32));
+    }
+
+    #[test]
+    fn remap_values_below_range() {
+        //remap -1 to -2, since the value will be doubled
+        assert_eq!(-2f32, map_range((0f32, 10f32), (0f32, 20f32), -1f32));
     }
 }
 

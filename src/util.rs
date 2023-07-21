@@ -55,46 +55,6 @@ mod test_color_support {
     }
 }
 
-///Remap a value from one range to another.
-///
-/// If the value is outside of the specified range, it will still be
-/// converted as if it was in the range. This means it could be much larger or smaller than expected.
-/// This can be fixed by using the `clamp` function after the remapping.
-///
-///# Examples
-/// ```
-/// use artem::util::map_range;
-///
-/// let remapped = map_range((0f32, 10f32), (0f32, 20f32), 2f32);
-/// assert_eq!(4f32, remapped);
-/// ```
-pub fn map_range(from_range: (f32, f32), to_range: (f32, f32), value: f32) -> f32 {
-    to_range.0 + (value - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
-}
-
-#[cfg(test)]
-mod test_map_range {
-    use super::*;
-
-    #[test]
-    fn remap_values() {
-        //remap 2 to 4
-        assert_eq!(4f32, map_range((0f32, 10f32), (0f32, 20f32), 2f32));
-    }
-
-    #[test]
-    fn remap_values_above_range() {
-        //remap 21 to 42, since the value will be doubled
-        assert_eq!(42f32, map_range((0f32, 10f32), (0f32, 20f32), 21f32));
-    }
-
-    #[test]
-    fn remap_values_below_range() {
-        //remap -1 to -2, since the value will be doubled
-        assert_eq!(-2f32, map_range((0f32, 10f32), (0f32, 20f32), -1f32));
-    }
-}
-
 ///Function for fatal errors.
 ///
 ///A fatal error is an error, from which the program can no recover, meaning the only option left is to print
