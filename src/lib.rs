@@ -13,9 +13,6 @@
 //! let ascii_art = artem::convert(image, &artem::config::ConfigBuilder::new().build());
 //! ```
 
-//import utilities, such as value remapping, etc
-pub mod util;
-
 //condense all arguments into a single struct
 pub mod config;
 
@@ -28,6 +25,7 @@ mod filter;
 mod target;
 
 use image::{DynamicImage, GenericImageView};
+use once_cell::sync::Lazy;
 
 pub use crate::config::ConfigBuilder;
 use crate::config::{Config, ResizingDimension, TargetType};
@@ -237,3 +235,26 @@ fn spacing_vertical(height: u32) -> String {
     log::trace!("H: {term_height}, h: {height}");
     "\n".repeat(term_height.saturating_sub(height).saturating_div(2) as usize)
 }
+
+///Returns if the terminal supports truecolor mode.
+///
+/// It checks the `COLORTERM` environment variable,
+/// if it is either set to
+/// `truecolor` or `24bit` true is returned.
+///
+/// In all other cases false will be returned.
+///
+/// # Examples
+/// ```
+/// use artem::util::SUPPORTS_TRUECOLOR;
+/// # use std::env;
+///
+/// # env::set_var("COLORTERM", "truecolor");
+/// //only true when run in a shell that supports true color
+/// let color_support = *SUPPORTS_TRUECOLOR;
+/// assert!(color_support);
+/// ```
+pub static SUPPORTS_TRUECOLOR: Lazy<bool> = Lazy::new(|| {
+    std::env::var("COLORTERM")
+        .is_ok_and(|value| value.contains("truecolor") || value.contains("24bit"))
+});

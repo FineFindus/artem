@@ -110,7 +110,6 @@ impl ResizingDimension {
 /// use artem::config::TargetType;
 ///
 /// assert_eq!(TargetType::Shell(true, false), TargetType::default());
-///
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetType {

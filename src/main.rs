@@ -20,12 +20,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use artem::{
-    config::{self, ConfigBuilder, TargetType},
-    util,
-};
-
-use crate::cli::Verbosity;
+use artem::config::{self, ConfigBuilder, TargetType};
 
 //import cli
 mod cli;
@@ -41,8 +36,8 @@ fn main() {
         .format_timestamp(None)
         .filter_level(
             (*matches
-                .get_one::<Verbosity>("verbosity")
-                .unwrap_or(&Verbosity::Warn))
+                .get_one::<cli::Verbosity>("verbosity")
+                .unwrap_or(&cli::Verbosity::Warn))
             .into(),
         )
         .init();
@@ -184,7 +179,7 @@ fn main() {
 
         //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
         log::info!("Using colored ascii");
-        if !*util::SUPPORTS_TRUECOLOR {
+        if !*artem::SUPPORTS_TRUECOLOR {
             if background_color {
                 log::warn!("Background flag will be ignored, since truecolor is not supported.")
             }
@@ -256,7 +251,7 @@ fn main() {
                     log::warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
                     TargetType::File
                 } else {
-                    if !*util::SUPPORTS_TRUECOLOR {
+                    if !*artem::SUPPORTS_TRUECOLOR {
                         log::warn!("truecolor is disabled, output file will not use truecolor chars")
                     }
                     TargetType::AnsiFile(background_color)

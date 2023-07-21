@@ -1,7 +1,5 @@
 use colored::{ColoredString, Colorize};
 
-use crate::util;
-
 /// Returns an colored string with the given colors.
 ///
 /// Checks if true_colors are supported, by checking the `COLORTERM` environnement variable,
@@ -12,7 +10,7 @@ use crate::util;
 /// println!("{}", get_colored_string(100, 100, 100, 'x', false));
 /// ```
 pub fn colored_char(red: u8, green: u8, blue: u8, char: char, background_color: bool) -> String {
-    if *util::SUPPORTS_TRUECOLOR {
+    if *crate::SUPPORTS_TRUECOLOR {
         //return true color string
         if background_color {
             char.to_string().on_truecolor(red, green, blue).to_string()
