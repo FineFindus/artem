@@ -99,7 +99,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
 
     log::trace!("Calculating horizontal spacing");
     let horizontal_spacing = if config.center_x {
-        util::spacing_horizontal(if config.border {
+        spacing_horizontal(if config.border {
             //two columns are missing because the border takes up two lines
             columns + 2
         } else {
@@ -111,7 +111,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
 
     if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
         log::trace!("Adding vertical top spacing");
-        output.push_str(&util::spacing_vertical(if config.border {
+        output.push_str(&spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
             rows + 2
         } else {
@@ -206,7 +206,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
 
     if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
         log::trace!("Adding vertical bottom spacing");
-        output.push_str(&util::spacing_vertical(if config.border {
+        output.push_str(&spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
             rows + 2
         } else {
@@ -215,4 +215,25 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
     }
 
     output
+}
+
+/// Return a spacer string, which can be used to center the ascii image in the middle of the terminal.
+///
+/// When the terminal width is not existing, for example when the output is not a terminal, the returned string will be empty.
+fn spacing_horizontal(width: u32) -> String {
+    let term_width = terminal_size::terminal_size()
+        .map(|dimensions| dimensions.0 .0 as u32)
+        .unwrap_or_default();
+    " ".repeat(term_width.saturating_sub(width).saturating_div(2) as usize)
+}
+
+/// Return a spacer string, which can be used to center the ascii image in the middle of the terminal.
+///
+/// When the terminal height is not existing, for example when the output is not a terminal, the returned string will be empty.
+fn spacing_vertical(height: u32) -> String {
+    let term_height = terminal_size::terminal_size()
+        .map(|dimensions| dimensions.1 .0 as u32)
+        .unwrap_or_default();
+    log::trace!("H: {term_height}, h: {height}");
+    "\n".repeat(term_height.saturating_sub(height).saturating_div(2) as usize)
 }
