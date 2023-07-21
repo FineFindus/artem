@@ -1,6 +1,102 @@
 use std::num::NonZeroU32;
 
-use crate::util::{self, ResizingDimension};
+///Preferred image resize direction
+///
+///This changes which dimensions should be used when resizing the image.
+///For example, to fully use one dimension (e.g. width), the height can not be scaled
+///up as well, since it already would be larger than the maximum terminal height.
+///By default width will be used.
+///
+/// # Examples
+/// ```
+/// use artem::config::ResizingDimension;
+///
+/// assert_eq!(ResizingDimension::Width, ResizingDimension::default());
+/// ```
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
+pub enum ResizingDimension {
+    #[default]
+    Width,
+    Height,
+}
+
+impl ResizingDimension {
+    /// Calculate image dimension related values.
+    ///
+    /// This calculates the number of columns, rows, and the tile dimensions (tile_width, tile_height) for these
+    /// values based on a target_size. It returns them as a tuple, the elements are in the previously named order.
+    /// The dimension property can be used to change what dimension will be scaled. Since terminal character are a bit higher the wide,
+    /// Width and Height of the output needs to be based on either one, so the other can be calculated.
+    ///
+    /// # Examples
+    /// ```
+    /// use artem::config::{ResizingDimension};
+    ///
+    /// assert_eq!(
+    /// (100, 46, 5, 11),
+    /// //image with a size of 512x512, split into 100 columns with no border
+    /// ResizingDimension::calculate_dimensions(100, 512, 512, 0.42, false, ResizingDimension::Width));
+    /// ```
+    pub fn calculate_dimensions(
+        target_size: u32,
+        height: u32,
+        width: u32,
+        scale: f32,
+        border: bool,
+        dimension: ResizingDimension,
+    ) -> (u32, u32, u32, u32) {
+        match dimension {
+            ResizingDimension::Width => {
+                //calculate dimensions based on columns
+                let mut columns = if width > target_size {
+                    target_size
+                } else {
+                    width
+                };
+
+                if border {
+                    //remove a bit of space for the border
+                    columns = columns.saturating_sub(2).max(1); //should be at last 1
+                }
+
+                //calculate tiles
+                let tile_width = width / columns;
+                let tile_height = (tile_width as f32 / scale).floor() as u32;
+
+                let rows = height / tile_height;
+
+                //.max(1) is used to ensure that the values are at least 1
+                //a value of 0 could cause an error (but not crash) later on
+                (columns.max(1), rows.max(1), tile_width, tile_height)
+            }
+
+            ResizingDimension::Height => {
+                let mut rows = if height > target_size {
+                    // minus 1, since the user input line is included
+                    target_size - 1
+                } else {
+                    height
+                };
+
+                //calculate tiles
+                let tile_height = height / rows;
+                let tile_width = (tile_height as f32 * scale).ceil() as u32;
+
+                let mut columns = width / tile_width;
+
+                if border {
+                    //remove a bit of space for the border
+                    columns = columns.saturating_sub(2);
+                    rows = rows.saturating_sub(2);
+                }
+
+                //.max(1) is used to ensure that the values are at least 1
+                //a value of 0 could cause an error (but not crash) later on
+                (columns.max(1), rows.max(1), tile_width, tile_height)
+            }
+        }
+    }
+}
 
 /// Target for the Ascii conversion.
 ///
@@ -119,7 +215,7 @@ mod test_option {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -329,12 +425,12 @@ impl ConfigBuilder {
     /// # Examples
     /// ```
     /// use artem::config::ConfigBuilder;
-    /// use artem::util::ResizingDimension;
+    /// use artem::config::ResizingDimension;
     ///
     /// let mut builder = ConfigBuilder::new();
     /// builder.dimension(ResizingDimension::Height);
     /// ```
-    => dimension, util::ResizingDimension
+    => dimension, ResizingDimension
     }
 
     property! {
@@ -499,7 +595,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -521,7 +617,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -545,7 +641,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -567,7 +663,7 @@ mod test_conversion_configuration_builder {
                 target_size: 314, //change attribute
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -591,7 +687,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: true, //change attribute
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -613,7 +709,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: true, //change attribute
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -635,7 +731,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Height, //change attribute
+                dimension: ResizingDimension::Height, //change attribute
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -645,7 +741,7 @@ mod test_conversion_configuration_builder {
                 target: TargetType::default(),
             },
             ConfigBuilder::new()
-                .dimension(util::ResizingDimension::Height)
+                .dimension(ResizingDimension::Height)
                 .build()
         );
     }
@@ -659,7 +755,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: true, //change attribute
                 transform_y: false,
                 center_x: false,
@@ -681,7 +777,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: true, //change attribute
                 center_x: false,
@@ -703,7 +799,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: true, //change attribute
@@ -725,7 +821,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -747,7 +843,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -769,7 +865,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -791,7 +887,7 @@ mod test_conversion_configuration_builder {
                 target_size: 80,
                 invert: false,
                 border: false,
-                dimension: util::ResizingDimension::Width,
+                dimension: ResizingDimension::Width,
                 transform_x: false,
                 transform_y: false,
                 center_x: false,
@@ -804,5 +900,169 @@ mod test_conversion_configuration_builder {
                 .target(TargetType::AnsiFile(false))
                 .build()
         );
+    }
+}
+
+#[cfg(test)]
+mod test_calculate_dimensions {
+    use super::*;
+
+    #[test]
+    fn calculate_dimensions_width() {
+        assert_eq!(
+            (100, 46, 5, 11),
+            ResizingDimension::calculate_dimensions(
+                100,
+                512,
+                512,
+                0.42,
+                false,
+                ResizingDimension::Width
+            )
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_width_119() {
+        assert_eq!(
+            (119, 56, 4, 9),
+            ResizingDimension::calculate_dimensions(
+                119,
+                512,
+                512,
+                0.42,
+                false,
+                ResizingDimension::Width
+            )
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_height() {
+        assert_eq!(
+            (170, 99, 3, 5),
+            ResizingDimension::calculate_dimensions(
+                100,
+                512,
+                512,
+                0.42,
+                false,
+                ResizingDimension::Height
+            )
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_height_1x1_img() {
+        assert_eq!(
+            (1, 1, 1, 1),
+            ResizingDimension::calculate_dimensions(
+                100,
+                1,
+                1,
+                0.42,
+                false,
+                ResizingDimension::Height
+            )
+        );
+    }
+
+    #[test]
+    fn calculate_dimensions_width_1x1_img() {
+        assert_eq!(
+            (1, 1, 1, 2),
+            ResizingDimension::calculate_dimensions(
+                100,
+                1,
+                1,
+                0.42,
+                false,
+                ResizingDimension::Width
+            )
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_height_zero() {
+        ResizingDimension::calculate_dimensions(
+            0,
+            512,
+            512,
+            0.42,
+            false,
+            ResizingDimension::Height,
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_width_zero() {
+        ResizingDimension::calculate_dimensions(0, 512, 512, 0.42, false, ResizingDimension::Width);
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_img_width_zero() {
+        ResizingDimension::calculate_dimensions(100, 512, 0, 0.42, false, ResizingDimension::Width);
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_img_height_zero() {
+        ResizingDimension::calculate_dimensions(
+            100,
+            0,
+            512,
+            0.42,
+            false,
+            ResizingDimension::Height,
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn calculate_dimensions_img_width_height_zero() {
+        ResizingDimension::calculate_dimensions(100, 0, 0, 0.42, false, ResizingDimension::Height);
+    }
+
+    #[test]
+    fn calculate_dimensions_scale_zero() {
+        assert_eq!(
+            (100, 1, 5, 4294967295),
+            ResizingDimension::calculate_dimensions(
+                100,
+                512,
+                512,
+                0f32,
+                false,
+                ResizingDimension::Width
+            )
+        );
+    }
+
+    #[test]
+    fn calculate_border_smaller_columns() {
+        assert_eq!(
+            (98, 1, 5, 4294967295),
+            ResizingDimension::calculate_dimensions(
+                100,
+                512,
+                512,
+                0f32,
+                true,
+                ResizingDimension::Width
+            )
+        );
+    }
+}
+
+#[cfg(test)]
+mod test_dimensions_enum {
+    use super::*;
+
+    #[test]
+    fn default_is_width() {
+        assert_eq!(ResizingDimension::Width, ResizingDimension::default());
     }
 }

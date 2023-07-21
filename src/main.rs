@@ -21,7 +21,7 @@ use std::{
 };
 
 use artem::{
-    config::{ConfigBuilder, TargetType},
+    config::{self, ConfigBuilder, TargetType},
     util,
 };
 
@@ -102,7 +102,7 @@ fn main() {
     config_builder.characters(density.to_string());
 
     //set the default resizing dimension to width
-    config_builder.dimension(util::ResizingDimension::Width);
+    config_builder.dimension(config::ResizingDimension::Width);
 
     //get target size from args
     //only one arg should be present
@@ -110,7 +110,7 @@ fn main() {
         //use max terminal height
         log::trace!("Using terminal height as target size");
         //change dimension to height
-        config_builder.dimension(util::ResizingDimension::Height);
+        config_builder.dimension(config::ResizingDimension::Height);
 
         //read terminal size, error when STDOUT is not a tty
         let Some(height) = terminal_size::terminal_size().map(|size| size.1.0 as u32) else {

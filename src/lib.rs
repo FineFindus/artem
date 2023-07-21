@@ -13,7 +13,7 @@
 //! let ascii_art = artem::convert(image, &artem::config::ConfigBuilder::new().build());
 //! ```
 
-//import utilities, such as dimensions, value remapping, etc
+//import utilities, such as value remapping, etc
 pub mod util;
 
 //condense all arguments into a single struct
@@ -30,7 +30,7 @@ mod target;
 use image::{DynamicImage, GenericImageView};
 
 pub use crate::config::ConfigBuilder;
-use crate::config::{Config, TargetType};
+use crate::config::{Config, ResizingDimension, TargetType};
 
 /// Takes an image and returns it as an ascii art string.
 ///
@@ -51,7 +51,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
     log::debug!("Input Image Height: {input_height}");
 
     //calculate the needed dimensions
-    let (columns, rows, tile_width, tile_height) = util::calculate_dimensions(
+    let (columns, rows, tile_width, tile_height) = ResizingDimension::calculate_dimensions(
         config.target_size,
         input_height,
         input_width,
