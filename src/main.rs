@@ -99,42 +99,34 @@ fn main() {
     //set the default resizing dimension to width
     config_builder.dimension(config::ResizingDimension::Width);
 
+    let terminal_size = |height: bool| -> u32 {
+        //read terminal size, error when STDOUT is not a tty
+        terminal_size::terminal_size()
+            .map(|size| if height { size.1 .0 } else { size.0 .0 } as u32)
+            .unwrap_or_else(|| {
+                fatal_error(
+                    "Failed to read terminal size, STDOUT is not a tty",
+                    Some(72),
+                )
+            })
+    };
+    let height = matches.get_flag("height");
     //get target size from args
     //only one arg should be present
-    let target_size = if matches.get_flag("height") {
-        //use max terminal height
-        log::trace!("Using terminal height as target size");
-        //change dimension to height
-        config_builder.dimension(config::ResizingDimension::Height);
-
-        //read terminal size, error when STDOUT is not a tty
-        let Some(height) = terminal_size::terminal_size().map(|size| size.1.0 as u32) else {
-            fatal_error(
-                "Failed to read terminal size, STDOUT is not a tty",
-                Some(72),
-            );
-        };
-        height
-    } else if matches.get_flag("width") {
-        //use max terminal width
-        log::trace!("Using terminal width as target size");
-
-        //read terminal size, error when STDOUT is not a tty
-        let Some(width) = terminal_size::terminal_size().map(|size| size.0.0 as u32) else {
-            fatal_error(
-                "Failed to read terminal size, STDOUT is not a tty",
-                Some(72),
-            );
-        };
-        width
+    let target_size = if matches.get_flag("width") || height {
+        if height {
+            config_builder.dimension(config::ResizingDimension::Height);
+        }
+        terminal_size(height)
     } else {
         //use given input size
         log::trace!("Using user input size as target size");
-        let Some(size) = matches
-            .get_one::<u32>("size") else {
-                fatal_error("Could not work with size input value", Some(65));
-            };
-        *size
+        *matches.get_one::<u32>("size").unwrap_or_else(|| {
+            fatal_error(
+                "Failed to read terminal size, STDOUT is not a tty",
+                Some(72),
+            )
+        })
     }
     .clamp(
         20,  //min should be 20 to ensure a somewhat visible picture
@@ -242,7 +234,6 @@ fn main() {
                 log::debug!("Target: Html-File");
                 TargetType::HtmlFile(color, background_color)
             }
-
             Some("ansi") | Some("ans") => {
                 log::debug!("Target: Ansi-File");
 
