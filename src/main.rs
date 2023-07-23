@@ -128,10 +128,7 @@ fn main() {
             )
         })
     }
-    .clamp(
-        20,  //min should be 20 to ensure a somewhat visible picture
-        230, //img above 230 might not be displayed properly
-    );
+    .max(20); //min should be 20 to ensure a somewhat visible picture
 
     log::debug!("Target Size: {target_size}");
     config_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before

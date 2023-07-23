@@ -7,6 +7,6 @@ use std::fs;
 /// Loads a string containing the correct and expected result of the command output.
 /// The returned String does not have color.
 pub fn load_correct_file() -> String {
-     //ignore errors
+    //ignore errors
     fs::read_to_string("assets/standard_test_img/standard_test_img.txt").unwrap()
 }
