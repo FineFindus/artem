@@ -236,7 +236,7 @@ fn spacing_vertical(height: u32) -> String {
     "\n".repeat(term_height.saturating_sub(height).saturating_div(2) as usize)
 }
 
-///Returns if the terminal supports truecolor mode.
+/// Returns if the terminal supports truecolor mode.
 ///
 /// It checks the `COLORTERM` environment variable,
 /// if it is either set to
