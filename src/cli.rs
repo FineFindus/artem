@@ -62,8 +62,8 @@ pub fn build_cli() -> Command {
                 .value_hint(ValueHint::Other)
                 .conflicts_with_all(["height", "width"])
                 .help("Change the size of the output image. \
-                The minimum size is 20, the maximum 230. Values outside of the range will be \
-                ignored and changed to the nearest usable value. This argument is conflicting with --width and --height."),
+                The minimum size is 20. Lower values will be \
+                ignored and changed to 20. This argument is conflicting with --width and --height."),
         )
         .arg(
             Arg::new("height")
