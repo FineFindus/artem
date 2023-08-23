@@ -293,7 +293,7 @@ jobs:
         continue-on-error: false
         with:
           command: build
-          args: --locked --release --verbose
+          args: --offline --release --verbose
 
         #copy to completion files from the out directory to the deployment/assets dir
       - name: Copy completion files and man page
