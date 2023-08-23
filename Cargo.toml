@@ -1,6 +1,6 @@
 [package]
 name = "artem"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["@FineFindus"]
 description = "Convert images from multiple formats (jpg, png, webp, etc…) to ASCII art"
 edition = "2021"
