@@ -23,10 +23,10 @@ jobs:
         target:
           #compile for x86 and armv8 (64-Bit)
           - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
+          # - aarch64-unknown-linux-gnu
           #compile with musl
           - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
+          # - aarch64-unknown-linux-musl
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,6 +36,17 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
+      - name: Install musl-gcc
+        if: contains(${{ matrix.target }}, "musl") #arm build can not run tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user musl-tools musl-dev
+      # https://github.com/briansmith/ring/blob/main/mk/install-build-tools.sh
+      - name: Install aarch64-linux-gnu-gcc
+        if: contains(${{ matrix.target }}, "aarch64") #arm build can not run tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user gcc-aarch64-linux-gnu libc6-dev-arm64-cross 
 
       - name: Build artem release
         continue-on-error: false
