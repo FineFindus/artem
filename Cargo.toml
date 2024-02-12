@@ -1,10 +1,10 @@
 [package]
 name = "artem"
-version = "2.0.2"
+version = "2.0.3"
 authors = ["@FineFindus"]
 description = "Convert images from multiple formats (jpg, png, webp, etc…) to ASCII art"
 edition = "2021"
-rust-version = "1.70.0"
+rust-version = "1.74.0"
 readme = "README.md"
 license = "MPL-2.0"
 homepage = "https://github.com/FineFindus/artem"
@@ -32,8 +32,8 @@ name = "artem_bench"
 harness = false
 
 [build-dependencies]
-clap = { version = "4.3", features = ["cargo", "derive"]}
-clap_complete = "4.3"
+clap = { version = "4.5", features = ["cargo", "derive"] }
+clap_complete = "4.5"
 clap_mangen = "0.2"
 log = "0.4"
 
@@ -41,17 +41,17 @@ log = "0.4"
 assert_cmd = "2.0"
 predicates = "3.0"
 criterion = "0.5"
-pretty_assertions = "1.3.0"
+pretty_assertions = "1.4.0"
 
 [dependencies]
-image = "0.24.6"
-colored = "2.0.4"
-clap = { version = "4.3", features = ["cargo"]}
-terminal_size = "0.2.1"
+image = "0.24.8"
+colored = "2.1"
+clap = { version = "4.5", features = ["cargo"] }
+terminal_size = "0.3.0"
 log = "0.4"
-env_logger = "0.10"
-once_cell = "1.18.0"
-ureq = { version = "2.7.1", optional = true}
+env_logger = "0.11"
+once_cell = "1.19.0"
+ureq = { version = "2.9.5", optional = true }
 
 [features]
 default = ["web_image"]
@@ -62,16 +62,48 @@ web_image = ["ureq"]
 section = "graphics"
 priority = "optional"
 assets = [
-      #file locations are partailly from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
-      ["target/release/artem", "usr/bin/", "755"],
-      ["deployment/assets/artem.1", "usr/share/man/man1/artem.1", "644"],
-      ["README.md", "usr/share/doc/artem/README", "644"],
-      ["CHANGELOG.md", "usr/share/doc/artem/CHANGELOG", "644"],
-      ["LICENSE", "usr/share/doc/artem/", "644"],
-      #the completion files and man page is generated and copied by the build script
-      ["deployment/assets/artem.bash", "usr/share/bash-completion/completions/artem", "644"],
-      ["deployment/assets/artem.fish", "usr/share/fish/vendor_completions.d/artem.fish", "644"],
-      ["deployment/assets/_artem", "usr/share/zsh/vendor-completions/", "644"],
+    #file locations are partailly from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
+    [
+        "target/release/artem",
+        "usr/bin/",
+        "755",
+    ],
+    [
+        "deployment/assets/artem.1",
+        "usr/share/man/man1/artem.1",
+        "644",
+    ],
+    [
+        "README.md",
+        "usr/share/doc/artem/README",
+        "644",
+    ],
+    [
+        "CHANGELOG.md",
+        "usr/share/doc/artem/CHANGELOG",
+        "644",
+    ],
+    [
+        "LICENSE",
+        "usr/share/doc/artem/",
+        "644",
+    ],
+    #the completion files and man page is generated and copied by the build script
+    [
+        "deployment/assets/artem.bash",
+        "usr/share/bash-completion/completions/artem",
+        "644",
+    ],
+    [
+        "deployment/assets/artem.fish",
+        "usr/share/fish/vendor_completions.d/artem.fish",
+        "644",
+    ],
+    [
+        "deployment/assets/_artem",
+        "usr/share/zsh/vendor-completions/",
+        "644",
+    ],
 ]
 extended-description = """\
 artem is a rust command-line interface to convert images from multiple formats (jpg, png, webp, gif and many more) to ASCII art, inspired by jp2a.
