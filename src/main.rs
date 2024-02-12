@@ -134,14 +134,12 @@ fn main() {
     config_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
 
     //best ratio between height and width is 0.43
-    let Some(scale) = matches
-        .get_one::<f32>("scale")
-        .map(|scale| {
-            scale.clamp(
-                0.1f32, //a negative or 0 scale is not allowed
-                1f32,   //even a scale above 0.43 is not looking good
-            )
-        }) else {
+    let Some(scale) = matches.get_one::<f32>("scale").map(|scale| {
+        scale.clamp(
+            0.1f32, //a negative or 0 scale is not allowed
+            1f32,   //even a scale above 0.43 is not looking good
+        )
+    }) else {
         fatal_error("Could not work with ratio input value", Some(65));
     };
     log::debug!("Scale: {scale}");
@@ -284,7 +282,7 @@ fn main() {
 
         log::trace!("Created output file");
         let Ok(bytes_count) = file.write(output.as_bytes()) else {
-                fatal_error("Could not write to output file", Some(74));
+            fatal_error("Could not write to output file", Some(74));
         };
         log::info!("Written ascii chars to output file");
         println!("Written {} bytes to {}", bytes_count, output_file.display())
@@ -311,11 +309,11 @@ fn load_image(path: &str) -> image::DynamicImage {
         log::info!("Started to download image from: {}", path);
         let now = std::time::Instant::now();
         let Ok(resp) = ureq::get(path).call() else {
-                    fatal_error(
-                        &format!("Failed to load image bytes from {}", path),
-                        Some(66),
-                    );
-                };
+            fatal_error(
+                &format!("Failed to load image bytes from {}", path),
+                Some(66),
+            );
+        };
 
         //get bytes of the images
         let mut bytes: Vec<u8> = Vec::new();
