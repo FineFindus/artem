@@ -35,7 +35,7 @@ jobs:
         with:
           components: clippy
       - name: Run clippy
-        run: cargo clippy -- --Dwarnigns
+        run: cargo clippy -- -Dwarnigns
 
   test:
     name: Test Suite
