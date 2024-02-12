@@ -35,6 +35,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
+          targets: ${{ matrix.target }}
 
       - name: Build artem release
         continue-on-error: false
@@ -98,6 +99,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
+          targets: ${{ matrix.target }}
 
       - name: Build artem release
         continue-on-error: false
