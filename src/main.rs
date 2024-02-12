@@ -338,9 +338,9 @@ fn load_image(path: &str) -> image::DynamicImage {
     }
 }
 
-///Function for fatal errors.
+/// Function for fatal errors.
 ///
-///A fatal error is an error, from which the program can no recover, meaning the only option left is to print
+/// A fatal error is an error, from which the program can no recover, meaning the only option left is to print
 /// an error message letting the user know what went wrong. For example if a non-existing file was passed in,
 /// this program can not work correctly and should print an error message and exit.
 ///
