@@ -1,3 +1,8 @@
+# Reference:
+# https://eugene-babichenko.github.io/blog/2020/05/09/github-actions-cross-platform-auto-releases/
+# https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
+# https://github.com/BurntSushi/ripgrep/blob/master/.github/workflows/release.yml
+
 # This workflow creates all the needed binaries, uploads the binaries to github releases and updates the crate as well as the
 # homebrew tap.
 # The binaries include versions from linux x86_64 and arm, windows gnu and mscv and macos x86_64 and arm versions.
@@ -23,10 +28,10 @@ jobs:
         target:
           #compile for x86 and armv8 (64-Bit)
           - x86_64-unknown-linux-gnu
-          # - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
           #compile with musl
           - x86_64-unknown-linux-musl
-          # - aarch64-unknown-linux-musl
+          - aarch64-unknown-linux-musl
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,22 +40,13 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          targets: ${{ matrix.target }}
-      - name: Install musl-gcc
-        if: contains(${{ matrix.target }}, "musl") #arm build can not run tests
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-user musl-tools musl-dev
-      # https://github.com/briansmith/ring/blob/main/mk/install-build-tools.sh
-      - name: Install aarch64-linux-gnu-gcc
-        if: contains(${{ matrix.target }}, "aarch64") #arm build can not run tests
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-user gcc-aarch64-linux-gnu libc6-dev-arm64-cross 
+
+      - name: Install cross release
+        run: cargo install cross
 
       - name: Build artem release
         continue-on-error: false
-        run: cargo build --locked --release --verbose --target=${{ matrix.target }}
+        run: cross build --locked --release --verbose --target=${{ matrix.target }}
 
           #from: https://github.com/sharkdp/bat/blob/master/.github/workflows/CICD.yml
       - name: Extract Version Number
@@ -110,7 +106,6 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          targets: ${{ matrix.target }}
 
       - name: Build artem release
         continue-on-error: false
@@ -322,7 +317,7 @@ jobs:
           cp -u assets/aur/PKGBUILD-* pkgbuilds
 
       - name: Publish artem to the AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
         with:
           pkgname: artem
           pkgbuild: ./pkgbuilds/PKGBUILD-stable
@@ -333,7 +328,7 @@ jobs:
           force_push: "true"
 
       - name: Publish artem-bin to the AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
         with:
           pkgname: artem-bin
           pkgbuild: ./pkgbuilds/PKGBUILD-bin
