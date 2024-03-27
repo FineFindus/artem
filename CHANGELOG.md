@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2024-03-27
+
+### Added
+- Support SVG output
+
+### Changed
+- **BREAKING**: Marked `TargetType` as non-exhaustive
+- **BREAKING**: Moved `color` and `background_color` from `TargetType` to `Config`
+- Updated dependencies
+- Exclude assets from cargo upload
+
+### Removed
+- **BREAKING**: Removed lifetimes from `Config::characters`
+
 ## [2.0.6] - 2024-02-13
 
 ### Fixed

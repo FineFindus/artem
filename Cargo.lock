@@ -130,7 +130,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "artem"
-version = "2.0.6"
+version = "3.0.0"
 dependencies = [
  "anstyle-svg",
  "assert_cmd",
