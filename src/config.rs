@@ -112,6 +112,7 @@ impl ResizingDimension {
 /// assert_eq!(TargetType::Shell(true, false), TargetType::default());
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum TargetType {
     /// Shell target, Supports color and background colors.
     Shell(bool, bool),
