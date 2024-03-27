@@ -141,7 +141,7 @@ impl TargetType {
     /// Returns whether the output supports colored output.
     pub(crate) fn supports_color(&self) -> bool {
         //all targets, except for raw file support colored output
-        !matches!(self, TargetType::File)
+        self != &TargetType::File
     }
 
     /// Returns whether the output supports background colors

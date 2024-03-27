@@ -286,7 +286,7 @@ fn main() {
             fatal_error("Could not create output file", Some(73));
         };
 
-        if matches!(config.target, TargetType::Svg) {
+        if config.target == TargetType::Svg {
             //convert terminal text to svg
             output = anstyle_svg::Term::new().render_svg(&output);
         }
