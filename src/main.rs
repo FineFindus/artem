@@ -245,6 +245,10 @@ fn main() {
                     TargetType::AnsiFile
                 }
             }
+            Some("svg") => {
+                log::debug!("Target: SVG");
+                TargetType::Svg
+            }
             _ => {
                 log::debug!("Target: File");
 
@@ -281,6 +285,11 @@ fn main() {
         let Ok(mut file) = File::create(output_file) else {
             fatal_error("Could not create output file", Some(73));
         };
+
+        if matches!(config.target, TargetType::Svg) {
+            //convert terminal text to svg
+            output = anstyle_svg::Term::new().render_svg(&output);
+        }
 
         log::trace!("Created output file");
         let Ok(bytes_count) = file.write(output.as_bytes()) else {

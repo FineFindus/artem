@@ -130,6 +130,11 @@ pub enum TargetType {
     ///
     /// Does not support either colored outputs.
     File,
+    /// SVG
+    ///
+    /// Supports both color and background colors.
+    /// The resulting output file may have visual glitches.
+    Svg,
 }
 
 impl TargetType {
@@ -142,7 +147,7 @@ impl TargetType {
     /// Returns whether the output supports background colors
     pub(crate) fn supports_background_colors(&self) -> bool {
         match self {
-            TargetType::Shell | TargetType::HtmlFile => true,
+            TargetType::Shell | TargetType::HtmlFile | TargetType::Svg => true,
             TargetType::AnsiFile | TargetType::File => false,
         }
     }

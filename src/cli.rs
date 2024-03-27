@@ -117,7 +117,7 @@ pub fn build_cli() -> Command {
                 .value_parser(value_parser!(PathBuf))
                 .value_hint(ValueHint::FilePath)
                 .help("Output file for non-colored ascii. If the output file is a plaintext file, no color will be used. The use color, either use a file with an \
-                .ansi extension, or an .html file, to convert the output to html. \
+                .ansi extension, or an .svg/.html file, to convert the output to the respective format. \
                 .ansi files will consider environment variables when creating colored output, for example when COLORTERM is not set to truecolor,\
                 the resulting file will fallback to 8-bit colors."),
         )
