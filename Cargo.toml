@@ -11,6 +11,8 @@ homepage = "https://github.com/FineFindus/artem"
 repository = "https://github.com/FineFindus/artem"
 keywords = ["text", "ascii", "ascii-art", "terminal"]
 categories = ["command-line-utilities", "multimedia::images"]
+#exclude test image files from cargo upload
+exclude = ["/assets", "/examples"]
 
 #build file
 build = "build.rs"
