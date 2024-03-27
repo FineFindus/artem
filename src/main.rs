@@ -151,6 +151,7 @@ fn main() {
 
     let background_color = matches.get_flag("background-color");
     log::debug!("BackgroundColor is set to: {background_color}");
+    config_builder.background_color(background_color);
 
     //check if no colors should be used or the if a output file will be used
     //since text documents don`t support ansi ascii colors
@@ -176,6 +177,7 @@ fn main() {
         }
         true
     };
+    config_builder.color(color);
 
     //get flag for border around image
     let border = matches.get_flag("border");
@@ -227,7 +229,7 @@ fn main() {
         config_builder.target(match file_extension {
             Some("html") | Some("htm") => {
                 log::debug!("Target: Html-File");
-                TargetType::HtmlFile(color, background_color)
+                TargetType::HtmlFile
             }
             Some("ansi") | Some("ans") => {
                 log::debug!("Target: Ansi-File");
@@ -240,7 +242,7 @@ fn main() {
                     if !*artem::SUPPORTS_TRUECOLOR {
                         log::warn!("truecolor is disabled, output file will not use truecolor chars")
                     }
-                    TargetType::AnsiFile(background_color)
+                    TargetType::AnsiFile
                 }
             }
             _ => {
@@ -255,7 +257,7 @@ fn main() {
         });
     } else {
         log::debug!("Target: Shell");
-        config_builder.target(TargetType::Shell(color, background_color));
+        config_builder.target(TargetType::Shell);
     }
 
     let config = config_builder.build();

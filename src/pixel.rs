@@ -1,6 +1,9 @@
 use image::Rgba;
 
-use crate::{config, target};
+use crate::{
+    config::{self, Config},
+    target,
+};
 
 /// Convert a pixel block to a char (as a String) from the given density string.
 ///
@@ -26,14 +29,9 @@ use crate::{config, target};
 /// To use color, use the `color` argument, if only the background should be colored, use the `on_background_color` arg instead.
 ///
 /// The `invert` arg, inverts the mapping from pixel luminosity to density string.
-pub fn correlating_char(
-    block: &[Rgba<u8>],
-    density: &str,
-    invert: bool,
-    target: config::TargetType,
-) -> String {
+pub fn correlating_char(block: &[Rgba<u8>], config: &Config) -> String {
     assert!(!block.is_empty());
-    assert!(!density.is_empty());
+    assert!(!config.characters.is_empty());
 
     let (red, green, blue) = average_color(block);
 
@@ -41,13 +39,13 @@ pub fn correlating_char(
     let luminosity = luminosity(red, green, blue);
 
     //use chars length to support unicode chars
-    let length = density.chars().count();
+    let length = config.characters.chars().count();
 
     //swap to range for white to black values
     //convert from rgb values (0 - 255) to the density string index (0 - string length)
     let density_index = map_range(
         (0f32, 255f32),
-        if invert {
+        if config.invert {
             (0f32, length as f32)
         } else {
             (length as f32, 0f32)
@@ -59,21 +57,27 @@ pub fn correlating_char(
 
     //get correct char from map
     assert!((density_index as usize) < length);
-    let density_char = density
+    let density_char = config
+        .characters
         .chars()
         .nth(density_index as usize)
         .expect("Failed to get char");
 
     //return the correctly formatted/colored string depending on the target
-    match target {
+    match config.target {
         //if no color, use default case
-        config::TargetType::Shell(true, background_color)
-        | config::TargetType::AnsiFile(background_color) => {
-            target::ansi::colored_char(red, green, blue, density_char, background_color)
+        config::TargetType::Shell | config::TargetType::AnsiFile if config.color() => {
+            target::ansi::colored_char(red, green, blue, density_char, config.background_color())
         }
-        config::TargetType::HtmlFile(color, background_color) => {
-            if color {
-                target::html::colored_char(red, green, blue, density_char, background_color)
+        config::TargetType::HtmlFile => {
+            if config.color() {
+                target::html::colored_char(
+                    red,
+                    green,
+                    blue,
+                    density_char,
+                    config.background_color(),
+                )
             } else {
                 density_char.to_string()
             }
@@ -87,6 +91,8 @@ pub fn correlating_char(
 mod test_pixel_density {
     use std::env;
 
+    use crate::ConfigBuilder;
+
     use super::*;
 
     #[test]
@@ -96,10 +102,12 @@ mod test_pixel_density {
             Rgba::<u8>::from([255, 255, 255, 255]),
             Rgba::<u8>::from([0, 0, 0, 255]),
         ];
-        assert_eq!(
-            " ",
-            correlating_char(&pixels, "# ", true, config::TargetType::Shell(false, false))
-        );
+        let config = ConfigBuilder::new()
+            .characters("# ".to_owned())
+            .invert(true)
+            .color(false)
+            .build();
+        assert_eq!(" ", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -108,15 +116,11 @@ mod test_pixel_density {
             Rgba::<u8>::from([255, 255, 255, 255]),
             Rgba::<u8>::from([0, 0, 0, 255]),
         ];
-        assert_eq!(
-            "k",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::Shell(false, false)
-            )
-        );
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .color(false)
+            .build();
+        assert_eq!("k", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -126,15 +130,11 @@ mod test_pixel_density {
             Rgba::<u8>::from([255, 255, 255, 255]),
             Rgba::<u8>::from([0, 0, 0, 255]),
         ];
-        assert_eq!(
-            "#",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::Shell(false, false)
-            )
-        );
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .color(false)
+            .build();
+        assert_eq!("#", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -146,14 +146,10 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        let config = ConfigBuilder::new().characters("#k. ".to_owned()).build();
         assert_eq!(
             "\u{1b}[38;2;0;0;255m \u{1b}[0m", //blue color
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::Shell(true, false)
-            )
+            correlating_char(&pixels, &config)
         );
     }
 
@@ -165,15 +161,8 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
         //just some random color
         let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
-        assert_eq!(
-            "\u{1b}[35m.\u{1b}[0m",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::Shell(true, false)
-            )
-        );
+        let config = ConfigBuilder::new().characters("#k. ".to_owned()).build();
+        assert_eq!("\u{1b}[35m.\u{1b}[0m", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -183,10 +172,11 @@ mod test_pixel_density {
         //force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
         let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
-        assert_eq!(
-            "\u{1b}[35m.\u{1b}[0m",
-            correlating_char(&pixels, "#k. ", false, config::TargetType::AnsiFile(false))
-        );
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .target(config::TargetType::AnsiFile)
+            .build();
+        assert_eq!("\u{1b}[35m.\u{1b}[0m", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -198,14 +188,13 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .background_color(true)
+            .build();
         assert_eq!(
             "\u{1b}[48;2;0;0;255m \u{1b}[0m",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::Shell(true, true)
-            )
+            correlating_char(&pixels, &config)
         );
     }
 
@@ -217,9 +206,14 @@ mod test_pixel_density {
         //force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .target(config::TargetType::AnsiFile)
+            .background_color(true)
+            .build();
         assert_eq!(
             "\u{1b}[48;2;0;0;255m \u{1b}[0m",
-            correlating_char(&pixels, "#k. ", false, config::TargetType::AnsiFile(true))
+            correlating_char(&pixels, &config)
         );
     }
 
@@ -230,10 +224,11 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
-        assert_eq!(
-            " ",
-            correlating_char(&pixels, "#k. ", false, config::TargetType::File)
-        );
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .target(config::TargetType::File)
+            .build();
+        assert_eq!(" ", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -243,15 +238,11 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
-        assert_eq!(
-            " ",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::HtmlFile(true, false)
-            )
-        );
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .target(config::TargetType::HtmlFile)
+            .build();
+        assert_eq!(" ", correlating_char(&pixels, &config));
     }
 
     #[test]
@@ -261,14 +252,14 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        let config = ConfigBuilder::new()
+            .characters("#k:.".to_owned())
+            .target(config::TargetType::HtmlFile)
+            .color(true)
+            .build();
         assert_eq!(
             "<span style=\"color: #0000FF\">.</span>",
-            correlating_char(
-                &pixels,
-                "#k:.",
-                false,
-                config::TargetType::HtmlFile(true, false)
-            )
+            correlating_char(&pixels, &config)
         );
     }
 
@@ -279,14 +270,14 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
+        let config = ConfigBuilder::new()
+            .characters("#k:. ".to_owned())
+            .target(config::TargetType::HtmlFile)
+            .background_color(true)
+            .build();
         assert_eq!(
             "<span style=\"background-color: #0000FF\"> </span>",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::HtmlFile(true, true)
-            )
+            correlating_char(&pixels, &config)
         );
     }
 
@@ -297,15 +288,12 @@ mod test_pixel_density {
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
-        assert_eq!(
-            " ",
-            correlating_char(
-                &pixels,
-                "#k. ",
-                false,
-                config::TargetType::HtmlFile(false, false)
-            )
-        );
+        let config = ConfigBuilder::new()
+            .characters("#k. ".to_owned())
+            .target(config::TargetType::HtmlFile)
+            .color(false)
+            .build();
+        assert_eq!(" ", correlating_char(&pixels, &config));
     }
 }
 

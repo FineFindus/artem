@@ -90,7 +90,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
     let mut output = String::with_capacity((tile_width * tile_height) as usize);
     log::trace!("Created output string");
 
-    if matches!(&config.target, &TargetType::HtmlFile(true, true)) {
+    if matches!(&config.target, &TargetType::HtmlFile) {
         log::trace!("Adding html top part");
         output.push_str(&target::html::html_top());
     }
@@ -107,7 +107,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
         String::with_capacity(0)
     };
 
-    if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
+    if config.center_y && matches!(&config.target, &TargetType::Shell) {
         log::trace!("Adding vertical top spacing");
         output.push_str(&spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines
@@ -150,8 +150,7 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
             }
 
             //convert pixels to a char/string
-            let mut ascii_char =
-                pixel::correlating_char(&pixels, &config.characters, config.invert, config.target);
+            let mut ascii_char = pixel::correlating_char(&pixels, config);
 
             //add border at the start
             //this cannot be done in single if-else, since the image might only be a single pixel wide
@@ -197,12 +196,12 @@ pub fn convert(image: DynamicImage, config: &Config) -> String {
     }
 
     //compare it, ignoring the enum value such as true, true
-    if matches!(&config.target, &TargetType::HtmlFile(true, true)) {
+    if matches!(&config.target, &TargetType::HtmlFile) {
         log::trace!("Adding html bottom part");
         output.push_str(&target::html::html_bottom());
     }
 
-    if config.center_y && matches!(&config.target, &TargetType::Shell(true, true)) {
+    if config.center_y && matches!(&config.target, &TargetType::Shell) {
         log::trace!("Adding vertical bottom spacing");
         output.push_str(&spacing_vertical(if config.border {
             //two rows are missing because the border takes up two lines

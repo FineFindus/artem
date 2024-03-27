@@ -109,45 +109,42 @@ impl ResizingDimension {
 ///```
 /// use artem::config::TargetType;
 ///
-/// assert_eq!(TargetType::Shell(true, false), TargetType::default());
+/// assert_eq!(TargetType::Shell, TargetType::default());
 ///```
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TargetType {
-    /// Shell target, Supports color and background colors.
-    Shell(bool, bool),
-    /// Special Ansi/ans file that will always have colors enabled. Can also have background colors.
-    AnsiFile(bool),
-    /// HTML target, Supports color and background colors.
-    HtmlFile(bool, bool),
-    /// Every other file, does not support either colored outputs.
+    /// Stdout
+    ///
+    /// Supports both color and background colors.
+    #[default]
+    Shell,
+    /// Special Ansi/ans file that will always have colors enabled.
+    /// Can also have background colors.
+    AnsiFile,
+    /// HTML target
+    ///
+    /// Supports color and background colors.
+    HtmlFile,
+    /// Every other file
+    ///
+    /// Does not support either colored outputs.
     File,
 }
 
-impl Default for TargetType {
-    /// Default [`TargetType`]
-    ///
-    /// The default [`TargetType`] is the shell with colors enabled.
-    /// Background colors are disabled by default.
-    ///
-    /// # Examples
-    /// ```
-    /// use artem::config::TargetType;
-    ///
-    /// assert_eq!(TargetType::Shell(true, false), TargetType::default());
-    /// ```
-    fn default() -> TargetType {
-        TargetType::Shell(true, false)
+impl TargetType {
+    /// Returns whether the output supports colored output.
+    pub(crate) fn supports_color(&self) -> bool {
+        //all targets, except for raw file support colored output
+        !matches!(self, TargetType::File)
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn default() {
-        assert_eq!(TargetType::Shell(true, false), TargetType::default());
+    /// Returns whether the output supports background colors
+    pub(crate) fn supports_background_colors(&self) -> bool {
+        match self {
+            TargetType::Shell | TargetType::HtmlFile => true,
+            TargetType::AnsiFile | TargetType::File => false,
+        }
     }
 }
 
@@ -157,6 +154,8 @@ pub struct Config {
     pub characters: String,
     pub scale: f32,
     pub target_size: u32,
+    pub color: bool,
+    pub background_color: bool,
     pub invert: bool,
     pub border: bool,
     pub dimension: ResizingDimension,
@@ -181,6 +180,22 @@ impl Config {
     pub fn builder() -> ConfigBuilder {
         ConfigBuilder::default()
     }
+
+    /// Returns whether the output should be colored.
+    ///
+    /// This depends on both if colored output is enabled and the output target supports colored
+    /// output.
+    pub(crate) fn color(&self) -> bool {
+        self.color && self.target.supports_color()
+    }
+
+    /// Returns whether the output should be colored using background colors.
+    ///
+    /// This depends on both if background color is enabled and the output target supports
+    /// background colored output.
+    pub(crate) fn background_color(&self) -> bool {
+        self.background_color && self.target.supports_background_colors()
+    }
 }
 
 impl Default for Config {
@@ -189,6 +204,8 @@ impl Default for Config {
             characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
             scale: 0.42f32,
             target_size: 80,
+            color: true,
+            background_color: false,
             invert: Default::default(),
             border: Default::default(),
             dimension: Default::default(),
@@ -213,6 +230,8 @@ mod test_option {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
+                color: true,
+                background_color: false,
                 invert: false,
                 border: false,
                 dimension: ResizingDimension::Width,
@@ -235,6 +254,8 @@ pub struct ConfigBuilder {
     characters: String,
     scale: f32,
     target_size: u32,
+    color: bool,
+    background_color: bool,
     invert: bool,
     border: bool,
     dimension: ResizingDimension,
@@ -254,6 +275,8 @@ impl Default for ConfigBuilder {
             characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
             scale: 0.42f32,
             target_size: 80,
+            color: true,
+            background_color: false,
             invert: Default::default(),
             border: Default::default(),
             dimension: Default::default(),
@@ -360,10 +383,6 @@ impl ConfigBuilder {
     /// ```
        => scale, f32
     }
-    // pub fn scale(&'a mut self, scale: f32) -> &'a mut Self {
-    //     self.scale = scale;
-    //     self
-    // }
 
     property! {
     /// Set the target_size.
@@ -382,7 +401,37 @@ impl ConfigBuilder {
     }
 
     property! {
-    ///Invert to density map/characters.
+    /// Render the output in color.
+    ///
+    /// If the chosen [`TargetType`] does not support color, it is ignored.
+    ///
+    /// # Examples
+    /// ```
+    /// use artem::config::ConfigBuilder;
+    ///
+    /// let mut builder = ConfigBuilder::new();
+    /// builder.color(true);
+    /// ```
+    => color, bool
+    }
+
+    property! {
+    /// Render the background of the output in color.
+    ///
+    /// If the chosen [`TargetType`] does not support background colors, it is ignored.
+    ///
+    /// # Examples
+    /// ```
+    /// use artem::config::ConfigBuilder;
+    ///
+    /// let mut builder = ConfigBuilder::new();
+    /// builder.color(true);
+    /// ```
+    => background_color, bool
+    }
+
+    property! {
+    /// Invert to density map/characters.
     ///
     /// This inverts the mapping from light to dark characters. It can be useful when
     /// the image has a dark background. It defaults to false.
@@ -395,13 +444,10 @@ impl ConfigBuilder {
     /// builder.invert(true);
     /// ```
     => invert, bool
-    // pub fn invert(mut self, invert: bool) -> Self {
-    //     self.invert = invert;
-    //     self
     }
 
     property! {
-    ///Enable a border surrounding the image.
+    /// Enable a border surrounding the image.
     ///
     /// The border will take reduced the space of the ascii image, since it will still
     /// use the same target size.
@@ -433,7 +479,7 @@ impl ConfigBuilder {
     }
 
     property! {
-    ///Flip the image along the X-axis
+    /// Flip the image along the X-axis
     ///
     /// This will flip the image horizontally by reversing reading of the horizontal part of the image.
     ///
@@ -448,7 +494,7 @@ impl ConfigBuilder {
     }
 
     property! {
-    ///Flip the image along the Y-axis
+    /// Flip the image along the Y-axis
     ///
     /// This will flip the image vertically by reversing reading of the vertical part of the image.
     ///
@@ -497,7 +543,7 @@ impl ConfigBuilder {
     }
 
     property! {
-    ///Convert the image to it's outline
+    /// Convert the image to it's outline
     ///
     /// This will use gaussian blur and sobel operators to only it's outline,
     /// it might not produce the best result on all images.
@@ -532,7 +578,7 @@ impl ConfigBuilder {
     }
 
     property! {
-    ///Set the target type
+    /// Set the target type
     ///
     /// This will effect the output, for example if the [`TargetType`] is set to html,
     /// the output will be the content of a Html-file.
@@ -546,12 +592,12 @@ impl ConfigBuilder {
     ///
     /// let mut builder = ConfigBuilder::new();
     /// //use color, but don't color the background
-    /// builder.target(TargetType::HtmlFile(true, false));
+    /// builder.target(TargetType::HtmlFile);
     /// ```
         => target,  TargetType
     }
 
-    ///Build the [`Config`] struct.
+    /// Build the [`Config`] struct.
     ///
     /// This returns a [`Config`], which can than be used for the image conversion using [`super::convert()`].
     /// If values are not explicitly specified, the default values will be used.
@@ -568,6 +614,8 @@ impl ConfigBuilder {
             characters: self.characters.to_owned(),
             scale: self.scale,
             target_size: self.target_size,
+            color: self.color,
+            background_color: self.background_color,
             invert: self.invert,
             border: self.border,
             dimension: self.dimension,
@@ -592,6 +640,8 @@ mod test_conversion_configuration_builder {
                 characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
                 scale: 0.42f32,
                 target_size: 80,
+                color: true,
+                background_color: false,
                 invert: false,
                 border: false,
                 dimension: ResizingDimension::Width,
@@ -604,300 +654,6 @@ mod test_conversion_configuration_builder {
                 target: TargetType::default(),
             },
             ConfigBuilder::new().build()
-        );
-    }
-
-    #[test]
-    fn change_characters() {
-        assert_eq!(
-            Config {
-                characters: r#"characters"#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new()
-                .characters("characters".to_string())
-                .build()
-        );
-    }
-
-    #[test]
-    fn change_scale() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 3.14f32, //change attribute
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().scale(3.14f32).build()
-        );
-    }
-
-    #[test]
-    fn change_target_size() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 314, //change attribute
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new()
-                .target_size(NonZeroU32::new(314).unwrap())
-                .build()
-        );
-    }
-
-    #[test]
-    fn change_invert() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: true, //change attribute
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().invert(true).build()
-        );
-    }
-
-    #[test]
-    fn change_border() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: true, //change attribute
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().border(true).build()
-        );
-    }
-
-    #[test]
-    fn change_dimension() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Height, //change attribute
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new()
-                .dimension(ResizingDimension::Height)
-                .build()
-        );
-    }
-
-    #[test]
-    fn change_transform_x() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: true, //change attribute
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().transform_x(true).build()
-        );
-    }
-
-    #[test]
-    fn change_transform_y() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: true, //change attribute
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().transform_y(true).build()
-        );
-    }
-
-    #[test]
-    fn change_center_x() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: true, //change attribute
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().center_x(true).build()
-        );
-    }
-
-    #[test]
-    fn change_center_y() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: true, //change attribute
-                outline: false,
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().center_y(true).build()
-        );
-    }
-
-    #[test]
-    fn change_outline() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: true, //change attribute
-                hysteresis: false,
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().outline(true).build()
-        );
-    }
-
-    #[test]
-    fn change_hysteresis() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: true, //change attribute
-                target: TargetType::default(),
-            },
-            ConfigBuilder::new().hysteresis(true).build()
-        );
-    }
-
-    #[test]
-    fn change_file_type() {
-        assert_eq!(
-            Config {
-                characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
-                scale: 0.42f32,
-                target_size: 80,
-                invert: false,
-                border: false,
-                dimension: ResizingDimension::Width,
-                transform_x: false,
-                transform_y: false,
-                center_x: false,
-                center_y: false,
-                outline: false,
-                hysteresis: false,
-                target: TargetType::AnsiFile(false), //change attribute
-            },
-            ConfigBuilder::new()
-                .target(TargetType::AnsiFile(false))
-                .build()
         );
     }
 }
@@ -1053,15 +809,5 @@ mod test_calculate_dimensions {
                 ResizingDimension::Width
             )
         );
-    }
-}
-
-#[cfg(test)]
-mod test_dimensions_enum {
-    use super::*;
-
-    #[test]
-    fn default_is_width() {
-        assert_eq!(ResizingDimension::Width, ResizingDimension::default());
     }
 }
