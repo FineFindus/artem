@@ -324,7 +324,7 @@ impl ConfigBuilder {
         Config::builder()
     }
 
-    ///Set the characters.
+    /// Set the characters.
     ///
     /// The characters will determine how 'visible'/light/dark a character will be perceived.
     ///
@@ -338,8 +338,7 @@ impl ConfigBuilder {
     /// let mut builder = ConfigBuilder::new();
     /// builder.characters("Mkl. ".to_string());
     /// ```
-    #[allow(clippy::needless_lifetimes)] //disable this, as the life is needed for the builder
-    pub fn characters<'a>(&'a mut self, characters: String) -> &'a Self {
+    pub fn characters(&mut self, characters: String) -> &mut Self {
         if !characters.is_empty() {
             self.characters = characters;
         }
