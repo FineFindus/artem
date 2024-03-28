@@ -66,7 +66,9 @@ pub fn correlating_char(block: &[Rgba<u8>], config: &Config) -> String {
     //return the correctly formatted/colored string depending on the target
     match config.target {
         //if no color, use default case
-        config::TargetType::Shell | config::TargetType::AnsiFile if config.color() => {
+        config::TargetType::Shell | config::TargetType::AnsiFile | config::TargetType::Svg
+            if config.color() =>
+        {
             target::ansi::colored_char(red, green, blue, density_char, config.background_color())
         }
         config::TargetType::HtmlFile => {
