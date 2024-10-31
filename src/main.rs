@@ -20,6 +20,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use image::{DynamicImage, ImageDecoder, ImageError, ImageReader};
+
 use artem::config::{self, ConfigBuilder, TargetType};
 
 //import cli
@@ -267,7 +269,7 @@ fn main() {
     let config = config_builder.build();
     let mut output = img_paths
         .iter()
-        .map(|path| load_image(path))
+        .map(|path| load_image(path).unwrap_or_else(|err| fatal_error(&err.to_string(), Some(66))))
         .filter(|img| img.height() != 0 || img.width() != 0)
         .map(|img| artem::convert(img, &config))
         .collect::<String>();
@@ -314,7 +316,7 @@ fn main() {
 /// ```
 /// let image = load_image("../examples/abraham_lincoln.jpg")
 /// ```
-fn load_image(path: &str) -> image::DynamicImage {
+fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
     #[cfg(feature = "web_image")]
     if path.starts_with("http") {
         log::info!("Started to download image from: {}", path);
@@ -334,17 +336,16 @@ fn load_image(path: &str) -> image::DynamicImage {
         log::info!("Downloading took {:3} ms", now.elapsed().as_millis());
 
         log::debug!("Opening downloaded image from memory");
-        return match image::load_from_memory(&bytes) {
-            Ok(img) => img,
-            Err(err) => fatal_error(&err.to_string(), Some(66)),
-        };
+        return image::load_from_memory(&bytes);
     }
 
     log::info!("Opening image");
-    match image::open(path) {
-        Ok(img) => img,
-        Err(err) => fatal_error(&err.to_string(), Some(66)),
-    }
+    let mut decoder = ImageReader::open(path)?.into_decoder()?;
+    let orientation = decoder.orientation()?;
+    let mut img = DynamicImage::from_decoder(decoder)?;
+    img.apply_orientation(orientation);
+
+    Ok(img)
 }
 
 /// Function for fatal errors.
