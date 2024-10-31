@@ -143,7 +143,6 @@ dependencies = [
  "env_logger",
  "image",
  "log",
- "once_cell",
  "predicates",
  "pretty_assertions",
  "terminal_size",

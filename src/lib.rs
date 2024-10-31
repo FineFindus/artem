@@ -24,8 +24,9 @@ mod filter;
 //functions for dealing with output targets/files
 mod target;
 
+use std::sync::LazyLock;
+
 use image::{DynamicImage, GenericImageView};
-use once_cell::sync::Lazy;
 
 pub use crate::config::ConfigBuilder;
 use crate::config::{Config, ResizingDimension, TargetType};
@@ -253,7 +254,7 @@ fn spacing_vertical(height: u32) -> String {
 /// let color_support = *SUPPORTS_TRUECOLOR;
 /// assert!(color_support);
 /// ```
-pub static SUPPORTS_TRUECOLOR: Lazy<bool> = Lazy::new(|| {
+pub static SUPPORTS_TRUECOLOR: LazyLock<bool> = LazyLock::new(|| {
     std::env::var("COLORTERM")
         .is_ok_and(|value| value.contains("truecolor") || value.contains("24bit"))
 });
