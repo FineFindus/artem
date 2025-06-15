@@ -18,7 +18,7 @@ pub mod characters {
     #[test]
     fn arg_is_number() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
+        // should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png").arg("-c 0.6");
         cmd.assert().success().stdout(predicate::str::starts_with(
             "..........0000000000000000000000000000000000.6666666666666666666666666..........",
@@ -30,7 +30,7 @@ pub mod characters {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .args(["-c", "M0123-."]);
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "333333333311111111111111111122222222222222223-----------------........3333333333",
         ));
@@ -42,7 +42,7 @@ pub mod characters {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("assets/images/standard_test_img.png")
                 .args(["-c", arg]);
-            //only check first line
+            // only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
                 "aaaaaaaaaa6666666665555555542222222211111111b:::::::+=========,,,,,,,,aaaaaaaaaa",
             ));
@@ -55,7 +55,7 @@ pub mod characters {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("assets/images/standard_test_img.png")
                 .args(["-c", arg]);
-            //only check first line
+            // only check first line
             cmd.assert()
                 .success()
                 .stdout(predicate::str::starts_with(load_correct_file()));
@@ -68,7 +68,7 @@ pub mod characters {
             let mut cmd = Command::cargo_bin("artem").unwrap();
             cmd.arg("assets/images/standard_test_img.png")
                 .args(["-c", arg]);
-            //only check first line
+            // only check first line
             cmd.assert().success().stdout(predicate::str::starts_with(
                 r"\\\\\\\\\\ZZZZZZZZOQQQQQQQQJzzzzzzzzuuuuuuuu)++++++++>>>>>>>>i::::::::\\\\\\\\\\",
             ));

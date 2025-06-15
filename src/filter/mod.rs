@@ -17,11 +17,11 @@ use image::{DynamicImage, GenericImageView, GrayImage, ImageBuffer};
 ///  let outlined_image = edge_detection_filter(img, 4);
 /// ```
 pub fn edge_detection_filter(img: DynamicImage, hysteresis: bool) -> DynamicImage {
-    //blur
+    // blur
     let blurred_img = blur(img, 6.4f32);
-    //apply sobel
+    // apply sobel
     let sobel_img = apply_sobel_kernel(blurred_img);
-    //double threshold and hysteresis
+    // double threshold and hysteresis
     if hysteresis {
         edge_tracking(sobel_img)
     } else {
@@ -29,7 +29,7 @@ pub fn edge_detection_filter(img: DynamicImage, hysteresis: bool) -> DynamicImag
     }
 }
 
-///Blur the given image using an gaussian blur, based on the given sigma.
+/// Blur the given image using an gaussian blur, based on the given sigma.
 ///
 /// This returns a new (blurred) image.
 ///
@@ -39,7 +39,7 @@ pub fn edge_detection_filter(img: DynamicImage, hysteresis: bool) -> DynamicImag
 /// ```
 fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
     log::info!("Blurring image");
-    //measure timing for this step
+    // measure timing for this step
     log::trace!("Started time tracking for blurring");
     let now = Instant::now();
 
@@ -50,30 +50,30 @@ fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
 
     let (width, height) = img.dimensions();
 
-    //create empty target img
+    // create empty target img
     log::debug!("Creating target blur image");
     let mut destination_img = ImageBuffer::new(width, height);
 
-    //use iter to iter over every pixel and create a new img
+    // use iter to iter over every pixel and create a new img
     img.pixels().for_each(|(x, y, _)| {
-        //kernel values for rgb
+        // kernel values for rgb
         let mut kernel_values_red = 0f32;
         let mut kernel_values_green = 0f32;
         let mut kernel_values_blue = 0f32;
 
-        //iterate through the kernel for this pixel
+        // iterate through the kernel for this pixel
         for (k_y, row) in kernel.iter().enumerate() {
             for (k_x, kernel_value) in row.iter().enumerate() {
-                // for k_x in 0..kernel_len {
-                //get pixel pos for kernel
+                //  for k_x in 0..kernel_len {
+                // get pixel pos for kernel
                 let pixel_pos_x = (x + k_x as u32).saturating_sub(offset).clamp(0, width - 1);
                 let pixel_pos_y = (y + k_y as u32).saturating_sub(offset).clamp(0, height - 1);
 
-                //check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
+                // check if pixel is in img, since the kernel will overlap to outside pixels, if not ignored it
                 if destination_img.in_bounds(pixel_pos_x, pixel_pos_y) {
-                    //get the current pixel
+                    // get the current pixel
                     let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
-                    //add rgb values
+                    // add RGB values
                     kernel_values_red += pixel.0[0] as f32 * kernel_value;
                     kernel_values_green += pixel.0[1] as f32 * kernel_value;
                     kernel_values_blue += pixel.0[2] as f32 * kernel_value;
@@ -81,7 +81,7 @@ fn blur(img: DynamicImage, sigma: f32) -> DynamicImage {
             }
         }
 
-        //add filtered/blurred pixel to new img
+        // add filtered/blurred pixel to new img
         destination_img.put_pixel(
             x,
             y,
@@ -107,7 +107,7 @@ mod test_blur {
     #[test]
     #[should_panic]
     fn panic_sigma_0() {
-        //create black image
+        // create black image
         let img = DynamicImage::ImageRgb8(ImageBuffer::new(3, 3));
         blur(img, 0f32);
     }
@@ -152,7 +152,7 @@ mod test_blur {
     }
 }
 
-///Creates a gaussian kernel based on the given sigma.
+/// Creates a gaussian kernel based on the given sigma.
 ///
 /// This is based on the c++ implementation on <https://www.geeksforgeeks.org/gaussian-filter-generation-c/>
 ///
@@ -231,10 +231,10 @@ mod test_create_gauss_kernel {
 /// ```
 fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
     log::info!("Creating outline image");
-    //create stop watch
+    // create stop watch
     log::trace!("Started time tracking for sobel");
     let now = Instant::now();
-    //sobel kernels
+    // sobel kernels
     let kernel_x = &[
         [1f32, 2f32, 1f32],
         [0f32, 0f32, 0f32],
@@ -254,36 +254,36 @@ fn apply_sobel_kernel(img: DynamicImage) -> DynamicImage {
 
     let (width, height) = img.dimensions();
 
-    //create empty target img
+    // create empty target img
     log::debug!("Creating target sobel image");
     let mut destination_img = ImageBuffer::new(width, height);
 
     img.pixels().for_each(|(x, y, _)| {
-        //kernel values for rgb
+        // kernel values for RGB
         let mut kernel_values_x = 0f32;
         let mut kernel_values_y = 0f32;
 
-        //iterate through the kernel for this pixel
+        // iterate through the kernel for this pixel
         for k_y in 0..kernel_length {
             for k_x in 0..kernel_length {
-                //get pixel pos for kernel
+                // get pixel pos for kernel
                 let pixel_pos_x = (x + k_x as u32).saturating_sub(offset).clamp(0, width - 1);
                 let pixel_pos_y = (y + k_y as u32).saturating_sub(offset).clamp(0, height - 1);
 
-                //get the current pixel, it will always be inside, since of the previous clamping
+                // get the current pixel, it will always be inside, since of the previous clamping
                 let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
                 let pixel_gray = crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
-                //add rgb values
+                // add rgb values
                 kernel_values_x += pixel_gray * kernel_x[k_x][k_y];
                 kernel_values_y += pixel_gray * kernel_y[k_x][k_y];
             }
         }
 
-        //usually in the canny edge detection algorithm, a non-maximum suppression would now be performed,
-        //to have thinner lines. In this case this is not needed, since thicker lines will produce a more clearly ascii like image.
+        // usually in the canny edge detection algorithm, a non-maximum suppression would now be performed,
+        // to have thinner lines. In this case this is not needed, since thicker lines will produce a more clearly ascii like image.
 
-        //add filtered pixel to new img
+        // add filtered pixel to new img
         destination_img.put_pixel(
             x,
             y,
@@ -308,7 +308,7 @@ mod test_sobel {
 
     #[test]
     fn no_edge() {
-        //create empty image with no edge
+        // create empty image with no edge
         let img = DynamicImage::ImageLuma8(ImageBuffer::new(3, 3));
         let edge_img = apply_sobel_kernel(img.clone());
         assert_eq!(img, edge_img);
@@ -316,7 +316,7 @@ mod test_sobel {
 
     #[test]
     fn edge_vertical() {
-        //create empty image with vertical edge
+        // create empty image with vertical edge
         //█ █
         //█ █
         //█ █
@@ -333,7 +333,7 @@ mod test_sobel {
 
     #[test]
     fn edge_horizontal() {
-        //create empty image with horizontal edge
+        // create empty image with horizontal edge
         //███
         //
         //███
@@ -361,7 +361,7 @@ mod test_sobel {
 /// let hysteresis_img = edge_tracking(img);
 /// ```
 fn edge_tracking(img: DynamicImage) -> DynamicImage {
-    //start tracking to for this step
+    // start tracking to for this step
     log::trace!("Started time tracking for hysteresis");
     let now = Instant::now();
 
@@ -376,44 +376,44 @@ fn edge_tracking(img: DynamicImage) -> DynamicImage {
     img.pixels().for_each(|(x, y, pixel)| {
         let grayscale_pixel = crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
-        //check if pixel is at least weak or strong
+        // check if pixel is at least weak or strong
         if grayscale_pixel >= upper_threshold {
-            //pixel is already strong, set to completely white and continue continue loop
+            // pixel is already strong, set to completely white and continue continue loop
             destination_img.put_pixel(x, y, image::Luma([255]));
         } else if grayscale_pixel >= lower_threshold {
-            //check if an adjacent pixel is strong
+            // check if an adjacent pixel is strong
             let mut strong = false;
 
             'outer: for k_y in 0..3 {
                 for k_x in 0..3 {
-                    //get pixel pos for kernel
+                    // get pixel pos for kernel
                     let pixel_pos_x = (x + k_x as u32).saturating_sub(1).clamp(0, img.width() - 1);
                     let pixel_pos_y = (y + k_y as u32)
                         .saturating_sub(1)
                         .clamp(0, img.height() - 1);
 
-                    //get the adjacent pixel to target pixel, it will always be inside, since of the previous clamping
+                    // get the adjacent pixel to target pixel, it will always be inside, since of the previous clamping
                     let pixel = img.get_pixel(pixel_pos_x, pixel_pos_y);
                     let pixel_gray = crate::pixel::luminosity(pixel.0[0], pixel.0[1], pixel.0[2]);
 
                     if pixel_gray >= upper_threshold {
-                        //adjacent pixel is strong, so target pixel should be strong as well
+                        // adjacent pixel is strong, so target pixel should be strong as well
                         strong = true;
-                        //no need to check for an second pixel, stop outer loop
+                        // no need to check for a second pixel, stop outer loop
                         break 'outer;
                     }
                 }
             }
 
             if strong {
-                //pixel has strong adjacent ones, make strong as well
+                // pixel has strong adjacent ones, make strong as well
                 destination_img.put_pixel(x, y, image::Luma([255]))
             } else {
-                //no strong pixels around, pixel is irrelevant, remove
+                // no strong pixels around, pixel is irrelevant, remove
                 destination_img.put_pixel(x, y, image::Luma([0]))
             }
         } else {
-            //pixel is irrelevant, remove
+            // pixel is irrelevant, remove
             destination_img.put_pixel(x, y, image::Luma([0]))
         }
     });
@@ -438,7 +438,7 @@ mod test_edge_detection {
 
     #[test]
     fn strong_pixels_stay() {
-        //there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
+        // there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
         let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
             if x == 1 && y == 1 {
                 image::Luma([255u8])
@@ -452,7 +452,7 @@ mod test_edge_detection {
 
     #[test]
     fn weak_pixel_removed() {
-        //there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
+        // there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
         let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
             if x == 1 && y == 1 {
                 image::Luma([126u8])
@@ -461,13 +461,13 @@ mod test_edge_detection {
             }
         }));
         let result = edge_tracking(img);
-        //result is equal to a black image
+        // result is equal to a black image
         assert_eq!(DynamicImage::ImageLuma8(ImageBuffer::new(3, 3)), result);
     }
 
     #[test]
     fn irrelevant_pixel_removed() {
-        //there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
+        // there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
         let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
             if x == 1 && y == 1 {
                 image::Luma([76u8])
@@ -476,13 +476,13 @@ mod test_edge_detection {
             }
         }));
         let result = edge_tracking(img);
-        //result is equal to a black image
+        // result is equal to a black image
         assert_eq!(DynamicImage::ImageLuma8(ImageBuffer::new(3, 3)), result);
     }
 
     #[test]
     fn weak_pixel_with_strong_neighbor_is_converted() {
-        //there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
+        // there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
         let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
             if x == 1 && y == 1 {
                 image::Luma([126u8])
@@ -496,19 +496,17 @@ mod test_edge_detection {
         let desired_result = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
             if x == 1 && y == 1 {
                 image::Luma([255u8])
-            } else if x == 2 && y == 1 {
-                image::Luma([255u8])
             } else {
                 image::Luma([0u8])
             }
         }));
         let result = edge_tracking(img);
-        //result is equal to a black image
+        // result is equal to a black image
         assert_eq!(desired_result, result);
     }
     #[test]
     fn irrelevant_pixel_with_strong_neighbor_is_removed() {
-        //there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
+        // there is method to use raw pixel data, but it is not good enough documented, so I couldn't figure out how to use it
         let img = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
             if x == 1 && y == 1 {
                 image::Luma([255u8])
@@ -527,7 +525,7 @@ mod test_edge_detection {
             }
         }));
         let result = edge_tracking(img);
-        //result is equal to a black image
+        // result is equal to a black image
         assert_eq!(desired_result, result);
     }
 }

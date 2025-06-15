@@ -1,3 +1,3 @@
-///Test all arguments
+/// Test all arguments
 mod arguments;
 mod common;

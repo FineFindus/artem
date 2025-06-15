@@ -18,7 +18,7 @@ pub mod flip_x {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--flipX");
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "::::::::::        .................;ooooooooddddddddxkkkkkkkkkOOOOOOOO::::::::::",
         ));
@@ -45,7 +45,7 @@ pub mod flip_y {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--flipY");
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "..........            cWWWWWWWWWWWWWWWWW                              ..........",
         ));
@@ -62,7 +62,7 @@ pub mod flip_x_y {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--flipY", "--flipX"]);
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "..........                              WWWWWWWWWWWWWWWWWc            ..........",
         ));
@@ -89,7 +89,7 @@ pub mod outline {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--outline");
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "         ll       .        :       .       ;x       .        :       ll         ",
         ));
@@ -129,7 +129,7 @@ pub mod hysteresis {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--outline", "--hys"]);
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "         ll                O               ;x                O       ll         ",
         ));
@@ -156,7 +156,7 @@ pub mod border {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--border");
-        //only check first line
+        // only check first line
         cmd.assert()
             .success().stdout(predicate::str::starts_with(
                 "╔══════════════════════════════════════════════════════════════════════════════╗",
@@ -188,7 +188,7 @@ pub mod center_x {
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--centerX");
 
-        //this is more or less a placeholder test, since the terminal size can and will be different during tests
+        // this is more or less a placeholder test, since the terminal size can and will be different during tests
         cmd.assert()
             .success()
             .stdout(predicate::str::contains("                 "));
@@ -216,8 +216,8 @@ pub mod center_y {
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--centerY");
 
-        //this is more or less a placeholder test, since the terminal size can and will be different during tests thus
-        //affecting the size. ANd the command output will be trimmed, so any spacing will be lost
+        // this is more or less a placeholder test, since the terminal size can and will be different during tests thus
+        // affecting the size. ANd the command output will be trimmed, so any spacing will be lost
         cmd.assert()
             .success()
             .stdout(predicate::str::contains("\n"));

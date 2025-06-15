@@ -18,7 +18,7 @@ pub mod invert {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--invert");
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "dddddddddd'''''''',,,,,,,,,;::::::::ccccccccx00000000KKKKKKKKKNNNNNNNNdddddddddd",
         ));
@@ -57,7 +57,7 @@ pub mod no_color {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--no-color");
-        //only check first line
+        // only check first line
         cmd.assert()
             .success()
             .stdout(predicate::str::starts_with(load_correct_file()));
@@ -96,7 +96,7 @@ pub mod background_color {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .arg("--background");
-        //only check first line
+        // only check first line
         cmd.assert()
             .success()
             .stdout(predicate::str::starts_with(load_correct_file()));

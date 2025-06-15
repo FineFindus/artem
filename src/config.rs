@@ -1,18 +1,18 @@
 use std::num::NonZeroU32;
 
-///Preferred image resize direction
+/// Preferred image resize direction
 ///
-///This changes which dimensions should be used when resizing the image.
-///For example, to fully use one dimension (e.g. width), the height can not be scaled
-///up as well, since it already would be larger than the maximum terminal height.
-///By default width will be used.
+/// This changes which dimensions should be used when resizing the image.
+/// For example, to fully use one dimension (e.g. width), the height can not be scaled
+/// up as well, since it already would be larger than the maximum terminal height.
+/// By default width will be used.
 ///
-/// # Examples
-/// ```
-/// use artem::config::ResizingDimension;
+///  # Examples
+///  ```
+///  use artem::config::ResizingDimension;
 ///
-/// assert_eq!(ResizingDimension::Width, ResizingDimension::default());
-/// ```
+///  assert_eq!(ResizingDimension::Width, ResizingDimension::default());
+///  ```
 #[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ResizingDimension {
     #[default]
@@ -34,7 +34,7 @@ impl ResizingDimension {
     ///
     /// assert_eq!(
     /// (100, 46, 5, 11),
-    /// //image with a size of 512x512, split into 100 columns with no border
+    /// // image with a size of 512x512, split into 100 columns with no border
     /// ResizingDimension::calculate_dimensions(100, 512, 512, 0.42, false, ResizingDimension::Width));
     /// ```
     pub fn calculate_dimensions(
@@ -47,7 +47,7 @@ impl ResizingDimension {
     ) -> (u32, u32, u32, u32) {
         match dimension {
             ResizingDimension::Width => {
-                //calculate dimensions based on columns
+                // calculate dimensions based on columns
                 let mut columns = if width > target_size {
                     target_size
                 } else {
@@ -55,43 +55,43 @@ impl ResizingDimension {
                 };
 
                 if border {
-                    //remove a bit of space for the border
-                    columns = columns.saturating_sub(2).max(1); //should be at last 1
+                    // remove a bit of space for the border
+                    columns = columns.saturating_sub(2).max(1); // should be at last 1
                 }
 
-                //calculate tiles
+                // calculate tiles
                 let tile_width = width / columns;
                 let tile_height = (tile_width as f32 / scale).floor() as u32;
 
                 let rows = height / tile_height;
 
-                //.max(1) is used to ensure that the values are at least 1
-                //a value of 0 could cause an error (but not crash) later on
+                // .max(1) is used to ensure that the values are at least 1
+                // a value of 0 could cause an error (but not crash) later on
                 (columns.max(1), rows.max(1), tile_width, tile_height)
             }
 
             ResizingDimension::Height => {
                 let mut rows = if height > target_size {
-                    // minus 1, since the user input line is included
+                    //  minus 1, since the user input line is included
                     target_size - 1
                 } else {
                     height
                 };
 
-                //calculate tiles
+                // calculate tiles
                 let tile_height = height / rows;
                 let tile_width = (tile_height as f32 * scale).ceil() as u32;
 
                 let mut columns = width / tile_width;
 
                 if border {
-                    //remove a bit of space for the border
+                    // remove a bit of space for the border
                     columns = columns.saturating_sub(2);
                     rows = rows.saturating_sub(2);
                 }
 
-                //.max(1) is used to ensure that the values are at least 1
-                //a value of 0 could cause an error (but not crash) later on
+                // .max(1) is used to ensure that the values are at least 1
+                // a value of 0 could cause an error (but not crash) later on
                 (columns.max(1), rows.max(1), tile_width, tile_height)
             }
         }
@@ -140,7 +140,7 @@ pub enum TargetType {
 impl TargetType {
     /// Returns whether the output supports colored output.
     pub(crate) fn supports_color(&self) -> bool {
-        //all targets, except for raw file support colored output
+        // all targets, except for raw file support colored output
         self != &TargetType::File
     }
 
@@ -153,7 +153,7 @@ impl TargetType {
     }
 }
 
-///Config for the conversion of the image to the ascii image.
+/// Config for the conversion of the image to the ascii image.
 #[derive(Debug, PartialEq)]
 pub struct Config {
     pub characters: String,
@@ -253,7 +253,7 @@ mod test_option {
     }
 }
 
-///A builder to create a [`Config`] struct.
+/// A builder to create a [`Config`] struct.
 #[derive(PartialEq, Debug)]
 pub struct ConfigBuilder {
     characters: String,
@@ -276,7 +276,7 @@ pub struct ConfigBuilder {
 impl Default for ConfigBuilder {
     fn default() -> Self {
         Self {
-            //these have to be set to custom defaults for the program to work
+            // these have to be set to custom defaults for the program to work
             characters: r#"MWNXK0Okxdolc:;,'...   "#.to_string(),
             scale: 0.42f32,
             target_size: 80,
@@ -306,15 +306,15 @@ impl Default for ConfigBuilder {
 ///
 /// ``` compile_fail, just an internal example code
 /// property!{
-/// ///Example doc
-/// ///This generates a name setter function.
+/// // /Example doc
+/// // /This generates a name setter function.
 /// => name, String
 /// }
 /// ```
 /// ## Generated function
 /// ``` compile_fail, just an internal example code
-/// ///Example doc
-/// ///This generates a name setter function.
+/// // /Example doc
+/// // /This generates a name setter function.
 /// pub fn name<'a>(&'a mut self, name: String) -> &'a Self {
 ///     self.name = name;
 ///     self
@@ -596,7 +596,7 @@ impl ConfigBuilder {
     /// use artem::config::TargetType;
     ///
     /// let mut builder = ConfigBuilder::new();
-    /// //use color, but don't color the background
+    /// // use color, but don't color the background
     /// builder.target(TargetType::HtmlFile);
     /// ```
         => target,  TargetType

@@ -11,9 +11,9 @@ use clap::{builder::PossibleValue, value_parser, Arg, ArgAction, Command, ValueE
 ///
 /// # Examples
 /// ```
-/// //get clap matches
+/// // get clap matches
 /// let matches = build_cli();
-/// //for example check if an arg is present
+/// // for example check if an arg is present
 /// matches.is_present("arg");
 /// ```
 pub fn build_cli() -> Command {
@@ -26,17 +26,17 @@ pub fn build_cli() -> Command {
                 .help(
                     if cfg!(feature = "web_image")
                     {
-                        //special help message with url help 
+                        // special help message with url help 
                         "Paths or URLs to the target image. If the input is an URL, the image is downloaded and then converted. The original image is NOT altered."
                     } else {
-                        //normal help text with only paths
+                        // normal help text with only paths
                         "Paths to the target image. The original image is NOT altered."
                     }
 
                 )
                 .required(true)
                 .value_hint(ValueHint::FilePath)
-                //because of web images accept strings, which allows for URLs and files
+                // because of web images accept strings, which allows for URLs and files
                 .value_parser(value_parser!(String))
                 .action(ArgAction::Append)
                 .num_args(..)
@@ -48,7 +48,7 @@ pub fn build_cli() -> Command {
                 .value_parser(value_parser!(String))
                 .action(ArgAction::Append)
                 .value_hint(ValueHint::Other)
-                //use "\" to keep this readable but still as a single line string
+                // use "\" to keep this readable but still as a single line string
                 .help("Change the characters that are used to display the image.\
                 The first character should have the highest 'darkness' and the last should have the least (recommended to be a space ' '). \
                 A lower detail map is recommend for smaller images. Included characters can be used with the argument 0 | 1 | 2. If no characters are passed in, the default set will be used."),
@@ -273,7 +273,7 @@ mod test {
 
     #[test]
     fn fail_conflicting_args_size_width() {
-        //size and width conflict
+        // size and width conflict
         let matches = build_cli().try_get_matches_from([
             "artem",
             "../example/abraham_lincoln.jpg",
@@ -285,7 +285,7 @@ mod test {
 
     #[test]
     fn fail_conflicting_args_size_height() {
-        //size and height conflict
+        // size and height conflict
         let matches = build_cli().try_get_matches_from([
             "artem",
             "../example/abraham_lincoln.jpg",
@@ -297,7 +297,7 @@ mod test {
 
     #[test]
     fn fail_conflicting_args_height_width() {
-        //height and width conflict
+        // height and width conflict
         let matches = build_cli().try_get_matches_from([
             "artem",
             "../example/abraham_lincoln.jpg",
@@ -309,7 +309,7 @@ mod test {
 
     #[test]
     fn fail_conflicting_args_no_color_background() {
-        //height and width conflict
+        // height and width conflict
         let matches = build_cli().try_get_matches_from([
             "artem",
             "../example/abraham_lincoln.jpg",

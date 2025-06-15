@@ -17,7 +17,7 @@ pub mod scale {
     #[test]
     fn arg_is_nan() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
+        // should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", "string"]);
         cmd.assert().failure().stderr(predicate::str::contains(
@@ -28,7 +28,7 @@ pub mod scale {
     #[test]
     fn arg_is_negative() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
+        // should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", "-6"]);
         cmd.assert().failure().stderr(predicate::str::starts_with(
@@ -39,7 +39,7 @@ pub mod scale {
     #[test]
     fn arg_is_larger_max() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
+        // should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", &f64::MAX.to_string()]);
         cmd.assert().success().stdout(predicate::str::starts_with(
@@ -50,7 +50,7 @@ pub mod scale {
     #[test]
     fn arg_is_zero() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
-        //should panic when trying to convert the arg
+        // should panic when trying to convert the arg
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", "0"]);
         cmd.assert().success().stdout(predicate::str::starts_with(
@@ -63,7 +63,7 @@ pub mod scale {
         let mut cmd = Command::cargo_bin("artem").unwrap();
         cmd.arg("assets/images/standard_test_img.png")
             .args(["--ratio", "0.75"]);
-        //only check first line
+        // only check first line
         cmd.assert().success().stdout(predicate::str::starts_with(
             "::::::::::OOOOOOOOkkkkkkkkkxddddddddoooooooo;.................        ::::::::::",
         ));

@@ -17,7 +17,7 @@ use crate::{
 /// use image::Rgba;
 /// use artem::config::TargetType;
 ///
-/// //example pixels, use them from the directly if possible
+/// // example pixels, use them from the directly if possible
 /// let pixels = vec![
 ///     Rgba::<u8>::from([255, 255, 255, 255]),
 ///     Rgba::<u8>::from([0, 0, 0, 255]),
@@ -35,14 +35,14 @@ pub fn correlating_char(block: &[Rgba<u8>], config: &Config) -> String {
 
     let (red, green, blue) = average_color(block);
 
-    //calculate luminosity from avg. pixel color
+    // calculate luminosity from avg. pixel color
     let luminosity = luminosity(red, green, blue);
 
-    //use chars length to support unicode chars
+    // use chars length to support Unicode chars
     let length = config.characters.chars().count();
 
-    //swap to range for white to black values
-    //convert from rgb values (0 - 255) to the density string index (0 - string length)
+    // swap to range for white to black values
+    // convert from RGB values (0 - 255) to the density string index (0 - string length)
     let density_index = map_range(
         (0f32, 255f32),
         if config.invert {
@@ -55,7 +55,7 @@ pub fn correlating_char(block: &[Rgba<u8>], config: &Config) -> String {
     .floor()
     .clamp(0f32, length as f32 - 1.0);
 
-    //get correct char from map
+    // get correct char from map
     assert!((density_index as usize) < length);
     let density_char = config
         .characters
@@ -63,9 +63,9 @@ pub fn correlating_char(block: &[Rgba<u8>], config: &Config) -> String {
         .nth(density_index as usize)
         .expect("Failed to get char");
 
-    //return the correctly formatted/colored string depending on the target
+    // return the correctly formatted/colored string depending on the target
     match config.target {
-        //if no color, use default case
+        // if no color, use default case
         config::TargetType::Shell | config::TargetType::AnsiFile | config::TargetType::Svg
             if config.color() =>
         {
@@ -84,7 +84,7 @@ pub fn correlating_char(block: &[Rgba<u8>], config: &Config) -> String {
                 density_char.to_string()
             }
         }
-        //all other case, including a plain text file and shell without colors
+        // all other case, including a plaintext file and shell without colors
         _ => density_char.to_string(),
     }
 }
@@ -142,26 +142,26 @@ mod test_pixel_density {
     #[test]
     #[ignore = "Requires truecolor support"]
     fn colored_char() {
-        //set needed env vars
+        // set needed env vars
         env::set_var("COLORTERM", "truecolor");
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         let config = ConfigBuilder::new().characters("#k. ".to_owned()).build();
         assert_eq!(
-            "\u{1b}[38;2;0;0;255m \u{1b}[0m", //blue color
+            "\u{1b}[38;2;0;0;255m \u{1b}[0m", // blue color
             correlating_char(&pixels, &config)
         );
     }
 
     #[test]
     fn ansi_colored_char_shell() {
-        //set no color support
+        // set no color support
         env::set_var("COLORTERM", "false");
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
-        //just some random color
+        // just some random color
         let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
         let config = ConfigBuilder::new().characters("#k. ".to_owned()).build();
         assert_eq!("\u{1b}[35m.\u{1b}[0m", correlating_char(&pixels, &config));
@@ -169,9 +169,9 @@ mod test_pixel_density {
 
     #[test]
     fn ansi_colored_char_ansi() {
-        //set no color support
+        // set no color support
         env::set_var("COLORTERM", "false");
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
         let pixels = vec![Rgba::<u8>::from([123, 42, 244, 255])];
         let config = ConfigBuilder::new()
@@ -184,9 +184,9 @@ mod test_pixel_density {
     #[test]
     #[ignore = "Requires truecolor support"]
     fn colored_background_char_shell() {
-        //set needed env vars
+        // set needed env vars
         env::set_var("COLORTERM", "truecolor");
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
 
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
@@ -203,9 +203,9 @@ mod test_pixel_density {
     #[test]
     #[ignore = "Requires truecolor support"]
     fn colored_background_char_ansi() {
-        //set needed env vars
+        // set needed env vars
         env::set_var("COLORTERM", "truecolor");
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("CLICOLOR_FORCE", "1");
         let pixels = vec![Rgba::<u8>::from([0, 0, 255, 255])];
         let config = ConfigBuilder::new()
@@ -221,7 +221,7 @@ mod test_pixel_density {
 
     #[test]
     fn target_file_returns_non_colored_string() {
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("COLORTERM", "truecolor");
         env::set_var("CLICOLOR_FORCE", "1");
 
@@ -235,7 +235,7 @@ mod test_pixel_density {
 
     #[test]
     fn white_has_no_tag() {
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("COLORTERM", "truecolor");
         env::set_var("CLICOLOR_FORCE", "1");
 
@@ -249,7 +249,7 @@ mod test_pixel_density {
 
     #[test]
     fn target_html_colored_string() {
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("COLORTERM", "truecolor");
         env::set_var("CLICOLOR_FORCE", "1");
 
@@ -267,7 +267,7 @@ mod test_pixel_density {
 
     #[test]
     fn target_html_background_string() {
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("COLORTERM", "truecolor");
         env::set_var("CLICOLOR_FORCE", "1");
 
@@ -285,7 +285,7 @@ mod test_pixel_density {
 
     #[test]
     fn target_html_no_color() {
-        //force color, this is not printed to the terminal anyways
+        // force color, this is not printed to the terminal anyways
         env::set_var("COLORTERM", "truecolor");
         env::set_var("CLICOLOR_FORCE", "1");
 
@@ -299,7 +299,7 @@ mod test_pixel_density {
     }
 }
 
-///Remap a value from one range to another.
+/// Remap a value from one range to another.
 ///
 /// If the value is outside of the specified range, it will still be
 /// converted as if it was in the range. This means it could be much larger or smaller than expected.
@@ -314,24 +314,24 @@ mod test_map_range {
 
     #[test]
     fn remap_values() {
-        //remap 2 to 4
+        // remap 2 to 4
         assert_eq!(4f32, map_range((0f32, 10f32), (0f32, 20f32), 2f32));
     }
 
     #[test]
     fn remap_values_above_range() {
-        //remap 21 to 42, since the value will be doubled
+        // remap 21 to 42, since the value will be doubled
         assert_eq!(42f32, map_range((0f32, 10f32), (0f32, 20f32), 21f32));
     }
 
     #[test]
     fn remap_values_below_range() {
-        //remap -1 to -2, since the value will be doubled
+        // remap -1 to -2, since the value will be doubled
         assert_eq!(-2f32, map_range((0f32, 10f32), (0f32, 20f32), -1f32));
     }
 }
 
-/// Returns the average rbg color of multiple pixel.
+/// Returns the average RGB color of multiple pixel.
 ///
 /// If the input block is empty, all pixels are seen and calculated as if there were black.
 ///
@@ -342,7 +342,7 @@ mod test_map_range {
 /// assert_eq!((0, 0, 0, 0.0), get_pixel_color_luminosity(&pixels));
 /// ```
 ///
-/// The formula for calculating the rbg colors is based an a minutephysics video <https://www.youtube.com/watch?v=LKnqECcg6Gw>
+/// The formula for calculating the RBG colors is based an a minutephysics video <https://www.youtube.com/watch?v=LKnqECcg6Gw>
 fn average_color(block: &[Rgba<u8>]) -> (u8, u8, u8) {
     let sum = block
         .iter()
@@ -397,9 +397,9 @@ mod test_avg_color {
     }
 }
 
-/// Returns the luminosity of the given rgb colors as an float.
+/// Returns the luminosity of the given RGB colors as a float.
 ///
-/// It converts the rgb values to floats, adds them with weightings and then returns them
+/// It converts the RGB values to floats, adds them with weightings and then returns them
 /// as a float value.
 ///
 /// # Examples

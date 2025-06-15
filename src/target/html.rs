@@ -1,4 +1,4 @@
-///Returns the top part of the output html file.
+/// Returns the top part of the output html file.
 ///
 /// This contains the html elements needed for a correct html file.
 /// The title will be set to `Artem Ascii Image`.
@@ -50,7 +50,7 @@ mod test_push_html_top {
     }
 }
 
-///Returns the bottom part of the output html file.
+/// Returns the bottom part of the output html file.
 ///
 /// The matching closing tags fro [`html_top`]. It will close
 /// the pres, body and html tag.
@@ -80,7 +80,7 @@ mod test_push_html_bottom {
 /// Returns an html string representation of the given char with optional background color support.
 ///
 /// Creates an <span> element with style attribute, which sets the (background) color to the
-/// given rgb inputs.
+/// given RGB inputs.
 /// Technically the span can have more than a single char, but the complexity needed for a system to group
 /// characters with the same color would be unnecessary and out of scope.
 ///
@@ -95,8 +95,8 @@ pub fn colored_char(red: u8, green: u8, blue: u8, char: char, background_color: 
             red, green, blue, char
         )
     } else if char.is_whitespace() {
-        //white spaces don't have a visible foreground color,
-        //it saves space when not  having an entire useless span tag
+        // white spaces don't have a visible foreground color,
+        // it saves space when not having an entire useless span tag
         String::from(char)
     } else {
         format!(

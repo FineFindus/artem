@@ -11,16 +11,16 @@ homepage = "https://github.com/FineFindus/artem"
 repository = "https://github.com/FineFindus/artem"
 keywords = ["text", "ascii", "ascii-art", "terminal"]
 categories = ["command-line-utilities", "multimedia::images"]
-#exclude test image files from cargo upload
+# exclude test image files from cargo upload
 exclude = ["/assets", "/examples"]
 
-#build file
+# build file
 build = "build.rs"
 
 [profile.release]
 opt-level = 3
 
-#bin definition
+# bin definition
 [[bin]]
 name = "artem"
 path = "src/main.rs"
@@ -64,7 +64,7 @@ web_image = ["ureq"]
 section = "graphics"
 priority = "optional"
 assets = [
-    #file locations are partailly from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
+    # file locations are partially from https://github.com/BurntSushi/ripgrep/blob/master/Cargo.toml
     [
         "target/release/artem",
         "usr/bin/",
@@ -90,7 +90,7 @@ assets = [
         "usr/share/doc/artem/",
         "644",
     ],
-    #the completion files and man page is generated and copied by the build script
+    # the completion files and man page is generated and copied by the build script
     [
         "deployment/assets/artem.bash",
         "usr/share/bash-completion/completions/artem",

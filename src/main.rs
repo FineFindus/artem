@@ -27,11 +27,11 @@ use artem::config::{self, ConfigBuilder, TargetType};
 mod cli;
 
 fn main() {
-    //get args from cli
+    // get args from cli
     let matches = cli::build_cli().get_matches();
 
-    //get log level from args
-    //enable logging
+    // get log level from args
+    // enable logging
     env_logger::builder()
         .format_target(false)
         .format_timestamp(None)
@@ -44,12 +44,12 @@ fn main() {
         .init();
     log::trace!("Started logger with trace");
 
-    //log enabled features
+    // log enabled features
     log::trace!("Feature web_image: {}", cfg!(feature = "web_image"));
 
     let mut config_builder = ConfigBuilder::new();
 
-    //at least one input must exist, so its safe to unwrap
+    // at least one input must exist, so its safe to unwrap
     let input = matches.get_many::<String>("INPUT").unwrap();
 
     let mut img_paths = Vec::with_capacity(input.len());
@@ -64,7 +64,7 @@ fn main() {
         }
 
         let path = Path::new(value);
-        //check if file exist and is a file (not a directory)
+        // check if file exist and is a file (not a directory)
         if !path.exists() {
             fatal_error(&format!("File {value} does not exist"), Some(66));
         } else if !Path::new(path).is_file() {
@@ -74,7 +74,7 @@ fn main() {
         img_paths.push(value);
     }
 
-    //density char map
+    // density char map
     let density = match matches
         .get_one::<String>("characters")
         .map(|res| res.as_str())
@@ -89,7 +89,7 @@ fn main() {
             chars
         }
         _ => {
-            //density map from jp2a
+            // density map from jp2a
             log::debug!("Using default characters");
             r#"MWNXK0Okxdolc:;,'...   "#
         }
@@ -97,11 +97,11 @@ fn main() {
     log::debug!("Characters used: '{density}'");
     config_builder.characters(density.to_string());
 
-    //set the default resizing dimension to width
+    // set the default resizing dimension to width
     config_builder.dimension(config::ResizingDimension::Width);
 
     let terminal_size = |height: bool| -> u32 {
-        //read terminal size, error when STDOUT is not a tty
+        // read terminal size, error when STDOUT is not a tty
         terminal_size::terminal_size()
             .map(|size| if height { size.1 .0 } else { size.0 .0 } as u32)
             .unwrap_or_else(|| {
@@ -112,15 +112,15 @@ fn main() {
             })
     };
     let height = matches.get_flag("height");
-    //get target size from args
-    //only one arg should be present
+    // get target size from args
+    // only one arg should be present
     let target_size = if matches.get_flag("width") || height {
         if height {
             config_builder.dimension(config::ResizingDimension::Height);
         }
         terminal_size(height)
     } else {
-        //use given input size
+        // use given input size
         log::trace!("Using user input size as target size");
         *matches.get_one::<u32>("size").unwrap_or_else(|| {
             fatal_error(
@@ -129,16 +129,16 @@ fn main() {
             )
         })
     }
-    .max(20); //min should be 20 to ensure a somewhat visible picture
+    .max(20); // min should be 20 to ensure a somewhat visible picture
 
     log::debug!("Target Size: {target_size}");
-    config_builder.target_size(NonZeroU32::new(target_size).unwrap()); //safe to unwrap, since it is clamped before
+    config_builder.target_size(NonZeroU32::new(target_size).unwrap()); // safe to unwrap, since it is clamped before
 
-    //best ratio between height and width is 0.43
+    // best ratio between height and width is 0.43
     let Some(scale) = matches.get_one::<f32>("scale").map(|scale| {
         scale.clamp(
-            0.1f32, //a negative or 0 scale is not allowed
-            1f32,   //even a scale above 0.43 is not looking good
+            0.1f32, // a negative or 0 scale is not allowed
+            1f32,   // even a scale above 0.43 is not looking good
         )
     }) else {
         fatal_error("Could not work with ratio input value", Some(65));
@@ -154,19 +154,19 @@ fn main() {
     log::debug!("BackgroundColor is set to: {background_color}");
     config_builder.background_color(background_color);
 
-    //check if no colors should be used or the if an output file will be used
-    //since text documents don`t support ansi ascii colors
+    // check if no colors should be used or the if an output file will be used
+    // since text documents don`t support ansi ascii colors
     let color = if matches.get_flag("no-color") {
-        //print the "normal" non-colored conversion
+        // print the "normal" non-colored conversion
         log::info!("Using non-colored ascii");
         false
     } else {
         if matches.get_flag("outline") {
             log::warn!("Using outline, result will only be in grayscale");
-            //still set colors to true, since grayscale has different gray tones
+            // still set colors to true, since grayscale has different gray tones
         }
 
-        //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
+        // print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
         log::info!("Using colored ascii");
         if !*artem::SUPPORTS_TRUECOLOR {
             if background_color {
@@ -180,22 +180,22 @@ fn main() {
     };
     config_builder.color(color);
 
-    //get flag for border around image
+    // get flag for border around image
     let border = matches.get_flag("border");
     config_builder.border(border);
     log::info!("Using border: {border}");
 
-    //get flags for flipping along x axis
+    // get flags for flipping along x axis
     let transform_x = matches.get_flag("flipX");
     config_builder.transform_x(transform_x);
     log::debug!("Flipping X-Axis: {transform_x}");
 
-    //get flags for flipping along y axis
+    // get flags for flipping along y axis
     let transform_y = matches.get_flag("flipY");
     config_builder.transform_y(transform_y);
     log::debug!("Flipping Y-Axis: {transform_y}");
 
-    //get flags for centering the image
+    // get flags for centering the image
     let center_x = matches.get_flag("centerX");
     config_builder.center_x(center_x);
     log::debug!("Centering X-Axis: {center_x}");
@@ -204,12 +204,12 @@ fn main() {
     config_builder.center_y(center_y);
     log::debug!("Center Y-Axis: {center_y}");
 
-    //get flag for creating an outline
+    // get flag for creating an outline
     let outline = matches.get_flag("outline");
     config_builder.outline(outline);
     log::debug!("Outline: {outline}");
 
-    //if outline is set, also check for hysteresis
+    // if outline is set, also check for hysteresis
     if outline {
         let hysteresis = matches.get_flag("hysteresis");
         config_builder.hysteresis(hysteresis);
@@ -219,11 +219,11 @@ fn main() {
         }
     }
 
-    //get output file extension for specific output, default to plain text
+    // get output file extension for specific output, default to plain text
     if let Some(output_file) = matches.get_one::<PathBuf>("output-file") {
         log::debug!("Output-file: {}", output_file.to_str().unwrap());
 
-        //check file extension
+        // check file extension
         let file_extension = output_file.extension().and_then(std::ffi::OsStr::to_str);
         log::debug!("FileExtension: {:?}", file_extension);
 
@@ -235,7 +235,7 @@ fn main() {
             Some("ansi") | Some("ans") => {
                 log::debug!("Target: Ansi-File");
 
-                //by definition ansi file must have colors, only the background color is optional
+                // by definition ansi file must have colors, only the background color is optional
                 if matches.get_flag("no-color") {
                     log::warn!("The --no-color argument conflicts with the target file type. Falling back to plain text file without colors.");
                     TargetType::File
@@ -254,7 +254,7 @@ fn main() {
                 log::debug!("Target: File");
 
                 if !matches.get_flag("no-color") {
-                    //warn user that output is not colored
+                    // warn user that output is not colored
                     log::warn!("Filetype does not support using colors. For colored output file please use either .html or .ansi files");
                 }
                 TargetType::File
@@ -273,13 +273,13 @@ fn main() {
         .map(|img| artem::convert(img, &config))
         .collect::<String>();
 
-    //remove last linebreak, we cannot use `.trim_end()` here
-    //as it may end up remove whitespace that is part of the image
+    // remove last linebreak, we cannot use `.trim_end()` here
+    // as it may end up remove whitespace that is part of the image
     if output.ends_with('\n') {
         output.remove(output.len() - 1);
     }
 
-    //create and write to output file
+    // create and write to output file
     if let Some(output_file) = matches.get_one::<PathBuf>("output-file") {
         log::info!("Writing output to output file");
 
@@ -288,7 +288,7 @@ fn main() {
         };
 
         if config.target == TargetType::Svg {
-            //convert terminal text to svg
+            // convert terminal text to svg
             output = anstyle_svg::Term::new().render_svg(&output);
         }
 
@@ -299,7 +299,7 @@ fn main() {
         log::info!("Written ascii chars to output file");
         println!("Written {} bytes to {}", bytes_count, output_file.display())
     } else {
-        //print the ascii img to the terminal
+        // print the ascii img to the terminal
         log::info!("Printing output");
         println!("{}", output);
     }
@@ -327,7 +327,7 @@ fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
             );
         };
 
-        //get bytes of the images
+        // get bytes of the images
         let mut bytes: Vec<u8> = Vec::new();
         resp.body_mut()
             .as_reader()
@@ -356,7 +356,7 @@ fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
 ///
 /// This function will print the passed in error message as well as an exit message, then it will exit the program with the exit code.
 /// If non is specified, it will use exit code 1 by default.
-/// A list of exit code can be found here: <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
+/// A list of exit code can be found here: <https://man.freebsd.org/cgi/man.cgi?query=sysexits&manpath=FreeBSD+4.3-RELEASE>
 ///
 /// # Examples
 /// ```no_run
@@ -369,7 +369,7 @@ fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
 /// };
 /// ```
 pub fn fatal_error(message: &str, code: Option<i32>) -> ! {
-    //This function never returns, since it always exit the program
+    // this function never returns, since it always exit the program
     log::error!("{}", message);
     log::error!("Artem exited with code: {}", code.unwrap_or(1));
     std::process::exit(code.unwrap_or(1));
