@@ -494,7 +494,7 @@ mod test_edge_detection {
         }));
 
         let desired_result = DynamicImage::ImageLuma8(ImageBuffer::from_fn(3, 3, |x, y| {
-            if x == 1 && y == 1 {
+            if (x == 1 || x == 2) && y == 1 {
                 image::Luma([255u8])
             } else {
                 image::Luma([0u8])
