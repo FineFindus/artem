@@ -24,7 +24,6 @@ use image::{DynamicImage, ImageDecoder, ImageError, ImageReader};
 
 use artem::config::{self, ConfigBuilder, TargetType};
 
-//import cli
 mod cli;
 
 fn main() {
@@ -155,7 +154,7 @@ fn main() {
     log::debug!("BackgroundColor is set to: {background_color}");
     config_builder.background_color(background_color);
 
-    //check if no colors should be used or the if a output file will be used
+    //check if no colors should be used or the if an output file will be used
     //since text documents don`t support ansi ascii colors
     let color = if matches.get_flag("no-color") {
         //print the "normal" non-colored conversion
@@ -164,7 +163,7 @@ fn main() {
     } else {
         if matches.get_flag("outline") {
             log::warn!("Using outline, result will only be in grayscale");
-            //still set colors  to true, since grayscale has different gray tones
+            //still set colors to true, since grayscale has different gray tones
         }
 
         //print colored terminal conversion, this should already respect truecolor support/use ansi colors if not supported
@@ -355,7 +354,7 @@ fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
 /// an error message letting the user know what went wrong. For example if a non-existing file was passed in,
 /// this program can not work correctly and should print an error message and exit.
 ///
-/// This function will print the passed in error message as well as a exit message, then it will exit the program with the exit code.
+/// This function will print the passed in error message as well as an exit message, then it will exit the program with the exit code.
 /// If non is specified, it will use exit code 1 by default.
 /// A list of exit code can be found here: <https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html>
 ///
