@@ -44,12 +44,12 @@ pub mod input {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.arg(
-            "https:// raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
+            "https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
         );
         // check only the first line, the rest is likely to be correct as well
         cmd.assert()
             .failure()
-            .stderr(predicate::str::starts_with("[ERROR] File https:// raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png does not exist"));
+            .stderr(predicate::str::starts_with("[ERROR] File https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png does not exist"));
     }
 
     #[test]
@@ -110,9 +110,9 @@ pub mod url_input {
     fn input_does_not_exist() {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
-        cmd.arg("https:// example.com/no.png");
+        cmd.arg("https://example.com/no.png");
         cmd.assert().failure().stderr(predicate::str::contains(
-            "[ERROR] Failed to load image bytes from https:// example.com/no.png",
+            "[ERROR] Failed to load image bytes from https://example.com/no.png",
         ));
     }
 
@@ -122,7 +122,7 @@ pub mod url_input {
 
         // use example abraham lincoln image from github repo
         cmd.arg(
-            "https:// raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
+            "https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
         );
         // check only the first line, the rest is likely to be correct as well
         cmd.assert()
@@ -135,11 +135,11 @@ pub mod url_input {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.args([
-            "https:// example.com/no-image.jpg",
-            "https:// example.com/no.png",
+            "https://example.com/no-image.jpg",
+            "https://example.com/no.png",
         ]);
         cmd.assert().failure().stderr(predicate::str::contains(
-            "[ERROR] Failed to load image bytes from https:// example.com/no-image.jpg",
+            "[ERROR] Failed to load image bytes from https://example.com/no-image.jpg",
         ));
     }
 
@@ -148,8 +148,8 @@ pub mod url_input {
         let mut cmd = Command::cargo_bin("artem").unwrap();
 
         cmd.args([
-            "https:// raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
-            "https:// raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
+            "https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
+            "https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
         ]);
 
         let mut ascii_img = String::new();

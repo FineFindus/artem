@@ -25,7 +25,7 @@ fn full_file_compare_url() {
     let mut cmd = Command::cargo_bin("artem").unwrap();
 
     cmd.arg(
-        "https:// raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
+        "https://raw.githubusercontent.com/FineFindus/artem/master/assets/images/standard_test_img.png",
     );
 
     // load file contents to compare
