@@ -15,7 +15,7 @@
 
 use std::{
     fs::File,
-    io::Write,
+    io::{Read, Write},
     num::NonZeroU32,
     path::{Path, PathBuf},
 };
@@ -321,7 +321,7 @@ fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
     if path.starts_with("http") {
         log::info!("Started to download image from: {}", path);
         let now = std::time::Instant::now();
-        let Ok(resp) = ureq::get(path).call() else {
+        let Ok(mut resp) = ureq::get(path).call() else {
             fatal_error(
                 &format!("Failed to load image bytes from {}", path),
                 Some(66),
@@ -330,7 +330,8 @@ fn load_image(path: &str) -> Result<DynamicImage, ImageError> {
 
         //get bytes of the images
         let mut bytes: Vec<u8> = Vec::new();
-        resp.into_reader()
+        resp.body_mut()
+            .as_reader()
             .read_to_end(&mut bytes)
             .expect("Failed to read bytes");
         log::info!("Downloading took {:3} ms", now.elapsed().as_millis());
